@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.greensmartplanet.gsc.ai.mapper.AiConversationMapper">
+
+    <!-- 按租户 + 用户查会话列表（update_time 倒序，仅 active） -->
+    <select id="selectByTenantUser"
+            resultType="cn.greensmartplanet.gsc.ai.entity.AiConversation">
+        SELECT id,
+               tenant_id,
+               user_id,
+               title,
+               status,
+               create_time,
+               update_time,
+               is_deleted
+        FROM ai_conversations
+        WHERE tenant_id = #{tenantId}
+          AND user_id = #{userId}
+          AND status = 'active'
+          AND is_deleted = 0
+        ORDER BY update_time DESC
+    </select>
+
+    <!-- 校验会话归属（租户 + 用户隔离，防越权）；详情查询要带摘要，供拼装 LLM 上下文 -->
+    <select id="selectByIdAndTenantUser"
+            resultType="cn.greensmartplanet.gsc.ai.entity.AiConversation">
+        SELECT id,
+               tenant_id,
+               user_id,
+               title,
+               status,
+               context_entities,
+               summary,
+               summary_up_to_msg_id,
+               create_time,
+               update_time,
+               is_deleted
+        FROM ai_conversations
+        WHERE id = #{id}
+          AND tenant_id = #{tenantId}
+          AND user_id = #{userId}
+          AND is_deleted = 0
+    </select>
+
+    <!-- CAS 推进摘要：只有覆盖点仍是本次读到的旧值才更新，并发压缩互不覆盖。
+         &lt;=&gt; 是 MySQL 的 NULL 安全等于——首次压缩时 oldUpToMsgId 为 null 也能正确匹配。
+         update_time 由建表 DDL 的 ON UPDATE CURRENT_TIMESTAMP 自动维护。 -->
+    <update id="updateSummaryIfUnchanged">
+        UPDATE ai_conversations
+        SET summary = #{summary},
+            summary_up_to_msg_id = #{upToMsgId}
+        WHERE id = #{id}
+          AND is_deleted = 0
+          AND summary_up_to_msg_id &lt;=&gt; #{oldUpToMsgId,jdbcType=BIGINT}
+    </update>
+
+</mapper>

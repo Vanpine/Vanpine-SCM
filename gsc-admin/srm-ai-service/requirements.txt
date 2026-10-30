@@ -1,0 +1,29 @@
+# FastAPI Web 框架 — 提供 REST API 服务
+fastapi>=0.115.0
+# ASGI 服务器 — 运行 FastAPI 应用
+uvicorn>=0.30.0
+# LangChain 核心 — AI 流程编排（LLM + Vector Store）
+langchain>=0.3.0
+# LangChain OpenAI 适配器 — 用于调用 DeepSeek（兼容 OpenAI API）
+langchain-openai>=0.2.0
+# Milvus 向量数据库客户端 — 生产级持久化向量存储
+pymilvus>=2.4.0
+# 注意：Milvus 客户端依赖 grpcio/protobuf，随 pymilvus 自动安装
+# Pydantic 数据校验 — FastAPI 请求/响应模型
+pydantic>=2.0.0
+# 本地 / 开发环境 .env 加载（生产由 systemd EnvironmentFile 注入）
+python-dotenv>=1.0.0
+# PDF 文本抽取 — 知识库文档解析（纯 Python，无系统依赖）
+pypdf>=4.0.0
+# 注意：不再需要 sentence-transformers 和 PyTorch
+# Embedding 已改为调用在线 API（默认硅基流动），使用 Python 标准库 urllib，无需额外 HTTP 依赖
+
+starlette
+# Word 文档解析 — 知识库 docx 支持（样式层级取标题）
+python-docx>=1.1.0
+
+# Excel 解析 — 知识库 xlsx 支持（按 sheet/表头行组）
+openpyxl>=3.1.0
+
+# PDF 深解析（字号标题 + 表格提取）— 受 PDF_DEEP_PARSE 开关控制
+pdfplumber>=0.11.0

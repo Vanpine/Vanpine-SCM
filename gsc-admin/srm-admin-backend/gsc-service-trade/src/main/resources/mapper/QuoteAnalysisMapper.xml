@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.greensmartplanet.gsc.trade.mapper.QuoteAnalysisMapper">
+
+    <resultMap id="BaseResultMap" type="cn.greensmartplanet.gsc.trade.entity.QuoteAnalysis">
+        <id column="id" property="id"/>
+        <result column="inquiry_id" property="inquiryId"/>
+        <result column="analysis_result" property="analysisResult"/>
+        <result column="quote_snapshot" property="quoteSnapshot"/>
+        <result column="analyzed_at" property="analyzedAt"/>
+    </resultMap>
+
+    <!-- AI 比价分析结果基础列 -->
+    <sql id="Base_Column_List">
+        id, inquiry_id, analysis_result, quote_snapshot, analyzed_at
+    </sql>
+
+    <select id="selectByInquiryId" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM quote_analysis WHERE inquiry_id = #{inquiryId}
+    </select>
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO quote_analysis (inquiry_id, analysis_result, quote_snapshot, analyzed_at)
+        VALUES (#{inquiryId}, #{analysisResult}, #{quoteSnapshot}, #{analyzedAt})
+    </insert>
+
+    <update id="updateByInquiryId">
+        UPDATE quote_analysis
+        SET analysis_result = #{analysisResult},
+            quote_snapshot = #{quoteSnapshot},
+            analyzed_at = #{analyzedAt}
+        WHERE inquiry_id = #{inquiryId}
+    </update>
+</mapper>

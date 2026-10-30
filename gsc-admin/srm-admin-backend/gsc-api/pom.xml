@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>cn.greensmartplanet</groupId>
+        <artifactId>gsc-backend</artifactId>
+        <version>0.0.1-SNAPSHOT</version>
+    </parent>
+
+    <artifactId>gsc-api</artifactId>
+    <name>gsc-api</name>
+    <description>服务间 API 契约模块 — Feign 接口/降级工厂/服务名常量（纯契约，不部署）</description>
+
+    <dependencies>
+        <!-- 公共层：R 响应体 / 事件信封等跨服务契约 -->
+        <dependency>
+            <groupId>cn.greensmartplanet</groupId>
+            <artifactId>gsc-common</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <!-- OpenFeign：@FeignClient / FallbackFactory -->
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-openfeign</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <optional>true</optional>
+        </dependency>
+    </dependencies>
+
+</project>

@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.greensmartplanet.gsc.trade.mapper.QuoteMapper">
+
+    <resultMap id="BaseResultMap" type="cn.greensmartplanet.gsc.trade.entity.Quote">
+        <id column="id" property="id"/>
+        <result column="quote_no" property="quoteNo"/>
+        <result column="inquiry_id" property="inquiryId"/>
+        <result column="buyer_tenant_id" property="buyerTenantId"/>
+        <result column="supplier_tenant_id" property="supplierTenantId"/>
+        <result column="unit_price" property="unitPrice"/>
+        <result column="total_price" property="totalPrice"/>
+        <result column="supply_quantity" property="supplyQuantity"/>
+        <result column="currency" property="currency"/>
+        <result column="delivery_days" property="deliveryDays"/>
+        <result column="delivery_terms" property="deliveryTerms"/>
+        <result column="valid_until" property="validUntil"/>
+        <result column="remark" property="remark"/>
+        <result column="attachment_key" property="attachmentKey"/>
+        <result column="status" property="status"/>
+        <result column="is_winning" property="isWinning"/>
+        <result column="submitted_at" property="submittedAt"/>
+        <result column="create_by" property="createBy"/>
+        <result column="update_by" property="updateBy"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+        <result column="is_deleted" property="isDeleted"/>
+    </resultMap>
+
+    <!-- 报价表基础列（报价保密红线在 WHERE 条件中实现，列不涉及隐私过滤） -->
+    <sql id="Base_Column_List">
+        id, quote_no, inquiry_id, buyer_tenant_id, supplier_tenant_id,
+        unit_price, total_price, supply_quantity, currency, delivery_days, delivery_terms,
+        valid_until, remark, attachment_key, status, is_winning, submitted_at,
+        create_by, update_by, create_time, update_time, is_deleted
+    </sql>
+
+    <!-- 查某询盘下所有报价 — 报价保密红线 -->
+    <select id="selectByInquiryId" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM quote
+        WHERE inquiry_id = #{inquiryId}
+          AND is_deleted = 0
+          AND (
+              buyer_tenant_id = #{tenantId}       -- 采购方能看全部
+              OR supplier_tenant_id = #{tenantId} -- 供应商只看自己
+          )
+        ORDER BY total_price ASC
+    </select>
+
+    <!-- 按ID查单条（同样遵守报价保密） -->
+    <select id="selectById" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM quote
+        WHERE id = #{id} AND is_deleted = 0
+    </select>
+
+    <!-- 插入报价 -->
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO quote (
+            quote_no, inquiry_id, buyer_tenant_id, supplier_tenant_id,
+            unit_price, total_price, supply_quantity, currency, delivery_days, delivery_terms,
+            valid_until, remark, attachment_key, status, submitted_at, create_by
+        ) VALUES (
+            #{quoteNo}, #{inquiryId}, #{buyerTenantId}, #{supplierTenantId},
+            #{unitPrice}, #{totalPrice}, #{supplyQuantity}, #{currency}, #{deliveryDays}, #{deliveryTerms},
+            #{validUntil}, #{remark}, #{attachmentKey}, 'pending', NOW(), #{createBy}
+        )
+    </insert>
+
+    <!-- 供应商撤回报价 -->
+    <update id="withdraw">
+        UPDATE quote
+        SET status = 'withdrawn', update_by = #{updateBy}
+        WHERE id = #{id} AND supplier_tenant_id = #{supplierTenantId}
+          AND status = 'pending' AND is_deleted = 0
+    </update>
+
+    <!-- 原地更新报价字段（保持编号不变） -->
+    <update id="updateFields">
+        UPDATE quote
+        SET unit_price = #{unitPrice},
+            total_price = #{totalPrice},
+            supply_quantity = #{supplyQuantity},
+            currency = #{currency},
+            delivery_days = #{deliveryDays},
+            delivery_terms = #{deliveryTerms},
+            valid_until = #{validUntil},
+            remark = #{remark},
+            attachment_key = #{attachmentKey},
+            update_by = #{updateBy}
+        WHERE id = #{id} AND supplier_tenant_id = #{supplierTenantId}
+          AND status = 'pending' AND is_deleted = 0
+    </update>
+
+    <!-- 标记中标 -->
+    <update id="markWinning">
+        UPDATE quote
+        SET is_winning = 1, update_by = #{updateBy}
+        WHERE id = #{id} AND is_deleted = 0
+    </update>
+
+    <!-- 清除某询盘下所有中标标记 -->
+    <update id="clearWinningByInquiryId">
+        UPDATE quote
+        SET is_winning = 0, update_by = #{updateBy}
+        WHERE inquiry_id = #{inquiryId} AND is_winning = 1 AND is_deleted = 0
+    </update>
+
+    <!-- 批量查某供应商在多个询盘中的报价 -->
+    <select id="selectByInquiryIdsAndSupplier" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM quote
+        WHERE inquiry_id IN
+        <foreach collection="inquiryIds" item="id" open="(" close=")" separator=",">
+            #{id}
+        </foreach>
+        AND supplier_tenant_id = #{supplierTenantId}
+        AND status IN ('pending', 'withdrawn') AND is_deleted = 0
+    </select>
+
+    <!-- 批量按ID查报价 -->
+    <select id="selectByIds" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM quote
+        WHERE id IN
+        <foreach collection="ids" item="id" open="(" close=")" separator=",">
+            #{id}
+        </foreach>
+        AND is_deleted = 0
+    </select>
+
+    <!-- 批量统计各询盘的报价数 -->
+    <select id="countByInquiryIds" resultType="cn.greensmartplanet.gsc.trade.projection.QuoteCountRow">
+        SELECT inquiry_id AS inquiryId, COUNT(*) AS quoteCount
+        FROM quote
+        WHERE inquiry_id IN
+        <foreach collection="inquiryIds" item="id" open="(" close=")" separator=",">
+            #{id}
+        </foreach>
+        AND status = 'pending' AND is_deleted = 0
+        GROUP BY inquiry_id
+    </select>
+</mapper>

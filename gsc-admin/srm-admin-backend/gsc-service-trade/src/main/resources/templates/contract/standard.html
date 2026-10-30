@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8"/>
+<style>
+  @page { size: A4; margin: 2.5cm 2.2cm 2.5cm 2.2cm; }
+  @font-face {
+    font-family: 'NotoSansSC';
+    src: url('classpath:fonts/NotoSansSC-Regular.ttf');
+  }
+  body { font-family: 'NotoSansSC', serif; font-size: 13pt; color: #000; line-height: 1.9; }
+  .doc-title { text-align: center; font-size: 24pt; font-weight: bold; letter-spacing: 12px; margin-bottom: 4px; }
+  .doc-no { text-align: center; font-size: 12pt; color: #000; margin-bottom: 28px; }
+  h2.clause { font-size: 14pt; font-weight: bold; margin: 18px 0 8px; }
+  table.info { width: 100%; border-collapse: collapse; margin: 8px 0 16px; }
+  table.info th, table.info td { border: 1px solid #000; padding: 6px 8px; font-size: 12pt; text-align: center; word-break: break-word; }
+  table.info th { font-weight: bold; width: 130px; }
+  .p { margin: 6px 0; text-indent: 2em; }
+  .p-no-indent { margin: 6px 0; }
+  .sign-wrap { margin-top: 64px; }
+  .sign { display: inline-block; width: 46%; vertical-align: top; }
+  .sign-title { font-size: 13pt; margin-bottom: 40px; font-weight: bold; }
+  .sign-line { font-size: 12pt; margin: 10px 0; }
+  .footer-note { margin-top: 36px; font-size: 10pt; color: #000; border-top: 1px solid #000; padding-top: 8px; }
+</style>
+</head>
+<body>
+
+  <div class="doc-title">产品采购合同</div>
+  <div class="doc-no">合同编号：{{contractNo}}</div>
+
+  <h2 class="clause">合同双方</h2>
+  <p class="p-no-indent">甲方（采购方）：{{buyerName}}</p>
+  <p class="p-no-indent">　　法定代表人：{{buyerLegalRep}}</p>
+  <p class="p-no-indent">　　注册地址：{{buyerAddress}}</p>
+  <p class="p-no-indent">　　联系人：{{buyerContact}}</p>
+  <p class="p-no-indent">　　联系电话：{{buyerPhone}}</p>
+  <p class="p-no-indent">　　电子邮箱：{{buyerEmail}}</p>
+  <p class="p-no-indent">乙方（供应方）：{{supplierName}}</p>
+  <p class="p-no-indent">　　法定代表人：{{supplierLegalRep}}</p>
+  <p class="p-no-indent">　　注册地址：{{supplierAddress}}</p>
+  <p class="p-no-indent">　　联系人：{{supplierContact}}</p>
+  <p class="p-no-indent">　　联系电话：{{supplierPhone}}</p>
+  <p class="p-no-indent">　　电子邮箱：{{supplierEmail}}</p>
+
+  <p class="p">甲乙双方本着平等互利、诚实信用、等价有偿的原则，经友好协商，就甲方向乙方采购相关产品事宜，达成如下协议，以资共同遵守：</p>
+
+  <h2 class="clause">第一条　合同标的</h2>
+  <table class="info">
+    <tr>
+      <th>产品名称</th>
+      <td>{{category}}</td>
+      <th>规格型号</th>
+      <td>{{specText}}</td>
+    </tr>
+    <tr>
+      <th>数量</th>
+      <td>{{quantity}} {{unit}}</td>
+      <th>单价（含税）</th>
+      <td>{{currency}} {{unitPrice}}</td>
+    </tr>
+    <tr>
+      <th>合同总金额（含税）</th>
+      <td colspan="3">{{currency}} {{amount}}</td>
+    </tr>
+  </table>
+  <p class="p">上述合同总金额已包含货物本身价款、包装费、运输费、装卸费、保险费及各项税费，为货物交付至甲方指定地点的最终价格，乙方不得以任何理由要求增加费用。</p>
+
+  <h2 class="clause">第二条　质量标准与技术要求</h2>
+  <p class="p">1. 乙方提供的产品应符合中华人民共和国国家标准、行业标准及甲方提出的特殊技术要求。如双方另有技术协议或规格书作为本合同附件的，以技术协议或规格书为准。</p>
+  <p class="p">2. 乙方应随货提供下列文件：产品合格证、出厂检验报告、第三方检测报告（如有）、产品使用说明书及质量保证书。上述文件均须加盖乙方公章。</p>
+  <p class="p">3. 甲方在到货后如发现产品存在质量问题，有权拒收并书面通知乙方。乙方应在收到通知后 10 个工作日内免费更换或退货，并承担因此产生的全部费用和甲方因此遭受的直接损失。</p>
+
+  <h2 class="clause">第三条　包装标准</h2>
+  <p class="p">1. 乙方应按照产品特性及国家标准对货物进行包装，确保货物在正常运输和储存条件下不致损坏、变质。因包装不当导致货物损坏或灭失的，由乙方承担全部责任。</p>
+  <p class="p">2. 包装物不另行收费，已包含在合同总金额内。包装物不回收。</p>
+  <p class="p">3. 每件包装外侧应标明产品名称、规格、数量、毛重、净重、收货单位、发货单位及"小心轻放""防潮"等必要标志。</p>
+
+  <h2 class="clause">第四条　交货条款</h2>
+  <p class="p">1. 交货地点：{{deliveryPlace}}。</p>
+  <p class="p">2. 交货日期：乙方应于 {{deliveryDate}} 前将全部货物交付至甲方指定地点。</p>
+  <p class="p">3. 交付条款：{{deliveryTerms}}。</p>
+  <p class="p">4. 运输方式及费用：由乙方负责运输至甲方指定地点，运输费用及运输途中的一切风险和保险费用均由乙方承担。货物交付至甲方指定地点并经甲方签收后，货物毁损、灭失的风险方转移至甲方。</p>
+  <p class="p">5. 乙方交货时应提供送货单，送货单应载明产品名称、规格、数量及本合同编号。甲方指定签收人为 {{buyerContact}}，联系电话 {{buyerPhone}}。</p>
+
+  <h2 class="clause">第五条　验收标准与方法</h2>
+  <p class="p">1. 甲方在收到货物后 5 个工作日内完成验收。验收内容包括但不限于：数量、外观、规格、型号及质量。</p>
+  <p class="p">2. 验收合格后，甲方签署验收确认单。验收合格不代表乙方对产品质量责任的免除。</p>
+  <p class="p">3. 验收不合格的，甲方有权拒收并书面通知乙方，乙方应在收到通知后 10 个工作日内免费补足或更换。经两次更换仍不符合约定的，甲方有权解除合同并要求乙方退还已付款项，乙方还应赔偿甲方因此遭受的全部损失。</p>
+  <p class="p">4. 甲方对产品质量的异议应在发现质量问题后 15 日内以书面形式向乙方提出，乙方应在收到异议后 5 个工作日内予以书面答复并采取相应补救措施。</p>
+
+  <h2 class="clause">第六条　价款与付款条件</h2>
+  <p class="p">1. 付款条件：{{paymentTerms}}。</p>
+  <p class="p">2. 甲方应按上述约定将款项支付至乙方指定银行账户。乙方应在每次付款前向甲方开具等额、合法、有效的增值税专用发票。乙方未按时提供发票的，甲方有权顺延付款且不承担违约责任。</p>
+  <p class="p">3. 乙方指定收款账户信息如下：开户银行　　　　　　　　，账户名称　　　　　　　　，银行账号　　　　　　　　。</p>
+
+  <h2 class="clause">第七条　质保与售后服务</h2>
+  <p class="p">1. 质保期：自甲方验收合格之日起计算，质保期为 12 个月。质保期内产品出现非人为损坏的质量问题的，乙方应在收到甲方通知后 48 小时内响应，7 个工作日内免费维修或更换。</p>
+  <p class="p">2. 质保期内因产品质量问题导致甲方遭受损失的，乙方应承担赔偿责任。质保期届满后，乙方仍应提供有偿技术支持和备件供应服务，价格不高于市场公允价格。</p>
+  <p class="p">3. 乙方应在产品交付时提供完整的售后服务联系方式，包括服务电话、邮箱及响应时限承诺。</p>
+
+  <h2 class="clause">第八条　知识产权</h2>
+  <p class="p">1. 乙方保证其交付的产品不侵犯任何第三方的专利权、商标权、著作权及其他知识产权。如因乙方产品导致甲方遭受第三方知识产权侵权主张的，乙方应负责解决并承担全部费用和赔偿责任。</p>
+  <p class="p">2. 乙方提供给甲方的技术资料、图纸、说明书等文件的知识产权归乙方所有，甲方仅在本合同目的范围内使用。未经乙方书面同意，甲方不得向第三方披露或转让。</p>
+  <p class="p">3. 甲方提供给乙方的采购需求文件、技术规格书等文件的知识产权归甲方所有，乙方不得用于本合同之外的用途。</p>
+
+  <h2 class="clause">第九条　违约责任</h2>
+  <p class="p">1. 逾期交货：乙方未按约定日期交货的，每逾期一日，应按合同总金额的 0.5% 向甲方支付违约金；逾期超过 15 日的，甲方有权解除本合同，乙方应退还甲方已付全部款项并赔偿甲方因此遭受的全部损失。</p>
+  <p class="p">2. 逾期付款：甲方未按约定时间付款的，每逾期一日，应按应付未付金额的 0.5% 向乙方支付违约金。</p>
+  <p class="p">3. 质量违约：乙方交付的产品不符合质量标准的，应负责免费更换或退货，并赔偿甲方因此遭受的全部损失。经两次更换仍不符合约定的，甲方有权解除合同。</p>
+  <p class="p">4. 任何一方违反本合同其他约定的，应承担继续履行、采取补救措施或赔偿损失等违约责任。赔偿范围包括但不限于守约方的直接损失、可得利益损失及为维权支出的合理费用（包括律师费、诉讼费、鉴定费等）。</p>
+
+  <h2 class="clause">第十条　不可抗力</h2>
+  <p class="p">1. 本合同所称不可抗力，是指不能预见、不能避免且不能克服的客观情况，包括但不限于地震、台风、洪水、海啸等自然灾害，以及战争、武装冲突、暴乱、罢工、政府行为、传染病疫情等社会异常事件。</p>
+  <p class="p">2. 因不可抗力导致一方无法履行或无法完全履行本合同的，遭遇方应在不可抗力事件发生后 3 个工作日内以书面形式通知对方，并提供有权机关出具的证明文件。逾期通知的，不得免除责任。</p>
+  <p class="p">3. 遭遇不可抗力的一方应采取一切合理措施减少损失。不可抗力的影响消除后，遭遇方应及时通知对方并恢复履行。</p>
+  <p class="p">4. 不可抗力持续超过 30 日的，双方应另行协商是否继续履行、部分履行或解除本合同。因不可抗力解除合同的，双方互不承担违约责任。</p>
+
+  <h2 class="clause">第十一条　保密条款</h2>
+  <p class="p">1. 双方对在合同履行过程中知悉的对方商业信息、技术资料、经营数据、客户信息及价格信息等负有保密义务，未经对方书面同意，不得向第三方披露或用于本合同之外的用途。</p>
+  <p class="p">2. 保密义务在合同终止或解除后继续有效，期限为 3 年。</p>
+  <p class="p">3. 违反保密义务的一方应赔偿守约方因此遭受的全部损失。</p>
+
+  <h2 class="clause">第十二条　合同变更与解除</h2>
+  <p class="p">1. 本合同生效后，未经双方书面协商一致，任何一方不得擅自变更或解除本合同。</p>
+  <p class="p">2. 出现下列情形之一的，一方有权书面通知对方解除本合同：（1）对方严重违约致使合同目的无法实现；（2）对方被依法宣告破产、解散或被吊销营业执照；（3）不可抗力持续超过 30 日致使合同无法履行。</p>
+  <p class="p">3. 合同解除后，乙方应在 15 日内退还甲方已付但未交货部分对应的款项。甲方已收货但存在质量问题的，乙方应按本合同第七条承担质保责任。</p>
+
+  <h2 class="clause">第十三条　通知与送达</h2>
+  <p class="p">1. 双方因履行本合同需要发出的任何通知，应以书面形式送达。书面形式包括信函、传真、电子邮件及双方认可的其他方式。</p>
+  <p class="p">2. 通知送达至本合同首部载明的地址、电话或电子邮箱即视为有效送达。一方变更联系方式的，应在变更后 3 个工作日内书面通知对方，否则按原联系方式送达视为有效。</p>
+
+  <h2 class="clause">第十四条　争议解决</h2>
+  <p class="p">本合同在履行过程中发生争议的，双方应首先通过友好协商解决；协商不成的，任何一方均可向甲方所在地有管辖权的人民法院提起诉讼。诉讼期间，不涉及争议的条款双方应继续履行。</p>
+
+  <h2 class="clause">第十五条　其他条款</h2>
+  <p class="p">1. 本合同自双方盖章及授权代表签字之日起生效，至 {{validUntil}} 止。质保期及保密义务按各自约定继续有效。</p>
+  <p class="p">2. 本合同未尽事宜，双方可另行签订补充协议。补充协议与本合同具有同等法律效力。补充协议与本合同约定不一致的，以补充协议为准。</p>
+  <p class="p">3. 本合同一式两份，甲乙双方各执一份，具有同等法律效力。</p>
+  <p class="p">4. 本合同任何条款的修改、补充均须经双方书面确认后方可生效。</p>
+  <p class="p">5. 本合同附件（如有）为本合同不可分割的组成部分，与本合同具有同等法律效力。</p>
+
+  <div class="sign-wrap">
+    <div class="sign">
+      <div class="sign-title">甲方（盖章）：</div>
+      <div class="sign-line">法定代表人（签字）：</div>
+      <div class="sign-line">授权代表（签字）：</div>
+      <div class="sign-line">签署日期：　　　年　　月　　日</div>
+    </div>
+    <div class="sign">
+      <div class="sign-title">乙方（盖章）：</div>
+      <div class="sign-line">法定代表人（签字）：</div>
+      <div class="sign-line">授权代表（签字）：</div>
+      <div class="sign-line">签署日期：　　　年　　月　　日</div>
+    </div>
+  </div>
+
+  <div class="footer-note">
+    本合同由全球供应链 AI 赋能平台生成，合同编号 {{contractNo}}，仅供双方参考使用，最终以双方盖章确认的纸质合同为准。
+  </div>
+
+</body>
+</html>

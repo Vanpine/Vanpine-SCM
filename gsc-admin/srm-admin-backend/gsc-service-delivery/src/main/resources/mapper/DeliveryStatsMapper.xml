@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.greensmartplanet.gsc.delivery.mapper.DeliveryStatsMapper">
+
+    <!-- ⚠️ 阶段 8.1：以下 SQL 从旧单体 DashboardMapper.xml 按表归属原样迁入，禁止改动语义 -->
+
+    <!-- 采购方：按状态统计交付单 -->
+    <select id="countDeliveryByBuyer" resultType="long">
+        SELECT COUNT(*) FROM delivery
+        WHERE buyer_tenant_id = #{tenantId}
+          AND status IN
+        <foreach collection="statuses" item="s" open="(" separator="," close=")">#{s}</foreach>
+          AND is_deleted = 0
+    </select>
+
+    <!-- 供应方：按状态统计交付单 -->
+    <select id="countDeliveryBySupplier" resultType="long">
+        SELECT COUNT(*) FROM delivery
+        WHERE supplier_tenant_id = #{tenantId}
+          AND status IN
+        <foreach collection="statuses" item="s" open="(" separator="," close=")">#{s}</foreach>
+          AND is_deleted = 0
+    </select>
+
+    <!-- 供应方：超期未发货 -->
+    <select id="countOverdueUnshipped" resultType="long">
+        SELECT COUNT(*) FROM delivery
+        WHERE supplier_tenant_id = #{tenantId}
+          AND status IN ('pending_shipment', 'returned')
+          AND delivery_date IS NOT NULL
+          AND delivery_date &lt; CURDATE()
+          AND is_deleted = 0
+    </select>
+
+    <!-- 采购方：超期未收货 -->
+    <select id="countOverdueUnreceived" resultType="long">
+        SELECT COUNT(*) FROM delivery
+        WHERE buyer_tenant_id = #{tenantId}
+          AND status = 'shipped'
+          AND ship_time IS NOT NULL
+          AND ship_time &lt; DATE_SUB(NOW(), INTERVAL #{overdueDays} DAY)
+          AND is_deleted = 0
+    </select>
+
+    <!-- 采购方：超期未验收 -->
+    <select id="countOverdueUnaccepted" resultType="long">
+        SELECT COUNT(*) FROM delivery
+        WHERE buyer_tenant_id = #{tenantId}
+          AND status = 'received'
+          AND receive_time IS NOT NULL
+          AND receive_time &lt; DATE_SUB(NOW(), INTERVAL #{overdueDays} DAY)
+          AND is_deleted = 0
+    </select>
+
+</mapper>

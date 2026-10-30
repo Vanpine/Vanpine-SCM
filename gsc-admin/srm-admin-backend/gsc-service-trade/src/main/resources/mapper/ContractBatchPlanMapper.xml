@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.greensmartplanet.gsc.trade.mapper.ContractBatchPlanMapper">
+
+    <resultMap id="BaseResultMap" type="cn.greensmartplanet.gsc.trade.entity.ContractBatchPlan">
+        <id column="id" property="id"/>
+        <result column="contract_id" property="contractId"/>
+        <result column="batch_no" property="batchNo"/>
+        <result column="quantity" property="quantity"/>
+        <result column="delivery_date" property="deliveryDate"/>
+        <result column="remark" property="remark"/>
+        <result column="create_time" property="createTime"/>
+        <result column="is_deleted" property="isDeleted"/>
+    </resultMap>
+
+    <!-- 合同分批计划基础列 -->
+    <sql id="Base_Column_List">
+        id, contract_id, batch_no, quantity, delivery_date, remark, create_time, is_deleted
+    </sql>
+
+    <!-- 按合同查分批计划（batch_no 升序） -->
+    <select id="selectByContractId" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM contract_batch_plan
+        WHERE contract_id = #{contractId} AND is_deleted = 0
+        ORDER BY batch_no ASC
+    </select>
+
+    <!-- 按合同ID批量查分批计划（列表回填用） -->
+    <select id="selectByContractIds" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM contract_batch_plan
+        WHERE contract_id IN
+        <foreach collection="contractIds" item="cid" open="(" close=")" separator=",">
+            #{cid}
+        </foreach>
+        AND is_deleted = 0
+        ORDER BY contract_id ASC, batch_no ASC
+    </select>
+
+    <!-- 批量插入分批计划（create_time/is_deleted 走 DB 默认值） -->
+    <insert id="batchInsert">
+        INSERT INTO contract_batch_plan (contract_id, batch_no, quantity, delivery_date, remark)
+        VALUES
+        <foreach collection="list" item="item" separator=",">
+            (#{item.contractId}, #{item.batchNo}, #{item.quantity}, #{item.deliveryDate}, #{item.remark})
+        </foreach>
+    </insert>
+
+    <!-- 按合同逻辑删除分批计划（编辑合同重建计划用） -->
+    <update id="deleteByContractId">
+        UPDATE contract_batch_plan SET is_deleted = 1
+        WHERE contract_id = #{contractId} AND is_deleted = 0
+    </update>
+</mapper>

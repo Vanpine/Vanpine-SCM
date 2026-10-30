@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.greensmartplanet.gsc.delivery.mapper.DeliveryRiskFactorMapper">
+
+    <!-- delivery_risk_factor 全字段（查询统一复用，禁止 SELECT *） -->
+    <sql id="Base_Column_List">
+        id, risk_id, delivery_id, risk_type, risk_level, factor_status,
+        estimated_arrival_time, risk_score, evidence, first_detected_time, closed_time,
+        create_time, update_time, is_deleted
+    </sql>
+
+    <resultMap id="BaseResultMap" type="cn.greensmartplanet.gsc.delivery.entity.DeliveryRiskFactor">
+        <id column="id" property="id"/>
+        <result column="risk_id" property="riskId"/>
+        <result column="delivery_id" property="deliveryId"/>
+        <result column="risk_type" property="riskType"/>
+        <result column="risk_level" property="riskLevel"/>
+        <result column="factor_status" property="factorStatus"/>
+        <result column="estimated_arrival_time" property="estimatedArrivalTime"/>
+        <result column="risk_score" property="riskScore"/>
+        <result column="evidence" property="evidence"/>
+        <result column="first_detected_time" property="firstDetectedTime"/>
+        <result column="closed_time" property="closedTime"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+        <result column="is_deleted" property="isDeleted"/>
+    </resultMap>
+
+    <!-- 插入因子（自增 id，create_time/update_time/is_deleted 走 DB 默认值） -->
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO delivery_risk_factor (
+            risk_id, delivery_id, risk_type, risk_level, factor_status,
+            estimated_arrival_time, risk_score, evidence, first_detected_time, closed_time
+        ) VALUES (
+            #{riskId}, #{deliveryId}, #{riskType}, #{riskLevel}, #{factorStatus},
+            #{estimatedArrivalTime}, #{riskScore}, #{evidence}, #{firstDetectedTime}, #{closedTime}
+        )
+    </insert>
+
+    <!-- 按风险查因子轨迹（时间正序） -->
+    <select id="selectByRiskId" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/> FROM delivery_risk_factor
+        WHERE risk_id = #{riskId} AND is_deleted = 0
+        ORDER BY first_detected_time ASC, id ASC
+    </select>
+
+    <!-- 关闭该风险的活跃因子 -->
+    <update id="closeActiveByRiskId">
+        UPDATE delivery_risk_factor
+        SET factor_status = 'closed', closed_time = NOW()
+        WHERE risk_id = #{riskId} AND factor_status = 'active' AND is_deleted = 0
+    </update>
+</mapper>

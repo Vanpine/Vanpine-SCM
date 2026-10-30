@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.greensmartplanet.gsc.platform.mapper.ApplicationMapper">
+
+    <!-- 入驻申请结果映射（仅保留入驻审核相关字段） -->
+    <resultMap id="BaseResultMap" type="cn.greensmartplanet.gsc.platform.entity.Application">
+        <id column="id" property="id"/>
+        <result column="passport_uuid" property="passportUuid"/>
+        <result column="applicant_role" property="applicantRole"/>
+        <result column="company_name" property="companyName"/>
+        <result column="country" property="country"/>
+        <result column="reg_number" property="regNumber"/>
+        <result column="established_year" property="establishedYear"/>
+        <result column="contact_name" property="contactName"/>
+        <result column="contact_title" property="contactTitle"/>
+        <result column="contact_email" property="contactEmail"/>
+        <result column="contact_phone" property="contactPhone"/>
+        <result column="buy_category" property="buyCategory"/>
+        <result column="buy_volume" property="buyVolume"/>
+        <result column="buy_volume_amount" property="buyVolumeAmount"/>
+        <result column="buy_volume_currency" property="buyVolumeCurrency"/>
+        <result column="fiscal_period_start" property="fiscalPeriodStart"/>
+        <result column="fiscal_period_end" property="fiscalPeriodEnd"/>
+        <result column="buy_market" property="buyMarket"/>
+        <result column="sup_category" property="supCategory"/>
+        <result column="sup_capacity" property="supCapacity"/>
+        <result column="sup_certs" property="supCerts"/>
+        <result column="sup_export" property="supExport"/>
+        <result column="status" property="status"/>
+        <result column="review_comment" property="reviewComment"/>
+        <result column="reviewed_by" property="reviewedBy"/>
+        <result column="reviewed_at" property="reviewedAt"/>
+        <result column="tenant_id" property="tenantId"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+        <result column="is_deleted" property="isDeleted"/>
+    </resultMap>
+
+    <!-- 新增入驻申请 -->
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO application (
+            passport_uuid, applicant_role,
+            company_name, country, reg_number, established_year,
+            contact_name, contact_title, contact_email, contact_phone,
+            buy_category, buy_volume, buy_volume_amount, buy_volume_currency,
+            fiscal_period_start, fiscal_period_end, buy_market,
+            sup_category, sup_capacity, sup_certs, sup_export,
+            status, create_time
+        ) VALUES (
+            #{passportUuid}, #{applicantRole},
+            #{companyName}, #{country}, #{regNumber}, #{establishedYear},
+            #{contactName}, #{contactTitle}, #{contactEmail}, #{contactPhone},
+            #{buyCategory}, #{buyVolume}, #{buyVolumeAmount}, #{buyVolumeCurrency},
+            #{fiscalPeriodStart}, #{fiscalPeriodEnd}, #{buyMarket},
+            #{supCategory}, #{supCapacity}, #{supCerts}, #{supExport},
+            #{status}, NOW()
+        )
+    </insert>
+
+    <!-- 按ID查单条 -->
+    <select id="selectById" resultMap="BaseResultMap">
+        SELECT id, passport_uuid, applicant_role, company_name, country, reg_number,
+               established_year, contact_name, contact_title, contact_email, contact_phone,
+               buy_category, buy_volume, buy_volume_amount, buy_volume_currency,
+               fiscal_period_start, fiscal_period_end, buy_market,
+               sup_category, sup_capacity, sup_certs, sup_export,
+               status, review_comment, reviewed_by, reviewed_at, tenant_id,
+               create_time, update_time
+        FROM application
+        WHERE id = #{id} AND is_deleted = 0
+    </select>
+
+    <!-- 按护照UUID查 -->
+    <select id="selectByPassportUuid" resultMap="BaseResultMap">
+        SELECT id, passport_uuid, applicant_role, company_name, country, reg_number,
+               established_year, contact_name, contact_title, contact_email, contact_phone,
+               buy_category, buy_volume, buy_volume_amount, buy_volume_currency,
+               fiscal_period_start, fiscal_period_end, buy_market,
+               sup_category, sup_capacity, sup_certs, sup_export,
+               status, review_comment, reviewed_by, reviewed_at, tenant_id,
+               create_time, update_time
+        FROM application
+        WHERE passport_uuid = #{passportUuid} AND is_deleted = 0
+    </select>
+
+    <!-- 驳回后重新提交：更新已有记录 -->
+    <update id="update">
+        UPDATE application SET
+            applicant_role = #{applicantRole},
+            company_name = #{companyName}, country = #{country},
+            reg_number = #{regNumber}, established_year = #{establishedYear},
+            contact_name = #{contactName}, contact_title = #{contactTitle},
+            contact_email = #{contactEmail}, contact_phone = #{contactPhone},
+            buy_category = #{buyCategory}, buy_volume = #{buyVolume},
+            buy_volume_amount = #{buyVolumeAmount},
+            buy_volume_currency = #{buyVolumeCurrency},
+            fiscal_period_start = #{fiscalPeriodStart},
+            fiscal_period_end = #{fiscalPeriodEnd},
+            buy_market = #{buyMarket},
+            sup_category = #{supCategory}, sup_capacity = #{supCapacity},
+            sup_certs = #{supCerts}, sup_export = #{supExport},
+            status = #{status}, review_comment = NULL, reviewed_by = NULL,
+            reviewed_at = NULL, tenant_id = NULL,
+            update_time = NOW()
+        WHERE id = #{id} AND is_deleted = 0
+    </update>
+
+    <!-- 审核更新 -->
+    <update id="updateStatus">
+        UPDATE application
+        SET status = #{status},
+            review_comment = #{reviewComment},
+            reviewed_by = #{reviewedBy},
+            reviewed_at = NOW(),
+            tenant_id = #{tenantId},
+            update_time = NOW()
+        WHERE id = #{id} AND is_deleted = 0
+    </update>
+
+    <!-- 根据租户ID查询入驻申请（一个租户只有一条） -->
+    <select id="selectByTenantId" resultMap="BaseResultMap">
+        SELECT id, passport_uuid, applicant_role, company_name, country, reg_number,
+               established_year, contact_name, contact_title, contact_email, contact_phone,
+               buy_category, buy_volume, buy_volume_amount, buy_volume_currency,
+               fiscal_period_start, fiscal_period_end, buy_market,
+               sup_category, sup_capacity, sup_certs, sup_export,
+               status, review_comment, reviewed_by, reviewed_at, tenant_id,
+               create_time, update_time
+        FROM application
+        WHERE tenant_id = #{tenantId} AND is_deleted = 0
+        LIMIT 1
+    </select>
+
+</mapper>

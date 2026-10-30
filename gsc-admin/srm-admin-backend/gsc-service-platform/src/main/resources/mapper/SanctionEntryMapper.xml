@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.greensmartplanet.gsc.platform.mapper.SanctionEntryMapper">
+
+    <resultMap id="BaseResultMap" type="cn.greensmartplanet.gsc.platform.entity.SanctionEntry">
+        <id column="id" property="id"/>
+        <result column="entity_id" property="entityId"/>
+        <result column="name" property="name"/>
+        <result column="aliases" property="aliases"/>
+        <result column="entity_type" property="entityType"/>
+        <result column="jurisdiction" property="jurisdiction"/>
+        <result column="program" property="program"/>
+        <result column="source_name" property="sourceName"/>
+        <result column="last_synced_at" property="lastSyncedAt"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+        <result column="is_deleted" property="isDeleted"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id, entity_id, name, aliases, entity_type, jurisdiction, program, source_name,
+        last_synced_at, create_time, update_time, is_deleted
+    </sql>
+
+    <!-- 批量 upsert：按 entity_id 唯一键，新插旧更 -->
+    <insert id="insertBatchUpsert">
+        INSERT INTO sanction_entry (
+            id, entity_id, name, aliases, entity_type, jurisdiction, program, source_name, last_synced_at
+        ) VALUES
+        <foreach collection="list" item="e" separator=",">
+            (#{e.id}, #{e.entityId}, #{e.name}, #{e.aliases}, #{e.entityType}, #{e.jurisdiction},
+             #{e.program}, #{e.sourceName}, #{e.lastSyncedAt})
+        </foreach>
+        ON DUPLICATE KEY UPDATE
+            name = VALUES(name),
+            aliases = VALUES(aliases),
+            entity_type = VALUES(entity_type),
+            jurisdiction = VALUES(jurisdiction),
+            program = VALUES(program),
+            source_name = VALUES(source_name),
+            last_synced_at = VALUES(last_synced_at),
+            update_time = NOW()
+    </insert>
+
+    <!-- 分页查询（超管名单库页） -->
+    <select id="selectPage" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/> FROM sanction_entry
+        <where>
+            is_deleted = 0
+            <if test="keyword != null and keyword != ''">
+                AND (name LIKE CONCAT('%', #{keyword}, '%') OR aliases LIKE CONCAT('%', #{keyword}, '%'))
+            </if>
+        </where>
+        ORDER BY id DESC
+        LIMIT #{offset}, #{size}
+    </select>
+
+    <!-- 分页总数 -->
+    <select id="count" resultType="long">
+        SELECT COUNT(*) FROM sanction_entry
+        <where>
+            is_deleted = 0
+            <if test="keyword != null and keyword != ''">
+                AND (name LIKE CONCAT('%', #{keyword}, '%') OR aliases LIKE CONCAT('%', #{keyword}, '%'))
+            </if>
+        </where>
+    </select>
+
+    <!-- 库内总条数 -->
+    <select id="countAll" resultType="long">
+        SELECT COUNT(*) FROM sanction_entry WHERE is_deleted = 0
+    </select>
+
+    <!-- 最近同步时间 -->
+    <select id="selectMaxSyncedAt" resultType="java.time.LocalDateTime">
+        SELECT MAX(last_synced_at) FROM sanction_entry WHERE is_deleted = 0
+    </select>
+
+</mapper>

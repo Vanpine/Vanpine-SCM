@@ -1,0 +1,329 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.greensmartplanet.gsc.trade.mapper.ContractMapper">
+
+    <resultMap id="BaseResultMap" type="cn.greensmartplanet.gsc.trade.entity.Contract">
+        <id column="id" property="id"/>
+        <result column="contract_no" property="contractNo"/>
+        <result column="inquiry_id" property="inquiryId"/>
+        <result column="winning_quote_id" property="winningQuoteId"/>
+        <result column="buyer_tenant_id" property="buyerTenantId"/>
+        <result column="supplier_tenant_id" property="supplierTenantId"/>
+        <result column="title" property="title"/>
+        <result column="amount" property="amount"/>
+        <result column="quantity" property="quantity"/>
+        <result column="currency" property="currency"/>
+        <result column="sign_date" property="signDate"/>
+        <result column="valid_until" property="validUntil"/>
+        <result column="delivery_place" property="deliveryPlace"/>
+        <result column="delivery_date" property="deliveryDate"/>
+        <result column="payment_terms" property="paymentTerms"/>
+        <result column="delivery_terms" property="deliveryTerms"/>
+        <result column="production_need_date" property="productionNeedDate"/>
+        <result column="material_critical_level" property="materialCriticalLevel"/>
+        <result column="inventory_cover_days" property="inventoryCoverDays"/>
+        <result column="planned_ship_date" property="plannedShipDate"/>
+        <result column="allowed_delay_days" property="allowedDelayDays"/>
+        <result column="partial_delivery_allowed" property="partialDeliveryAllowed"/>
+        <result column="substitution_allowed" property="substitutionAllowed"/>
+        <result column="expedite_allowed" property="expediteAllowed"/>
+        <result column="delivery_notice_days" property="deliveryNoticeDays"/>
+        <result column="exception_notice_hours" property="exceptionNoticeHours"/>
+        <result column="penalty_daily_rate" property="penaltyDailyRate"/>
+        <result column="penalty_max_rate" property="penaltyMaxRate"/>
+        <result column="status" property="status"/>
+        <result column="terminate_reason" property="terminateReason"/>
+        <result column="terminate_type" property="terminateType"/>
+        <result column="attachment_key" property="attachmentKey"/>
+        <result column="supplier_confirmed" property="supplierConfirmed"/>
+        <result column="supplier_confirmed_at" property="supplierConfirmedAt"/>
+        <result column="decline_reason" property="declineReason"/>
+        <result column="sign_attachment_url" property="signAttachmentUrl"/>
+        <result column="sign_attachment_key" property="signAttachmentKey"/>
+        <result column="sign_uploaded_by_tenant_id" property="signUploadedByTenantId"/>
+        <result column="buyer_sign_attachment_url" property="buyerSignAttachmentUrl"/>
+        <result column="buyer_sign_attachment_key" property="buyerSignAttachmentKey"/>
+        <result column="supplier_sign_attachment_url" property="supplierSignAttachmentUrl"/>
+        <result column="supplier_sign_attachment_key" property="supplierSignAttachmentKey"/>
+        <result column="buyer_sign_confirm" property="buyerSignConfirm"/>
+        <result column="supplier_sign_confirm" property="supplierSignConfirm"/>
+        <result column="withdrawn_at" property="withdrawnAt"/>
+        <result column="create_by" property="createBy"/>
+        <result column="update_by" property="updateBy"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+        <result column="is_deleted" property="isDeleted"/>
+    </resultMap>
+
+    <!-- 合同表基础列 -->
+    <sql id="Base_Column_List">
+        id, contract_no, inquiry_id, winning_quote_id, buyer_tenant_id, supplier_tenant_id,
+        title, amount, quantity, currency, sign_date, valid_until,
+        delivery_place, delivery_date, payment_terms, delivery_terms,
+        production_need_date, material_critical_level, inventory_cover_days,
+        planned_ship_date, allowed_delay_days, partial_delivery_allowed,
+        substitution_allowed, expedite_allowed, delivery_notice_days, exception_notice_hours,
+        penalty_daily_rate, penalty_max_rate,
+        status, terminate_reason, terminate_type, attachment_key,
+        supplier_confirmed, supplier_confirmed_at, decline_reason,
+        sign_attachment_url, sign_attachment_key, sign_uploaded_by_tenant_id,
+        buyer_sign_attachment_url, buyer_sign_attachment_key,
+        supplier_sign_attachment_url, supplier_sign_attachment_key,
+        buyer_sign_confirm, supplier_sign_confirm, withdrawn_at,
+        create_by, update_by, create_time, update_time, is_deleted
+    </sql>
+
+    <!-- 采购方分页查合同 -->
+    <select id="selectByBuyer" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM contract
+        WHERE buyer_tenant_id = #{tenantId} AND is_deleted = 0
+        <if test="status != null and status != ''">
+            AND status = #{status}
+        </if>
+        <if test="keyword != null and keyword != ''">
+            AND title LIKE CONCAT('%', #{keyword}, '%')
+        </if>
+        ORDER BY create_time DESC
+        LIMIT #{offset}, #{limit}
+    </select>
+
+    <select id="countByBuyer" resultType="long">
+        SELECT COUNT(*) FROM contract
+        WHERE buyer_tenant_id = #{tenantId} AND is_deleted = 0
+        <if test="status != null and status != ''">
+            AND status = #{status}
+        </if>
+        <if test="keyword != null and keyword != ''">
+            AND title LIKE CONCAT('%', #{keyword}, '%')
+        </if>
+    </select>
+
+    <!-- 供应方分页查合同 -->
+    <select id="selectBySupplier" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM contract
+        WHERE supplier_tenant_id = #{tenantId} AND is_deleted = 0
+        <if test="status != null and status != ''">
+            AND status = #{status}
+        </if>
+        <if test="keyword != null and keyword != ''">
+            AND title LIKE CONCAT('%', #{keyword}, '%')
+        </if>
+        ORDER BY create_time DESC
+        LIMIT #{offset}, #{limit}
+    </select>
+
+    <select id="countBySupplier" resultType="long">
+        SELECT COUNT(*) FROM contract
+        WHERE supplier_tenant_id = #{tenantId} AND is_deleted = 0
+        <if test="status != null and status != ''">
+            AND status = #{status}
+        </if>
+        <if test="keyword != null and keyword != ''">
+            AND title LIKE CONCAT('%', #{keyword}, '%')
+        </if>
+    </select>
+
+    <!-- 按ID查单条 -->
+    <select id="selectById" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM contract WHERE id = #{id} AND is_deleted = 0
+    </select>
+
+    <!-- 插入合同 -->
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO contract (
+            contract_no, inquiry_id, winning_quote_id,
+            buyer_tenant_id, supplier_tenant_id,
+            title, amount, quantity, currency, sign_date, valid_until,
+            delivery_place, delivery_date, payment_terms, delivery_terms,
+            production_need_date, material_critical_level, inventory_cover_days,
+            planned_ship_date, allowed_delay_days, partial_delivery_allowed,
+            substitution_allowed, expedite_allowed, delivery_notice_days, exception_notice_hours,
+            penalty_daily_rate, penalty_max_rate,
+            status, attachment_key, create_by
+        ) VALUES (
+            #{contractNo}, #{inquiryId}, #{winningQuoteId},
+            #{buyerTenantId}, #{supplierTenantId},
+            #{title}, #{amount}, #{quantity}, #{currency}, #{signDate}, #{validUntil},
+            #{deliveryPlace}, #{deliveryDate}, #{paymentTerms}, #{deliveryTerms},
+            #{productionNeedDate}, #{materialCriticalLevel}, #{inventoryCoverDays},
+            #{plannedShipDate}, #{allowedDelayDays}, #{partialDeliveryAllowed},
+            #{substitutionAllowed}, #{expediteAllowed}, #{deliveryNoticeDays}, #{exceptionNoticeHours},
+            #{penaltyDailyRate}, #{penaltyMaxRate},
+            #{status}, #{attachmentKey}, #{createBy}
+        )
+    </insert>
+
+    <!-- 编辑合同（仅 draft） -->
+    <update id="update">
+        UPDATE contract
+        SET title = #{title},
+            amount = #{amount},
+            currency = #{currency},
+            sign_date = #{signDate},
+            valid_until = #{validUntil},
+            delivery_place = #{deliveryPlace},
+            delivery_date = #{deliveryDate},
+            payment_terms = #{paymentTerms},
+            delivery_terms = #{deliveryTerms},
+            production_need_date = #{productionNeedDate},
+            material_critical_level = #{materialCriticalLevel},
+            inventory_cover_days = #{inventoryCoverDays},
+            planned_ship_date = #{plannedShipDate},
+            allowed_delay_days = #{allowedDelayDays},
+            partial_delivery_allowed = #{partialDeliveryAllowed},
+            substitution_allowed = #{substitutionAllowed},
+            expedite_allowed = #{expediteAllowed},
+            delivery_notice_days = #{deliveryNoticeDays},
+            exception_notice_hours = #{exceptionNoticeHours},
+            penalty_daily_rate = #{penaltyDailyRate},
+            penalty_max_rate = #{penaltyMaxRate},
+            attachment_key = #{attachmentKey},
+            update_by = #{updateBy}
+        WHERE id = #{id} AND buyer_tenant_id = #{buyerTenantId}
+          AND status = 'draft' AND is_deleted = 0
+    </update>
+
+    <!-- 更新合同状态 -->
+    <update id="updateStatus">
+        UPDATE contract
+        SET status = #{status},
+            <if test="terminateReason != null">terminate_reason = #{terminateReason},</if>
+            <if test="terminateType != null">terminate_type = #{terminateType},</if>
+            update_by = #{updateBy}
+        WHERE id = #{id} AND buyer_tenant_id = #{tenantId} AND is_deleted = 0
+    </update>
+
+    <!-- 交付域回写：全部交付验收完成 → signed → completed（幂等：已 completed 走此分支命中 0 行由调用方判读） -->
+    <update id="updateCompleted">
+        UPDATE contract
+        SET status = 'completed', update_by = #{updateBy}
+        WHERE id = #{id} AND buyer_tenant_id = #{tenantId}
+          AND (status = 'signed' OR status = 'completed') AND is_deleted = 0
+    </update>
+
+    <!-- 按询盘ID统计（防重） -->
+    <select id="countByInquiryId" resultType="int">
+        SELECT COUNT(*) FROM contract WHERE inquiry_id = #{inquiryId} AND is_deleted = 0
+    </select>
+
+    <!-- 按询盘+中标报价统计合同数（分量授标：每个中标报价各建一份合同） -->
+    <select id="countByInquiryAndWinningQuote" resultType="int">
+        SELECT COUNT(*) FROM contract
+        WHERE inquiry_id = #{inquiryId} AND winning_quote_id = #{winningQuoteId}
+        AND status != 'terminated' AND is_deleted = 0
+    </select>
+
+    <!-- 查某询盘下已有活跃（非终止）合同的 winning_quote_id 列表 -->
+    <select id="selectActiveWinningQuoteIdsByInquiryId" resultType="long">
+        SELECT winning_quote_id FROM contract
+        WHERE inquiry_id = #{inquiryId} AND status != 'terminated' AND is_deleted = 0
+    </select>
+
+    <!-- 发起合同：采购方 + draft → pending_supplier，清撤回标记 -->
+    <update id="submit">
+        UPDATE contract
+        SET status = 'pending_supplier', withdrawn_at = NULL, update_by = #{updateBy}
+        WHERE id = #{id} AND buyer_tenant_id = #{tenantId}
+          AND status = 'draft' AND is_deleted = 0
+    </update>
+
+    <!-- 采购方撤回：pending_supplier → draft，清供应商确认标记/拒绝理由，记撤回时间 -->
+    <update id="withdraw">
+        UPDATE contract
+        SET status = 'draft',
+            supplier_confirmed = 0,
+            supplier_confirmed_at = NULL,
+            decline_reason = NULL,
+            withdrawn_at = NOW(),
+            update_by = #{updateBy}
+        WHERE id = #{id} AND buyer_tenant_id = #{tenantId}
+          AND status = 'pending_supplier' AND is_deleted = 0
+    </update>
+
+    <!-- 供应商确认条款：supplier + pending_supplier → 记 confirmed 标记（状态不变） -->
+    <update id="confirmSupplier">
+        UPDATE contract
+        SET supplier_confirmed = 1, supplier_confirmed_at = NOW(), update_by = #{updateBy}
+        WHERE id = #{id} AND supplier_tenant_id = #{tenantId}
+          AND status = 'pending_supplier' AND is_deleted = 0
+    </update>
+
+    <!-- 供应商拒绝：supplier + pending_supplier → draft + 拒绝理由，清确认标记 -->
+    <update id="decline">
+        UPDATE contract
+        SET status = 'draft', supplier_confirmed = 0, supplier_confirmed_at = NULL,
+            decline_reason = #{reason}, update_by = #{updateBy}
+        WHERE id = #{id} AND supplier_tenant_id = #{tenantId}
+          AND status = 'pending_supplier' AND is_deleted = 0
+    </update>
+
+    <!-- 上传盖章件：任一方上传自己盖好章的合同；对方已上传（双章齐全）则直接 signed，否则 pending_confirm -->
+    <!-- sign_attachment_key 始终记录最后上传的版本 = 最终双章合同 -->
+    <!-- 注意：存的是 OSS object key（非签名 URL），返回 VO 时才现签，避免签名过期变死链 -->
+    <update id="uploadSign">
+        UPDATE contract
+        SET buyer_sign_attachment_key = IF(buyer_tenant_id = #{tenantId}, #{key}, buyer_sign_attachment_key),
+            supplier_sign_attachment_key = IF(supplier_tenant_id = #{tenantId}, #{key}, supplier_sign_attachment_key),
+            sign_attachment_key = #{key},
+            status = IF(
+                (buyer_tenant_id = #{tenantId} AND supplier_sign_attachment_key IS NOT NULL)
+                OR (supplier_tenant_id = #{tenantId} AND buyer_sign_attachment_key IS NOT NULL),
+                'signed', 'pending_confirm'
+            ),
+            sign_date = IF(
+                (buyer_tenant_id = #{tenantId} AND supplier_sign_attachment_key IS NOT NULL)
+                OR (supplier_tenant_id = #{tenantId} AND buyer_sign_attachment_key IS NOT NULL),
+                CURDATE(), sign_date
+            ),
+            update_by = #{updateBy}
+        WHERE id = #{id} AND (buyer_tenant_id = #{tenantId} OR supplier_tenant_id = #{tenantId})
+          AND status IN ('pending_supplier', 'pending_confirm') AND is_deleted = 0
+          AND (status != 'pending_supplier' OR supplier_confirmed = 1)
+    </update>
+
+    <!-- 确认盖章件：本方确认对方上传的双盖章件即 signed（单方上传模式，不要求本方也上传） -->
+    <update id="confirmSign">
+        UPDATE contract
+        SET buyer_sign_confirm = IF(buyer_tenant_id = #{tenantId}, 1, buyer_sign_confirm),
+            supplier_sign_confirm = IF(supplier_tenant_id = #{tenantId}, 1, supplier_sign_confirm),
+            status = IF(
+                (buyer_tenant_id = #{tenantId} AND supplier_sign_attachment_key IS NOT NULL)
+                OR (supplier_tenant_id = #{tenantId} AND buyer_sign_attachment_key IS NOT NULL),
+                'signed', 'pending_confirm'
+            ),
+            sign_date = IF(
+                (buyer_tenant_id = #{tenantId} AND supplier_sign_attachment_key IS NOT NULL)
+                OR (supplier_tenant_id = #{tenantId} AND buyer_sign_attachment_key IS NOT NULL),
+                CURDATE(), sign_date
+            ),
+            update_by = #{updateBy}
+        WHERE id = #{id} AND (buyer_tenant_id = #{tenantId} OR supplier_tenant_id = #{tenantId})
+          AND status = 'pending_confirm' AND is_deleted = 0
+    </update>
+
+    <!-- 按中标报价ID批量查合同 -->
+    <select id="selectByWinningQuoteIds" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM contract
+        WHERE winning_quote_id IN
+        <foreach collection="winningQuoteIds" item="id" open="(" close=")" separator=",">
+            #{id}
+        </foreach>
+        AND is_deleted = 0
+        ORDER BY id ASC
+    </select>
+
+    <!-- 按供应商租户查已签署合同（内部契约：交付域列可建交付单合同/发货排期；create_time 倒序保证交付侧顺序稳定） -->
+    <select id="selectSignedBySupplier" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM contract
+        WHERE supplier_tenant_id = #{supplierTenantId}
+          AND status = 'signed'
+          AND is_deleted = 0
+        ORDER BY create_time DESC
+    </select>
+</mapper>

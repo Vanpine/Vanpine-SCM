@@ -1,0 +1,263 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.greensmartplanet.gsc.trade.mapper.InquiryMapper">
+
+    <resultMap id="BaseResultMap" type="cn.greensmartplanet.gsc.trade.entity.Inquiry">
+        <id column="id" property="id"/>
+        <result column="inquiry_no" property="inquiryNo"/>
+        <result column="requirement_id" property="requirementId"/>
+        <result column="connection_id" property="connectionId"/>
+        <result column="buyer_tenant_id" property="buyerTenantId"/>
+        <result column="title" property="title"/>
+        <result column="currency" property="currency"/>
+        <result column="category" property="category"/>
+        <result column="quantity" property="quantity"/>
+        <result column="unit" property="unit"/>
+        <result column="delivery_place" property="deliveryPlace"/>
+        <result column="delivery_date" property="deliveryDate"/>
+        <result column="quote_deadline" property="quoteDeadline"/>
+        <result column="payment_terms" property="paymentTerms"/>
+        <result column="spec_text" property="specText"/>
+        <result column="attachment_key" property="attachmentKey"/>
+        <result column="status" property="status"/>
+        <result column="winning_quote_id" property="winningQuoteId"/>
+        <result column="awarded_at" property="awardedAt"/>
+        <result column="awarded_by" property="awardedBy"/>
+        <result column="award_reason" property="awardReason"/>
+        <result column="create_by" property="createBy"/>
+        <result column="update_by" property="updateBy"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+        <result column="is_deleted" property="isDeleted"/>
+    </resultMap>
+
+    <!-- 询盘表基础列（供应商视角 JOIN inquiry_invite 时传 ${p} 表别名前缀） -->
+    <sql id="Base_Column_List">
+        ${p}id, ${p}inquiry_no, ${p}requirement_id, ${p}connection_id, ${p}buyer_tenant_id,
+        ${p}title, ${p}currency, ${p}category, ${p}quantity, ${p}unit,
+        ${p}delivery_place, ${p}delivery_date, ${p}quote_deadline, ${p}payment_terms, ${p}spec_text,
+        ${p}attachment_key, ${p}status, ${p}winning_quote_id, ${p}awarded_at, ${p}awarded_by,
+        ${p}award_reason, ${p}create_by, ${p}update_by, ${p}create_time, ${p}update_time, ${p}is_deleted
+    </sql>
+
+    <!-- 列表状态与页面标签对齐：截止已过有报价=待授标，无报价=已过期 -->
+    <sql id="inquiryStatusFilter">
+        <if test="status != null and status != ''">
+            <choose>
+                <when test="status == 'open'">
+                    AND ${p}status = 'open'
+                    AND (${p}quote_deadline IS NULL OR ${p}quote_deadline &gt;= NOW())
+                </when>
+                <when test="status == 'quoting'">
+                    AND ${p}status = 'quoting'
+                    AND (${p}quote_deadline IS NULL OR ${p}quote_deadline &gt;= NOW())
+                </when>
+                <when test="status == 'pending_award'">
+                    AND (
+                        ${p}status = 'expired'
+                        OR (${p}status IN ('open', 'quoting')
+                            AND ${p}quote_deadline IS NOT NULL
+                            AND ${p}quote_deadline &lt; NOW())
+                    )
+                    AND EXISTS (
+                        SELECT 1 FROM quote q
+                        WHERE q.inquiry_id = ${inquiryIdCol} AND q.status = 'pending' AND q.is_deleted = 0
+                    )
+                </when>
+                <when test="status == 'expired'">
+                    AND (
+                        ${p}status = 'expired'
+                        OR (${p}status IN ('open', 'quoting')
+                            AND ${p}quote_deadline IS NOT NULL
+                            AND ${p}quote_deadline &lt; NOW())
+                    )
+                    AND NOT EXISTS (
+                        SELECT 1 FROM quote q
+                        WHERE q.inquiry_id = ${inquiryIdCol} AND q.status = 'pending' AND q.is_deleted = 0
+                    )
+                </when>
+                <otherwise>
+                    AND ${p}status = #{status}
+                </otherwise>
+            </choose>
+        </if>
+    </sql>
+
+    <!-- 采购方分页查自己发起的询盘 -->
+    <select id="selectByBuyer" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"><property name="p" value=""/></include>
+        FROM inquiry
+        WHERE buyer_tenant_id = #{tenantId}
+          AND is_deleted = 0
+        <include refid="inquiryStatusFilter"><property name="p" value=""/><property name="inquiryIdCol" value="inquiry.id"/></include>
+        <if test="keyword != null and keyword != ''">
+            AND (title LIKE CONCAT('%', #{keyword}, '%')
+                 OR category LIKE CONCAT('%', #{keyword}, '%')
+                 OR inquiry_no LIKE CONCAT('%', #{keyword}, '%'))
+        </if>
+        ORDER BY create_time DESC
+        LIMIT #{offset}, #{limit}
+    </select>
+
+    <select id="countByBuyer" resultType="long">
+        SELECT COUNT(*)
+        FROM inquiry
+        WHERE buyer_tenant_id = #{tenantId}
+          AND is_deleted = 0
+        <include refid="inquiryStatusFilter"><property name="p" value=""/><property name="inquiryIdCol" value="inquiry.id"/></include>
+        <if test="keyword != null and keyword != ''">
+            AND (title LIKE CONCAT('%', #{keyword}, '%')
+                 OR category LIKE CONCAT('%', #{keyword}, '%')
+                 OR inquiry_no LIKE CONCAT('%', #{keyword}, '%'))
+        </if>
+    </select>
+
+    <!-- 供应商分页查受邀询盘（JOIN inquiry_invite — 红线：供应商只看邀请自己的） -->
+    <select id="selectBySupplier" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"><property name="p" value="i."/></include>
+        FROM inquiry i
+        INNER JOIN inquiry_invite inv ON inv.inquiry_id = i.id
+            AND inv.supplier_tenant_id = #{tenantId}
+            AND inv.is_deleted = 0
+        WHERE i.is_deleted = 0
+        <include refid="inquiryStatusFilter"><property name="p" value="i."/><property name="inquiryIdCol" value="i.id"/></include>
+        <if test="keyword != null and keyword != ''">
+            AND (i.title LIKE CONCAT('%', #{keyword}, '%')
+                 OR i.category LIKE CONCAT('%', #{keyword}, '%')
+                 OR i.inquiry_no LIKE CONCAT('%', #{keyword}, '%'))
+        </if>
+        ORDER BY i.create_time DESC
+        LIMIT #{offset}, #{limit}
+    </select>
+
+    <select id="countBySupplier" resultType="long">
+        SELECT COUNT(*)
+        FROM inquiry i
+        INNER JOIN inquiry_invite inv ON inv.inquiry_id = i.id
+            AND inv.supplier_tenant_id = #{tenantId}
+            AND inv.is_deleted = 0
+        WHERE i.is_deleted = 0
+        <include refid="inquiryStatusFilter"><property name="p" value="i."/><property name="inquiryIdCol" value="i.id"/></include>
+        <if test="keyword != null and keyword != ''">
+            AND (i.title LIKE CONCAT('%', #{keyword}, '%')
+                 OR i.category LIKE CONCAT('%', #{keyword}, '%')
+                 OR i.inquiry_no LIKE CONCAT('%', #{keyword}, '%'))
+        </if>
+    </select>
+
+    <!-- 按ID查单条 -->
+    <select id="selectById" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"><property name="p" value=""/></include>
+        FROM inquiry WHERE id = #{id} AND is_deleted = 0
+    </select>
+
+    <!-- 插入询盘 -->
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO inquiry (
+            inquiry_no, requirement_id, connection_id, buyer_tenant_id,
+            title, currency, category, quantity, unit, delivery_place, delivery_date,
+            quote_deadline, payment_terms, spec_text, attachment_key,
+            status, create_by
+        ) VALUES (
+            #{inquiryNo}, #{requirementId}, #{connectionId}, #{buyerTenantId},
+            #{title}, #{currency}, #{category}, #{quantity}, #{unit}, #{deliveryPlace}, #{deliveryDate},
+            #{quoteDeadline}, #{paymentTerms}, #{specText}, #{attachmentKey},
+            #{status}, #{createBy}
+        )
+    </insert>
+
+    <!-- 更新状态 -->
+    <update id="updateStatus">
+        UPDATE inquiry
+        SET status = #{status}, update_by = #{updateBy}
+        WHERE id = #{id} AND buyer_tenant_id = #{tenantId} AND is_deleted = 0
+    </update>
+
+    <!-- 过期扫描：open / quoting 且 deadline 已过 → expired -->
+    <update id="updateExpired">
+        UPDATE inquiry
+        SET status = 'expired'
+        WHERE status IN ('open', 'quoting') AND quote_deadline IS NOT NULL
+          AND quote_deadline &lt; NOW() AND is_deleted = 0
+    </update>
+
+    <!-- 选定中标 -->
+    <update id="updateAward">
+        UPDATE inquiry
+        SET status = 'awarded',
+            winning_quote_id = #{winningQuoteId},
+            awarded_at = NOW(),
+            awarded_by = #{awardedBy},
+            award_reason = #{awardReason},
+            update_by = #{awardedBy}
+        WHERE id = #{id} AND buyer_tenant_id = #{tenantId} AND is_deleted = 0
+    </update>
+
+    <!-- 编辑询盘（仅 open 状态） -->
+    <update id="update">
+        UPDATE inquiry
+        SET title = #{title},
+            category = #{category},
+            quantity = #{quantity},
+            unit = #{unit},
+            delivery_place = #{deliveryPlace},
+            delivery_date = #{deliveryDate},
+            quote_deadline = #{quoteDeadline},
+            payment_terms = #{paymentTerms},
+            spec_text = #{specText},
+            attachment_key = #{attachmentKey},
+            update_by = #{updateBy}
+        WHERE id = #{id} AND buyer_tenant_id = #{buyerTenantId}
+          AND status = 'open' AND is_deleted = 0
+    </update>
+
+    <!-- 部分更新询盘（AI 工具 update_inquiry 用：只 set 非 null 字段，防清空；不含 quote_deadline，改截止走 extend_deadline） -->
+    <update id="updateForAi">
+        UPDATE inquiry
+        <set>
+            <if test="title != null">title = #{title},</if>
+            <if test="category != null">category = #{category},</if>
+            <if test="quantity != null">quantity = #{quantity},</if>
+            <if test="unit != null">unit = #{unit},</if>
+            <if test="deliveryPlace != null">delivery_place = #{deliveryPlace},</if>
+            <if test="deliveryDate != null">delivery_date = #{deliveryDate},</if>
+            <if test="paymentTerms != null">payment_terms = #{paymentTerms},</if>
+            <if test="specText != null">spec_text = #{specText},</if>
+            update_by = #{updateBy}
+        </set>
+        WHERE id = #{id} AND buyer_tenant_id = #{buyerTenantId}
+          AND status = 'open' AND is_deleted = 0
+    </update>
+
+    <!-- 批量查哪些对接已有活跃询盘（按需求+供应商维度匹配，覆盖一个询盘邀请多家供应商的场景） -->
+    <select id="selectActiveByConnectionIds" resultType="cn.greensmartplanet.gsc.trade.projection.ActiveConnectionInquiryRow">
+        SELECT DISTINCT c.id AS connectionId, i.id AS inquiryId, i.status AS inquiryStatus
+        FROM connection c
+        JOIN inquiry_invite ii ON ii.supplier_tenant_id = c.supplier_tenant_id AND ii.is_deleted = 0
+        JOIN inquiry i ON i.id = ii.inquiry_id AND i.is_deleted = 0
+        WHERE c.id IN
+          <foreach collection="connectionIds" item="cid" open="(" separator="," close=")">#{cid}</foreach>
+          AND c.is_deleted = 0
+          AND c.buyer_tenant_id = #{buyerTenantId}
+          AND i.buyer_tenant_id = #{buyerTenantId}
+          AND i.requirement_id = c.requirement_id
+          AND i.status IN ('open', 'quoting', 'awarded')
+    </select>
+
+    <!-- 延长报价截止时间 -->
+    <update id="updateDeadline">
+        UPDATE inquiry SET quote_deadline = #{quoteDeadline}, update_by = #{updateBy} WHERE id = #{id} AND is_deleted = 0
+    </update>
+
+    <!-- 查某采购商下指定标题的进行中询盘（创建防重用） -->
+    <select id="selectActiveByBuyerAndTitle" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"><property name="p" value=""/></include>
+        FROM inquiry
+        WHERE buyer_tenant_id = #{tenantId}
+          AND title = #{title}
+          AND status IN ('open', 'quoting')
+          AND is_deleted = 0
+        LIMIT 1
+    </select>
+</mapper>

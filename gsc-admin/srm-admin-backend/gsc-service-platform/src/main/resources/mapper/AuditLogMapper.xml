@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.greensmartplanet.gsc.platform.mapper.AuditLogMapper">
+
+    <!-- 写入操作日志 -->
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO audit_log (event_id, tenant_id, user_id, username, module, operation,
+            description, request_method, request_url, request_params, ip,
+            status, error_msg, cost_time_ms, target_type, target_id, target_summary, create_time)
+        VALUES (#{eventId}, #{tenantId}, #{userId}, #{username}, #{module}, #{operation},
+            #{description}, #{requestMethod}, #{requestUrl}, #{requestParams}, #{ip},
+            #{status}, #{errorMsg}, #{costTimeMs}, #{targetType}, #{targetId}, #{targetSummary}, #{createTime})
+    </insert>
+
+    <!-- 分页查询操作日志（超管 tenantId=null 查全部，企业管理员传 tenantId 只看自己租户） -->
+    <select id="selectPage" resultType="cn.greensmartplanet.gsc.platform.entity.AuditLogEntry">
+        SELECT id, tenant_id, user_id, username, module, operation,
+               description, request_method, request_url, request_params, ip,
+               status, error_msg, cost_time_ms, target_type, target_id, target_summary, create_time
+        FROM audit_log
+        WHERE 1 = 1
+        <if test="tenantId != null">
+            AND tenant_id = #{tenantId}
+        </if>
+        <if test="module != null and module != ''">
+            AND module = #{module}
+        </if>
+        <if test="operation != null and operation != ''">
+            AND operation = #{operation}
+        </if>
+        <if test="username != null and username != ''">
+            AND (
+                username LIKE CONCAT('%', #{username}, '%')
+                OR CAST(user_id AS CHAR) = #{username}
+                OR user_id IN (
+                    SELECT id FROM `user`
+                    WHERE is_deleted = 0
+                      AND real_name LIKE CONCAT('%', #{username}, '%')
+                )
+            )
+        </if>
+        <if test="status != null and status != ''">
+            AND status = #{status}
+        </if>
+        <if test="startTime != null and startTime != ''">
+            AND create_time &gt;= #{startTime}
+        </if>
+        <if test="endTime != null and endTime != ''">
+            AND create_time &lt;= #{endTime}
+        </if>
+        ORDER BY id DESC
+    </select>
+
+</mapper>

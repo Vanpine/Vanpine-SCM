@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.greensmartplanet.gsc.delivery.mapper.DeliveryLogisticsEventMapper">
+
+    <!-- DeliveryLogisticsEvent 全字段（查询统一复用，禁止 SELECT *；${p} 为别名前缀参数，无别名传 value=""） -->
+    <sql id="Base_Column_List">
+        ${p}id, ${p}delivery_id, ${p}event_type, ${p}event_time,
+        ${p}estimated_arrival_time, ${p}location, ${p}remark, ${p}source,
+        ${p}external_event_id, ${p}operator_tenant_id, ${p}operator_user_id,
+        ${p}create_time
+    </sql>
+
+    <resultMap id="BaseResultMap" type="cn.greensmartplanet.gsc.delivery.entity.DeliveryLogisticsEvent">
+        <id column="id" property="id"/>
+        <result column="delivery_id" property="deliveryId"/>
+        <result column="event_type" property="eventType"/>
+        <result column="event_time" property="eventTime"/>
+        <result column="estimated_arrival_time" property="estimatedArrivalTime"/>
+        <result column="location" property="location"/>
+        <result column="remark" property="remark"/>
+        <result column="source" property="source"/>
+        <result column="external_event_id" property="externalEventId"/>
+        <result column="operator_tenant_id" property="operatorTenantId"/>
+        <result column="operator_user_id" property="operatorUserId"/>
+        <result column="create_time" property="createTime"/>
+    </resultMap>
+
+    <!-- 插入物流事件（create_time 走 DB 默认值） -->
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO delivery_logistics_event (
+            delivery_id, event_type, event_time, estimated_arrival_time,
+            location, remark, source, operator_tenant_id, operator_user_id
+        ) VALUES (
+            #{deliveryId}, #{eventType}, #{eventTime}, #{estimatedArrivalTime},
+            #{location}, #{remark}, #{source}, #{operatorTenantId}, #{operatorUserId}
+        )
+    </insert>
+
+    <!-- 按交付单查物流事件时间线（时间正序） -->
+    <select id="selectByDeliveryId" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"><property name="p" value=""/></include> FROM delivery_logistics_event
+        WHERE delivery_id = #{deliveryId}
+        ORDER BY event_time ASC, id ASC
+    </select>
+
+    <!-- 按交付单查最新一条物流事件（按录入顺序，id 自增即录入先后） -->
+    <select id="selectLatestByDeliveryId" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"><property name="p" value=""/></include> FROM delivery_logistics_event
+        WHERE delivery_id = #{deliveryId}
+        ORDER BY id DESC
+        LIMIT 1
+    </select>
+
+    <!-- 按交付单查最新一条带 ETA 的事件（按录入顺序） -->
+    <select id="selectLatestEtaByDeliveryId" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"><property name="p" value=""/></include> FROM delivery_logistics_event
+        WHERE delivery_id = #{deliveryId} AND estimated_arrival_time IS NOT NULL
+        ORDER BY id DESC
+        LIMIT 1
+    </select>
+
+    <!-- 按交付单+类型统计事件数（清关滞留/重复判断） -->
+    <select id="countByDeliveryAndType" resultType="int">
+        SELECT COUNT(*) FROM delivery_logistics_event
+        WHERE delivery_id = #{deliveryId} AND event_type = #{eventType}
+    </select>
+
+    <!-- 批量查每单最新一条物流事件（子查询取每单最大 id，雪花主键按 id 排序即录入顺序） -->
+    <select id="selectLatestByDeliveryIds" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"><property name="p" value="e."/></include> FROM delivery_logistics_event e
+        JOIN (
+            SELECT delivery_id, MAX(id) AS max_id
+            FROM delivery_logistics_event
+            WHERE delivery_id IN
+            <foreach collection="deliveryIds" item="did" open="(" separator="," close=")">
+                #{did}
+            </foreach>
+            GROUP BY delivery_id
+        ) t ON e.id = t.max_id
+    </select>
+
+    <!-- 批量查每单最新一条带 ETA 的事件 -->
+    <select id="selectLatestEtaByDeliveryIds" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"><property name="p" value="e."/></include> FROM delivery_logistics_event e
+        JOIN (
+            SELECT delivery_id, MAX(id) AS max_id
+            FROM delivery_logistics_event
+            WHERE delivery_id IN
+            <foreach collection="deliveryIds" item="did" open="(" separator="," close=")">
+                #{did}
+            </foreach>
+            AND estimated_arrival_time IS NOT NULL
+            GROUP BY delivery_id
+        ) t ON e.id = t.max_id
+    </select>
+
+    <!-- 批量查存在指定类型事件的交付单ID（清关阻塞判定，一次 IN 查询替代逐单 count） -->
+    <select id="selectDeliveryIdsWithEventType" resultType="long">
+        SELECT DISTINCT delivery_id FROM delivery_logistics_event
+        WHERE event_type = #{eventType}
+        AND delivery_id IN
+        <foreach collection="deliveryIds" item="did" open="(" separator="," close=")">
+            #{did}
+        </foreach>
+    </select>
+</mapper>

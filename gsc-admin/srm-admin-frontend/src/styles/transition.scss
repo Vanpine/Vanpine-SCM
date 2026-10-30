@@ -1,0 +1,36 @@
+/* ========================================
+ * SRM Admin - 全局过渡动画
+ * ======================================== */
+
+/* 侧边栏折叠过渡 */
+.sidebar-transition {
+  transition: width 0.3s ease;
+}
+
+/* 页面切换过渡 */
+.fade-transform-enter-active,
+.fade-transform-leave-active {
+  transition: all 0.3s ease;
+}
+
+.fade-transform-enter-from {
+  opacity: 0;
+  transform: translateX(-30px);
+}
+
+.fade-transform-leave-to {
+  opacity: 0;
+  transform: translateX(30px);
+}
+
+/* 面包屑过渡 */
+.breadcrumb-enter-active,
+.breadcrumb-leave-active {
+  transition: all 0.2s ease;
+}
+
+.breadcrumb-enter-from,
+.breadcrumb-leave-to {
+  opacity: 0;
+  transform: translateX(20px);
+}

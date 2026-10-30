@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.greensmartplanet.gsc.platform.mapper.TenantMapper">
+
+    <!-- 根据租户编码查租户 -->
+    <select id="findTenantByCode" resultType="cn.greensmartplanet.gsc.platform.entity.Tenant">
+        SELECT id, tenant_code, tenant_name, short_name, country,
+               reg_number, logo_url, contact_name, contact_email,
+               contact_phone, status, subscription_id, expired_at
+        FROM tenant
+        WHERE tenant_code = #{tenantCode}
+          AND is_deleted = 0
+    </select>
+
+    <!-- 分页查询（租户编码/企业名称 各自精确模糊匹配 + 状态筛选），LEFT JOIN 查申请人身份 -->
+    <select id="selectPage" resultType="cn.greensmartplanet.gsc.platform.entity.Tenant">
+        SELECT t.id, t.tenant_code, t.tenant_name, t.short_name, t.country,
+               t.reg_number, t.contact_name, t.contact_email, t.contact_phone,
+               t.status, t.create_time,
+               a.applicant_role
+        FROM tenant t
+        LEFT JOIN application a ON a.tenant_id = t.id AND a.is_deleted = 0
+        WHERE t.is_deleted = 0
+          AND t.id != 1
+        <if test="tenantCode != null and tenantCode != ''">
+          AND t.tenant_code LIKE CONCAT('%', #{tenantCode}, '%')
+        </if>
+        <if test="companyName != null and companyName != ''">
+          AND t.tenant_name LIKE CONCAT('%', #{companyName}, '%')
+        </if>
+        <if test="status != null and status != ''">
+          AND t.status = #{status}
+        </if>
+        ORDER BY t.id ASC
+    </select>
+
+    <!-- 根据ID查租户详情 -->
+    <select id="selectById" resultType="cn.greensmartplanet.gsc.platform.entity.Tenant">
+        SELECT id, tenant_code, tenant_name, short_name, country,
+               reg_number, logo_url, contact_name, contact_email,
+               contact_phone, status, review_comment, reviewed_by,
+               reviewed_at, subscription_id, expired_at, sort_order,
+               create_time, update_time
+        FROM tenant
+        WHERE id = #{id}
+          AND is_deleted = 0
+    </select>
+
+    <!-- 新增租户，返回自增主键 -->
+    <insert id="insertTenant" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO tenant (tenant_code, tenant_name, short_name, country,
+                            reg_number, contact_name, contact_email, contact_phone,
+                            status, sort_order, create_time, update_time)
+        VALUES (#{tenantCode}, #{tenantName}, #{shortName}, #{country},
+                #{regNumber}, #{contactName}, #{contactEmail}, #{contactPhone},
+                #{status}, #{sortOrder}, NOW(), NOW())
+    </insert>
+
+    <!-- 审核操作：更新状态 -->
+    <update id="updateStatus">
+        UPDATE tenant
+        SET status = #{status},
+            review_comment = #{reviewComment},
+            reviewed_by = #{reviewedBy},
+            reviewed_at = NOW(),
+            update_time = NOW()
+        WHERE id = #{id}
+          AND is_deleted = 0
+    </update>
+
+    <!-- 逻辑删除 -->
+    <update id="softDelete">
+        UPDATE tenant
+        SET is_deleted = 1,
+            update_time = NOW()
+        WHERE id = #{id}
+          AND is_deleted = 0
+    </update>
+
+</mapper>

@@ -1,0 +1,332 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.greensmartplanet.gsc.platform.mapper.DueDiligenceMapper">
+
+    <resultMap id="BaseResultMap" type="cn.greensmartplanet.gsc.platform.entity.DueDiligence">
+        <id column="id" property="id"/>
+        <result column="application_id" property="applicationId"/>
+        <result column="tenant_id" property="tenantId"/>
+        <!-- 基础信息（与 application 重叠） -->
+        <result column="company_name" property="companyName"/>
+        <result column="country" property="country"/>
+        <result column="reg_number" property="regNumber"/>
+        <result column="established_year" property="establishedYear"/>
+        <!-- 联系信息（与 application 重叠） -->
+        <result column="contact_name" property="contactName"/>
+        <result column="contact_title" property="contactTitle"/>
+        <result column="contact_email" property="contactEmail"/>
+        <result column="contact_phone" property="contactPhone"/>
+        <!-- 采购方信息（与 application 重叠） -->
+        <result column="buy_category" property="buyCategory"/>
+        <result column="buy_volume" property="buyVolume"/>
+        <result column="buy_volume_amount" property="buyVolumeAmount"/>
+        <result column="buy_volume_currency" property="buyVolumeCurrency"/>
+        <result column="buy_market" property="buyMarket"/>
+        <!-- 供应方信息（与 application 重叠） -->
+        <result column="sup_category" property="supCategory"/>
+        <result column="sup_capacity" property="supCapacity"/>
+        <result column="sup_certs" property="supCerts"/>
+        <result column="sup_export" property="supExport"/>
+        <!-- 申请身份 -->
+        <result column="applicant_role" property="applicantRole"/>
+        <!-- 企业补充信息（尽调独有） -->
+        <result column="province" property="province"/>
+        <result column="city" property="city"/>
+        <result column="business_license_key" property="businessLicenseKey"/>
+        
+        <result column="website" property="website"/>
+        <result column="description" property="description"/>
+        <result column="employee_count" property="employeeCount"/>
+        <result column="annual_revenue" property="annualRevenue"/>
+        <result column="annual_revenue_amount" property="annualRevenueAmount"/>
+        <result column="annual_revenue_currency" property="annualRevenueCurrency"/>
+        <result column="fiscal_period_start" property="fiscalPeriodStart"/>
+        <result column="fiscal_period_end" property="fiscalPeriodEnd"/>
+        <!-- 供应方补充（尽调独有） -->
+        <result column="main_products" property="mainProducts"/>
+        <result column="management_cert" property="managementCert"/>
+        <result column="product_cert" property="productCert"/>
+        <result column="key_clients" property="keyClients"/>
+        <result column="delivery_terms" property="deliveryTerms"/>
+        <result column="lead_time" property="leadTime"/>
+        <result column="export_markets" property="exportMarkets"/>
+        <!-- 采购方补充（尽调独有） -->
+        <result column="industry" property="industry"/>
+        <result column="procurement_detail" property="procurementDetail"/>
+        <result column="supplier_requirement" property="supplierRequirement"/>
+        <result column="target_region" property="targetRegion"/>
+        <result column="payment_terms" property="paymentTerms"/>
+        <!-- 尽调核心材料 -->
+        <result column="legal_person_name" property="legalPersonName"/>
+        <result column="legal_person_id" property="legalPersonId"/>
+        <result column="shareholder_info_key" property="shareholderInfoKey"/>
+        <result column="financial_report_key" property="financialReportKey"/>
+        <result column="legal_record_text" property="legalRecordText"/>
+        <result column="legal_record_key" property="legalRecordKey"/>
+        <!-- 套餐/支付 -->
+        <result column="package_type" property="packageType"/>
+        <result column="payment_status" property="paymentStatus"/>
+        <result column="payment_amount" property="paymentAmount"/>
+        <result column="payment_currency" property="paymentCurrency"/>
+        <result column="payment_out_trade_no" property="paymentOutTradeNo"/>
+        <result column="payment_order_no" property="paymentOrderNo"/>
+        <result column="dd_submitted_at" property="ddSubmittedAt"/>
+        <result column="dd_resubmitted_at" property="ddResubmittedAt"/>
+        <!-- 事务所 -->
+        <result column="dd_firm_id" property="ddFirmId"/>
+        <result column="dd_firm_name" property="ddFirmName"/>
+        <result column="dd_firm_status" property="ddFirmStatus"/>
+        <result column="dd_firm_progress" property="ddFirmProgress"/>
+        <result column="dd_firm_assigned_at" property="ddFirmAssignedAt"/>
+        <result column="dd_firm_deadline" property="ddFirmDeadline"/>
+        <result column="dd_firm_instruction" property="ddFirmInstruction"/>
+        <result column="dd_firm_return_reason" property="ddFirmReturnReason"/>
+        <!-- 报告 -->
+        <result column="dd_report_key" property="ddReportKey"/>
+        <result column="dd_report_name" property="ddReportName"/>
+        <result column="dd_report_status" property="ddReportStatus"/>
+        <result column="dd_report_time" property="ddReportTime"/>
+        <result column="dd_confirmed_at" property="ddConfirmedAt"/>
+        <!-- 审计 -->
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+        <result column="is_deleted" property="isDeleted"/>
+    </resultMap>
+
+    <!-- 按入驻申请ID查 -->
+    <select id="selectByApplicationId" resultMap="BaseResultMap">
+        SELECT * FROM due_diligence
+        WHERE application_id = #{applicationId} AND is_deleted = 0
+    </select>
+
+    <!-- 批量按入驻申请ID查 -->
+    <select id="selectByApplicationIds" resultMap="BaseResultMap">
+        SELECT * FROM due_diligence
+        WHERE application_id IN
+        <foreach collection="applicationIds" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+        AND is_deleted = 0
+    </select>
+
+    <!-- 按主键查 -->
+    <select id="selectById" resultMap="BaseResultMap">
+        SELECT * FROM due_diligence
+        WHERE id = #{id} AND is_deleted = 0
+    </select>
+
+    <!-- 新增 -->
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO due_diligence (
+            application_id,
+            company_name, country, reg_number, established_year,
+            contact_name, contact_title, contact_email, contact_phone,
+            buy_category, buy_volume, buy_volume_amount, buy_volume_currency,
+            buy_market,
+            sup_category, sup_capacity, sup_certs, sup_export,
+            applicant_role,
+            province, city, business_license_key,
+            website, description, employee_count, annual_revenue,
+            annual_revenue_amount, annual_revenue_currency,
+            fiscal_period_start, fiscal_period_end,
+            main_products, management_cert, product_cert, key_clients,
+            delivery_terms, lead_time, export_markets,
+            industry, procurement_detail, supplier_requirement,
+            target_region, payment_terms,
+            legal_person_name, legal_person_id,
+            shareholder_info_key, financial_report_key, legal_record_text, legal_record_key,
+            package_type, payment_status, payment_amount,
+            dd_firm_id, dd_firm_status, dd_firm_progress,
+            dd_report_key, dd_report_name, dd_report_status, dd_report_time
+        ) VALUES (
+            #{applicationId},
+            #{companyName}, #{country}, #{regNumber}, #{establishedYear},
+            #{contactName}, #{contactTitle}, #{contactEmail}, #{contactPhone},
+            #{buyCategory}, #{buyVolume}, #{buyVolumeAmount}, #{buyVolumeCurrency},
+            #{buyMarket},
+            #{supCategory}, #{supCapacity}, #{supCerts}, #{supExport},
+            #{applicantRole},
+            #{province}, #{city}, #{businessLicenseKey},
+            #{website}, #{description}, #{employeeCount}, #{annualRevenue},
+            #{annualRevenueAmount}, #{annualRevenueCurrency},
+            #{fiscalPeriodStart}, #{fiscalPeriodEnd},
+            #{mainProducts}, #{managementCert}, #{productCert}, #{keyClients},
+            #{deliveryTerms}, #{leadTime}, #{exportMarkets},
+            #{industry}, #{procurementDetail}, #{supplierRequirement},
+            #{targetRegion}, #{paymentTerms},
+            #{legalPersonName}, #{legalPersonId},
+            #{shareholderInfoKey}, #{financialReportKey}, #{legalRecordText}, #{legalRecordKey},
+            #{packageType}, #{paymentStatus}, #{paymentAmount},
+            #{ddFirmId}, #{ddFirmStatus}, #{ddFirmProgress},
+            #{ddReportKey}, #{ddReportName}, #{ddReportStatus}, #{ddReportTime}
+        )
+    </insert>
+
+    <!-- 更新尽调信息（用户在尽调表单修改的所有字段） -->
+    <update id="update">
+        UPDATE due_diligence
+        SET company_name = #{companyName},
+            country = #{country},
+            reg_number = #{regNumber},
+            established_year = #{establishedYear},
+            contact_name = #{contactName},
+            contact_title = #{contactTitle},
+            contact_email = #{contactEmail},
+            contact_phone = #{contactPhone},
+            buy_category = #{buyCategory},
+            buy_volume = #{buyVolume},
+            buy_volume_amount = #{buyVolumeAmount},
+            buy_volume_currency = #{buyVolumeCurrency},
+            buy_market = #{buyMarket},
+            sup_category = #{supCategory},
+            sup_capacity = #{supCapacity},
+            sup_certs = #{supCerts},
+            sup_export = #{supExport},
+            applicant_role = #{applicantRole},
+            province = #{province},
+            city = #{city},
+            business_license_key = #{businessLicenseKey},
+            
+            website = #{website},
+            description = #{description},
+            employee_count = #{employeeCount},
+            annual_revenue = #{annualRevenue},
+            annual_revenue_amount = #{annualRevenueAmount},
+            annual_revenue_currency = #{annualRevenueCurrency},
+            fiscal_period_start = #{fiscalPeriodStart},
+            fiscal_period_end = #{fiscalPeriodEnd},
+            main_products = #{mainProducts},
+            management_cert = #{managementCert},
+            product_cert = #{productCert},
+            key_clients = #{keyClients},
+            delivery_terms = #{deliveryTerms},
+            lead_time = #{leadTime},
+            export_markets = #{exportMarkets},
+            industry = #{industry},
+            procurement_detail = #{procurementDetail},
+            supplier_requirement = #{supplierRequirement},
+            target_region = #{targetRegion},
+            payment_terms = #{paymentTerms},
+            legal_person_name = #{legalPersonName},
+            legal_person_id = #{legalPersonId},
+            shareholder_info_key = #{shareholderInfoKey},
+            financial_report_key = #{financialReportKey},
+            legal_record_text = #{legalRecordText},
+            legal_record_key = #{legalRecordKey},
+            <!-- 事务所工作流字段：正常保存时 Java 层从 exist 保留原值防止 NULL 覆盖；
+                 退回场景下 Java 层显式置 assigned+清空原因，实现自动恢复 -->
+            dd_firm_status = #{ddFirmStatus},
+            dd_firm_return_reason = #{ddFirmReturnReason},
+            <!-- 重新提交时间：传入非空才更新（recovering 时 Java 层置 now），null 时保留原值，
+                 避免其他调用方传未设值的实体把已有时间覆盖成 NULL -->
+            dd_resubmitted_at = COALESCE(#{ddResubmittedAt}, dd_resubmitted_at)
+        WHERE application_id = #{applicationId} AND is_deleted = 0
+    </update>
+
+    <select id="selectByOutTradeNo" resultMap="BaseResultMap">
+        SELECT id, application_id, package_type, payment_status, payment_amount, payment_currency,
+               payment_out_trade_no, payment_order_no
+        FROM due_diligence
+        WHERE payment_out_trade_no = #{outTradeNo} AND is_deleted = 0
+        LIMIT 1
+    </select>
+
+    <!-- 创建支付单：锁定套餐/金额/单号，仍为 unpaid，等回调再改 paid -->
+    <update id="updatePaymentIntent">
+        UPDATE due_diligence
+        SET package_type = #{packageType},
+            payment_amount = #{paymentAmount},
+            payment_currency = #{paymentCurrency},
+            payment_out_trade_no = #{outTradeNo},
+            payment_order_no = #{orderNo}
+        WHERE application_id = #{applicationId} AND is_deleted = 0
+          AND payment_status = 'unpaid'
+    </update>
+
+    <!-- 更新支付状态（SQL层防御：只有未支付才能更新为已支付；同时写入首次资料提交时间，一次性不再变更） -->
+    <update id="updatePaymentStatus">
+        UPDATE due_diligence
+        SET package_type = #{packageType},
+            payment_amount = #{paymentAmount},
+            payment_currency = #{paymentCurrency},
+            payment_status = 'paid',
+            dd_submitted_at = NOW()
+        WHERE application_id = #{applicationId} AND is_deleted = 0
+          AND payment_status = 'unpaid'
+    </update>
+
+    <!-- 更新尽调报告 -->
+    <update id="updateDdReport">
+        UPDATE due_diligence
+        SET dd_report_key = #{ddReportUrl},
+            dd_report_name = #{ddReportName},
+            dd_report_status = 'completed',
+            dd_report_time = NOW()
+        WHERE application_id = #{applicationId} AND is_deleted = 0
+    </update>
+
+    <!-- 按事务所ID查已分配的企业 -->
+    <select id="selectByFirmId" resultMap="BaseResultMap">
+        SELECT * FROM due_diligence
+        WHERE dd_firm_id = #{firmId} AND is_deleted = 0
+    </select>
+
+    <!-- 分配事务所（SQL层防御：已完成的事务所分配不可覆盖） -->
+    <update id="updateFirmInfo">
+        UPDATE due_diligence
+        SET dd_firm_id = #{firmId}, dd_firm_name = #{firmName},
+            dd_firm_status = #{firmStatus},
+            dd_firm_deadline = #{deadline},
+            dd_firm_instruction = #{instruction},
+            dd_firm_assigned_at = NOW()
+        WHERE application_id = #{applicationId} AND is_deleted = 0
+          AND (dd_firm_status IS NULL OR dd_firm_status NOT IN ('completed', 'submitted'))
+    </update>
+
+    <!-- 事务所提交尽调结果（SQL层防御：只有已分配状态才能提交，提交后状态=submitted 等待管理员确认） -->
+    <update id="submitFirmResult">
+        UPDATE due_diligence
+        SET dd_firm_status = #{firmStatus},
+            dd_firm_progress = #{firmProgress},
+            dd_report_key = #{reportUrl},
+            dd_report_name = #{reportName},
+            dd_report_status = 'submitted',
+            dd_report_time = NOW()
+        WHERE application_id = #{applicationId} AND is_deleted = 0
+          AND dd_firm_status IN ('assigned', 'in_progress')
+    </update>
+
+    <!-- 管理员确认尽调通过（SQL层防御：只有 submitted 状态才能确认） -->
+    <update id="confirmDdComplete">
+        UPDATE due_diligence
+        SET dd_firm_status = 'completed',
+            dd_report_status = 'completed',
+            dd_confirmed_at = NOW()
+        WHERE application_id = #{applicationId} AND is_deleted = 0
+          AND dd_firm_status = 'submitted'
+    </update>
+
+    <!-- 事务所退回尽调给企业补充材料（SQL层防御：只有已分配状态 + 归属校验才能退回） -->
+    <update id="returnToEnterprise">
+        UPDATE due_diligence
+        SET dd_firm_status = 'returned',
+            dd_firm_return_reason = #{returnReason}
+        WHERE application_id = #{applicationId} AND is_deleted = 0
+          AND dd_firm_status IN ('assigned', 'in_progress')
+          AND dd_firm_id = #{firmId}
+    </update>
+
+    <!-- 按租户ID列表批量查尽调（JOIN application 表取 tenant_id） -->
+    <select id="selectByTenantIds" resultMap="BaseResultMap">
+        SELECT dd.*, a.tenant_id
+        FROM due_diligence dd
+        INNER JOIN application a ON dd.application_id = a.id AND a.is_deleted = 0
+        WHERE a.tenant_id IN
+        <foreach collection="tenantIds" item="tid" open="(" separator="," close=")">
+            #{tid}
+        </foreach>
+        AND dd.is_deleted = 0
+    </select>
+
+</mapper>

@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.greensmartplanet.gsc.delivery.mapper.Delivery8dReportMapper">
+
+    <!-- 8D 报告全字段（查询统一复用，禁止 SELECT *） -->
+    <sql id="Base_Column_List">
+        id, risk_id, status, deadline,
+        d1_team, d2_desc, d3_containment, d4_root_cause, d5_corrective,
+        d6_verification, d7_prevention, d8_summary,
+        reject_reason, create_by, create_time,
+        submit_time, audit_by, audit_time, is_deleted
+    </sql>
+
+    <resultMap id="BaseResultMap" type="cn.greensmartplanet.gsc.delivery.entity.Delivery8dReport">
+        <id column="id" property="id"/>
+        <result column="risk_id" property="riskId"/>
+        <result column="status" property="status"/>
+        <result column="deadline" property="deadline"/>
+        <result column="d1_team" property="d1Team"/>
+        <result column="d2_desc" property="d2Desc"/>
+        <result column="d3_containment" property="d3Containment"/>
+        <result column="d4_root_cause" property="d4RootCause"/>
+        <result column="d5_corrective" property="d5Corrective"/>
+        <result column="d6_verification" property="d6Verification"/>
+        <result column="d7_prevention" property="d7Prevention"/>
+        <result column="d8_summary" property="d8Summary"/>
+        <result column="reject_reason" property="rejectReason"/>
+        <result column="create_by" property="createBy"/>
+        <result column="create_time" property="createTime"/>
+        <result column="submit_time" property="submitTime"/>
+        <result column="audit_by" property="auditBy"/>
+        <result column="audit_time" property="auditTime"/>
+        <result column="is_deleted" property="isDeleted"/>
+    </resultMap>
+
+    <!-- 插入 8D 报告（雪花 id 显式传入，create_time/is_deleted 走 DB 默认值） -->
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO delivery_8d_report (id, risk_id, status, deadline, create_by)
+        VALUES (#{id}, #{riskId}, #{status}, #{deadline}, #{createBy})
+    </insert>
+
+    <!-- 按ID查单条 -->
+    <select id="selectById" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/> FROM delivery_8d_report WHERE id = #{id} AND is_deleted = 0
+    </select>
+
+    <!-- 按风险查 8D 报告 -->
+    <select id="selectByRiskId" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/> FROM delivery_8d_report WHERE risk_id = #{riskId} AND is_deleted = 0
+    </select>
+
+    <!-- 供应商提交 D1-D8（pending → submitted） -->
+    <update id="submit">
+        UPDATE delivery_8d_report
+        SET status = 'submitted',
+            d1_team = #{d1Team},
+            d2_desc = #{d2Desc},
+            d3_containment = #{d3Containment},
+            d4_root_cause = #{d4RootCause},
+            d5_corrective = #{d5Corrective},
+            d6_verification = #{d6Verification},
+            d7_prevention = #{d7Prevention},
+            d8_summary = #{d8Summary},
+            submit_time = NOW(),
+            reject_reason = NULL
+        WHERE id = #{id} AND status IN ('pending', 'rejected') AND is_deleted = 0
+    </update>
+
+    <!-- 采购方审核通过（submitted → approved） -->
+    <update id="approve">
+        UPDATE delivery_8d_report
+        SET status = 'approved', audit_by = #{auditBy}, audit_time = NOW()
+        WHERE id = #{id} AND status = 'submitted' AND is_deleted = 0
+    </update>
+
+    <!-- 采购方打回（submitted → rejected，记录打回原因） -->
+    <update id="reject">
+        UPDATE delivery_8d_report
+        SET status = 'rejected', audit_by = #{auditBy}, audit_time = NOW(), reject_reason = #{rejectReason}
+        WHERE id = #{id} AND status = 'submitted' AND is_deleted = 0
+    </update>
+</mapper>

@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.greensmartplanet.gsc.ai.mapper.AiDocumentMapper">
+
+    <!-- 按租户查文档列表（create_time 倒序） -->
+    <select id="selectByTenant"
+            resultType="cn.greensmartplanet.gsc.ai.entity.AiDocument">
+        SELECT id,
+               tenant_id,
+               uploader_user_id,
+               file_name,
+               file_type,
+               file_size,
+               oss_key,
+               chunk_count,
+               status,
+               error_message,
+               create_time,
+               update_time,
+               is_deleted
+        FROM ai_documents
+        WHERE tenant_id = #{tenantId}
+          AND is_deleted = 0
+        ORDER BY create_time DESC
+    </select>
+
+    <!-- 校验文档归属（租户隔离，防越权） -->
+    <select id="selectByIdAndTenant"
+            resultType="cn.greensmartplanet.gsc.ai.entity.AiDocument">
+        SELECT id,
+               tenant_id,
+               uploader_user_id,
+               file_name,
+               file_type,
+               file_size,
+               oss_key,
+               chunk_count,
+               status,
+               error_message,
+               create_time,
+               update_time,
+               is_deleted
+        FROM ai_documents
+        WHERE id = #{id}
+          AND tenant_id = #{tenantId}
+          AND is_deleted = 0
+    </select>
+
+</mapper>

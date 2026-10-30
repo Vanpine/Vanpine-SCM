@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.greensmartplanet.gsc.trade.mapper.InquiryInviteMapper">
+
+    <resultMap id="BaseResultMap" type="cn.greensmartplanet.gsc.trade.entity.InquiryInvite">
+        <id column="id" property="id"/>
+        <result column="inquiry_id" property="inquiryId"/>
+        <result column="supplier_tenant_id" property="supplierTenantId"/>
+        <result column="invite_status" property="inviteStatus"/>
+        <result column="invited_at" property="invitedAt"/>
+        <result column="responded_at" property="respondedAt"/>
+        <result column="decline_reason" property="declineReason"/>
+        <result column="create_by" property="createBy"/>
+        <result column="update_by" property="updateBy"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+        <result column="is_deleted" property="isDeleted"/>
+    </resultMap>
+
+    <!-- 询盘受邀名单基础列 -->
+    <sql id="Base_Column_List">
+        id, inquiry_id, supplier_tenant_id, invite_status, invited_at, responded_at, decline_reason,
+        create_by, update_by, create_time, update_time, is_deleted
+    </sql>
+
+    <!-- 按询盘ID查受邀名单 -->
+    <select id="selectByInquiryId" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM inquiry_invite
+        WHERE inquiry_id = #{inquiryId} AND is_deleted = 0
+        ORDER BY invited_at ASC
+    </select>
+
+    <!-- 按ID查单条 -->
+    <select id="selectById" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM inquiry_invite
+        WHERE id = #{id} AND is_deleted = 0
+    </select>
+
+    <!-- 供应商查自己的受邀记录 -->
+    <select id="selectBySupplierId" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM inquiry_invite
+        WHERE supplier_tenant_id = #{supplierTenantId} AND is_deleted = 0
+        <if test="inviteStatus != null and inviteStatus != ''">
+            AND invite_status = #{inviteStatus}
+        </if>
+        ORDER BY invited_at DESC
+    </select>
+
+    <!-- 批量插入受邀供应商 -->
+    <insert id="insertBatch" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO inquiry_invite (inquiry_id, supplier_tenant_id, invite_status, invited_at, create_by)
+        VALUES
+        <foreach collection="list" item="item" separator=",">
+            (#{item.inquiryId}, #{item.supplierTenantId}, #{item.inviteStatus}, NOW(), #{item.createBy})
+        </foreach>
+    </insert>
+
+    <!-- 供应商响应邀请 -->
+    <update id="updateInviteStatus">
+        UPDATE inquiry_invite
+        SET invite_status = #{inviteStatus}, responded_at = NOW(),
+            decline_reason = #{declineReason}, update_by = #{updateBy}
+        WHERE id = #{id} AND supplier_tenant_id = #{supplierTenantId} AND is_deleted = 0
+    </update>
+
+    <!-- 批量查某供应商在多个询盘中的邀请记录 -->
+    <select id="selectByInquiryIdsAndSupplier" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM inquiry_invite
+        WHERE inquiry_id IN
+        <foreach collection="inquiryIds" item="id" open="(" close=")" separator=",">
+            #{id}
+        </foreach>
+        AND supplier_tenant_id = #{supplierTenantId} AND is_deleted = 0
+    </select>
+
+    <!-- 批量统计各询盘按状态分组的供应商数 -->
+    <select id="countByInquiryIdsGroupByStatus" resultType="cn.greensmartplanet.gsc.trade.projection.InviteStatusCountRow">
+        SELECT inquiry_id AS inquiryId, invite_status AS inviteStatus, COUNT(*) AS supplierCount
+        FROM inquiry_invite
+        WHERE inquiry_id IN
+        <foreach collection="inquiryIds" item="id" open="(" close=")" separator=",">
+            #{id}
+        </foreach>
+        AND is_deleted = 0
+        GROUP BY inquiry_id, invite_status
+    </select>
+
+    <!-- 重置邀请为待响应 -->
+    <update id="resetToPending">
+        UPDATE inquiry_invite
+        SET invite_status = 'pending', responded_at = NULL, decline_reason = NULL, update_by = #{updateBy}
+        WHERE id = #{id} AND invite_status = 'declined' AND is_deleted = 0
+    </update>
+
+    <!-- 按需求ID查拒绝过询盘的供应商（智能匹配页"已拒绝该询盘"标注） -->
+    <select id="selectDeclinedSupplierIdsByRequirement" resultType="java.lang.Long">
+        SELECT DISTINCT ii.supplier_tenant_id
+        FROM inquiry_invite ii
+        JOIN inquiry i ON ii.inquiry_id = i.id AND i.is_deleted = 0
+        WHERE i.requirement_id = #{requirementId}
+          AND i.buyer_tenant_id = #{buyerTenantId}
+          AND ii.invite_status = 'declined'
+          AND ii.is_deleted = 0
+    </select>
+
+    <!-- 查该采购商在该需求下已授标过的供应商（前端禁选"已授标"用） -->
+    <select id="selectInvitedSupplierIdsByBuyer" resultType="java.lang.Long">
+        SELECT DISTINCT q.supplier_tenant_id
+        FROM quote q
+        JOIN inquiry i ON q.inquiry_id = i.id AND i.is_deleted = 0
+        WHERE i.buyer_tenant_id = #{buyerTenantId}
+          AND i.requirement_id = #{requirementId}
+          AND q.is_winning = 1
+          AND q.is_deleted = 0
+    </select>
+
+    <!-- 查这批供应商中在该需求下已授标过的（创建询盘/追加供应商防重复） -->
+    <select id="selectInvitedSupplierIdsByBuyerAndSuppliers" resultType="java.lang.Long">
+        SELECT DISTINCT q.supplier_tenant_id
+        FROM quote q
+        JOIN inquiry i ON q.inquiry_id = i.id AND i.is_deleted = 0
+        WHERE i.buyer_tenant_id = #{buyerTenantId}
+          AND i.requirement_id = #{requirementId}
+          AND q.is_winning = 1
+          AND q.is_deleted = 0
+          AND q.supplier_tenant_id IN
+        <foreach collection="supplierTenantIds" item="sid" open="(" separator="," close=")">#{sid}</foreach>
+    </select>
+
+    <!-- 查该需求下进行中询盘已邀请的供应商（前端禁选"询价中"用） -->
+    <select id="selectActiveInquirySupplierIdsByRequirement" resultType="java.lang.Long">
+        SELECT DISTINCT ii.supplier_tenant_id
+        FROM inquiry_invite ii
+        JOIN inquiry i ON ii.inquiry_id = i.id AND i.is_deleted = 0
+        WHERE i.buyer_tenant_id = #{buyerTenantId}
+          AND i.requirement_id = #{requirementId}
+          AND i.status IN ('open', 'quoting')
+          AND ii.is_deleted = 0
+    </select>
+
+    <!-- 查这批供应商中在该需求下进行中询盘已邀请的（创建询盘/追加供应商防重复） -->
+    <select id="selectActiveInquirySupplierIdsByRequirementAndSuppliers" resultType="java.lang.Long">
+        SELECT DISTINCT ii.supplier_tenant_id
+        FROM inquiry_invite ii
+        JOIN inquiry i ON ii.inquiry_id = i.id AND i.is_deleted = 0
+        WHERE i.buyer_tenant_id = #{buyerTenantId}
+          AND i.requirement_id = #{requirementId}
+          AND i.status IN ('open', 'quoting')
+          AND ii.is_deleted = 0
+          AND ii.supplier_tenant_id IN
+        <foreach collection="supplierTenantIds" item="sid" open="(" separator="," close=")">#{sid}</foreach>
+    </select>
+</mapper>

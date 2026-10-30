@@ -1,0 +1,73 @@
+.drag-verify {
+  position: relative;
+  overflow: hidden;
+  text-align: center;
+  background: #e8ecf1;
+  border: 1px solid #e2e8f0;
+}
+
+.dv-progress {
+  position: absolute;
+  top: 0;
+  left: 0;
+  background: #3b82f6;
+}
+
+.dv-progress.done {
+  background: #22c55e;
+}
+
+.dv-msg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  user-select: none;
+  background: linear-gradient(
+    to right,
+    var(--textColor) 0%,
+    var(--textColor) 40%,
+    #fff 50%,
+    var(--textColor) 60%,
+    var(--textColor) 100%
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: slidetounlock 3s infinite;
+}
+
+.dv-msg.done {
+  -webkit-text-fill-color: #fff;
+  animation: none;
+}
+
+.dv-ball {
+  position: absolute;
+  top: 0;
+  border-radius: 50%;
+  background: #fff;
+  cursor: move;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
+  z-index: 2;
+}
+
+.dv-ball.done {
+  cursor: default;
+}
+
+.ball-icon {
+  width: 16px;
+  height: 16px;
+}
+
+@keyframes slidetounlock {
+  0% {
+    background-position: var(--negHalfW) 0;
+  }
+  100% {
+    background-position: var(--halfW) 0;
+  }
+}

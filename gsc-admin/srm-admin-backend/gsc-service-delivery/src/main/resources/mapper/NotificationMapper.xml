@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- ⚠️ 迁移期桥接（微服务拆分）：本文件归属平台域，delivery 内为过渡副本（共享单库直写）；阶段 8 切 MQ 事件后收敛。 -->
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.greensmartplanet.gsc.delivery.mapper.NotificationMapper">
+
+    <resultMap id="BaseResultMap" type="cn.greensmartplanet.gsc.delivery.entity.Notification">
+        <id column="id" property="id"/>
+        <result column="receiver_tenant_id" property="receiverTenantId"/>
+        <result column="type" property="type"/>
+        <result column="title" property="title"/>
+        <result column="content" property="content"/>
+        <result column="related_type" property="relatedType"/>
+        <result column="related_id" property="relatedId"/>
+        <result column="from_tenant_id" property="fromTenantId"/>
+        <result column="from_user_id" property="fromUserId"/>
+        <result column="is_read" property="isRead"/>
+        <result column="read_time" property="readTime"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+        <result column="is_deleted" property="isDeleted"/>
+    </resultMap>
+
+    <!-- 分页查我的通知（未读优先 + 时间倒序） -->
+    <select id="selectPage" resultMap="BaseResultMap">
+        SELECT id, receiver_tenant_id, type, title, content,
+               related_type, related_id, from_tenant_id, from_user_id,
+               is_read, read_time, create_time, update_time, is_deleted
+        FROM notification
+        WHERE receiver_tenant_id = #{tenantId} AND is_deleted = 0
+        <if test="unreadOnly != null and unreadOnly">
+            AND is_read = 0
+        </if>
+        ORDER BY is_read ASC, create_time DESC
+        LIMIT #{offset}, #{limit}
+    </select>
+
+    <select id="countList" resultType="long">
+        SELECT COUNT(*) FROM notification
+        WHERE receiver_tenant_id = #{tenantId} AND is_deleted = 0
+        <if test="unreadOnly != null and unreadOnly">
+            AND is_read = 0
+        </if>
+    </select>
+
+    <select id="countUnread" resultType="int">
+        SELECT COUNT(*) FROM notification
+        WHERE receiver_tenant_id = #{tenantId} AND is_read = 0 AND is_deleted = 0
+    </select>
+
+    <update id="markRead">
+        UPDATE notification
+        SET is_read = 1, read_time = NOW()
+        WHERE id = #{id} AND receiver_tenant_id = #{tenantId} AND is_deleted = 0
+    </update>
+
+    <update id="markAllRead">
+        UPDATE notification
+        SET is_read = 1, read_time = NOW()
+        WHERE receiver_tenant_id = #{tenantId} AND is_read = 0 AND is_deleted = 0
+    </update>
+</mapper>

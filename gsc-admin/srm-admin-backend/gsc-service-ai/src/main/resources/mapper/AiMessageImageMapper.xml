@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.greensmartplanet.gsc.ai.mapper.AiMessageImageMapper">
+
+    <!-- 按消息ID批量查关联（租户过滤，供消息历史回显 + 图片描述排序）。
+         ORDER BY id：id 是雪花（时间有序），即用户上传顺序——
+         图片描述的「第 N 张」必须与用户看到的顺序一致，不能依赖 DB 默认返回序。 -->
+    <select id="selectByMessageIds" resultType="cn.greensmartplanet.gsc.ai.entity.AiMessageImage">
+        SELECT id,
+               message_id,
+               image_id,
+               tenant_id,
+               create_time,
+               is_deleted
+        FROM ai_message_images
+        WHERE tenant_id = #{tenantId}
+          AND is_deleted = 0
+          AND message_id IN
+        <foreach collection="messageIds" item="item" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+        ORDER BY message_id, id
+    </select>
+
+</mapper>

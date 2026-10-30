@@ -1,0 +1,256 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.greensmartplanet.gsc.supplier.mapper.EnterpriseProfileMapper">
+
+    <resultMap id="BaseResultMap" type="cn.greensmartplanet.gsc.supplier.entity.EnterpriseProfile">
+        <id column="id" property="id"/>
+        <result column="tenant_id" property="tenantId"/>
+        <result column="profile_type" property="profileType"/>
+        <result column="company_name" property="companyName"/>
+        <result column="country" property="country"/>
+        <result column="province" property="province"/>
+        <result column="city" property="city"/>
+        <result column="buy_categories" property="buyCategories"/>
+        <result column="buy_volume" property="buyVolume"/>
+        <result column="buy_volume_amount" property="buyVolumeAmount"/>
+        <result column="buy_volume_currency" property="buyVolumeCurrency"/>
+        <result column="reg_number" property="regNumber"/>
+        <result column="established_year" property="establishedYear"/>
+        <result column="buy_market" property="buyMarket"/>
+        <result column="sup_categories" property="supCategories"/>
+        <result column="sup_capacity" property="supCapacity"/>
+        <result column="sup_certs" property="supCerts"/>
+        <result column="sup_export" property="supExport"/>
+        <result column="main_products" property="mainProducts"/>
+        <result column="industry" property="industry"/>
+        <result column="key_clients" property="keyClients"/>
+        <result column="lead_time" property="leadTime"/>
+        <result column="employee_count" property="employeeCount"/>
+        <result column="annual_revenue" property="annualRevenue"/>
+        <result column="annual_revenue_amount" property="annualRevenueAmount"/>
+        <result column="annual_revenue_currency" property="annualRevenueCurrency"/>
+        <result column="fiscal_period_start" property="fiscalPeriodStart"/>
+        <result column="fiscal_period_end" property="fiscalPeriodEnd"/>
+        <result column="description" property="description"/>
+        <result column="contact_name" property="contactName"/>
+        <result column="contact_phone" property="contactPhone"/>
+        <result column="contact_email" property="contactEmail"/>
+        <result column="legal_rep" property="legalRep"/>
+        <result column="registered_address" property="registeredAddress"/>
+        <result column="completeness_score" property="completenessScore"/>
+        <result column="on_time_rate" property="onTimeRate"/>
+        <result column="accept_pass_rate" property="acceptPassRate"/>
+        <result column="return_count" property="returnCount"/>
+        <result column="perf_score" property="perfScore"/>
+        <result column="perf_sample_size" property="perfSampleSize"/>
+        <result column="create_by" property="createBy"/>
+        <result column="update_by" property="updateBy"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+        <result column="is_deleted" property="isDeleted"/>
+    </resultMap>
+
+    <!-- 企业画像表基础列（无别名前缀；selectByTenantIds 等直查用） -->
+    <sql id="Base_Column_List">
+        id, tenant_id, profile_type, company_name, country, province, city,
+        buy_categories, buy_volume, buy_volume_amount, buy_volume_currency,
+        reg_number, established_year, buy_market,
+        sup_categories, sup_capacity, sup_certs, sup_export,
+        main_products, industry, key_clients, lead_time,
+        employee_count, annual_revenue, annual_revenue_amount, annual_revenue_currency,
+        fiscal_period_start, fiscal_period_end, description,
+        contact_name, contact_phone, contact_email,
+        legal_rep, registered_address, completeness_score,
+        on_time_rate, accept_pass_rate, return_count, perf_score, perf_sample_size,
+        create_by, update_by, create_time, update_time, is_deleted
+    </sql>
+
+    <!-- 按租户ID查画像 -->
+    <select id="selectByTenantId" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM enterprise_profile
+        WHERE tenant_id = #{tenantId} AND is_deleted = 0
+    </select>
+
+    <!-- 批量按租户ID查画像 -->
+    <select id="selectByTenantIds" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM enterprise_profile
+        WHERE tenant_id IN
+        <foreach collection="tenantIds" item="id" open="(" close=")" separator=",">
+            #{id}
+        </foreach>
+        AND is_deleted = 0
+    </select>
+
+    <!-- 插入画像 -->
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO enterprise_profile (
+            tenant_id, profile_type,
+            company_name, country, province, city,
+            reg_number, established_year,
+            buy_categories, buy_volume, buy_volume_amount, buy_volume_currency,
+            buy_market,
+            procurement_detail,
+            sup_categories, sup_capacity, sup_certs, sup_export,
+            main_products, industry, key_clients, lead_time,
+            employee_count, annual_revenue, annual_revenue_amount, annual_revenue_currency,
+            fiscal_period_start, fiscal_period_end, description,
+            contact_name, contact_phone, contact_email,
+            legal_rep, registered_address,
+            completeness_score, create_by
+        ) VALUES (
+            #{tenantId}, #{profileType},
+            #{companyName}, #{country}, #{province}, #{city},
+            #{regNumber}, #{establishedYear},
+            #{buyCategories}, #{buyVolume}, #{buyVolumeAmount}, #{buyVolumeCurrency},
+            #{buyMarket},
+            #{procurementDetail},
+            #{supCategories}, #{supCapacity}, #{supCerts}, #{supExport},
+            #{mainProducts}, #{industry}, #{keyClients}, #{leadTime},
+            #{employeeCount}, #{annualRevenue}, #{annualRevenueAmount}, #{annualRevenueCurrency},
+            #{fiscalPeriodStart}, #{fiscalPeriodEnd}, #{description},
+            #{contactName}, #{contactPhone}, #{contactEmail},
+            #{legalRep}, #{registeredAddress},
+            #{completenessScore}, #{createBy}
+        )
+    </insert>
+
+    <!-- 更新画像 -->
+    <update id="update">
+        UPDATE enterprise_profile
+        SET profile_type = #{profileType},
+            company_name = #{companyName},
+            country = #{country},
+            province = #{province},
+            city = #{city},
+            reg_number = #{regNumber},
+            established_year = #{establishedYear},
+            buy_categories = #{buyCategories},
+            buy_volume = #{buyVolume},
+            buy_volume_amount = #{buyVolumeAmount},
+            buy_volume_currency = #{buyVolumeCurrency},
+            buy_market = #{buyMarket},
+            procurement_detail = #{procurementDetail},
+            sup_categories = #{supCategories},
+            sup_capacity = #{supCapacity},
+            sup_certs = #{supCerts},
+            sup_export = #{supExport},
+            main_products = #{mainProducts},
+            industry = #{industry},
+            key_clients = #{keyClients},
+            lead_time = #{leadTime},
+            employee_count = #{employeeCount},
+            annual_revenue = #{annualRevenue},
+            annual_revenue_amount = #{annualRevenueAmount},
+            annual_revenue_currency = #{annualRevenueCurrency},
+            fiscal_period_start = #{fiscalPeriodStart},
+            fiscal_period_end = #{fiscalPeriodEnd},
+            description = #{description},
+            contact_name = #{contactName},
+            contact_phone = #{contactPhone},
+            contact_email = #{contactEmail},
+            legal_rep = #{legalRep},
+            registered_address = #{registeredAddress},
+            completeness_score = #{completenessScore},
+            update_by = #{updateBy}
+        WHERE tenant_id = #{tenantId} AND is_deleted = 0
+    </update>
+
+    <!-- 履约表现回写：仅更新履约字段，避免全量覆盖画像 -->
+    <update id="updatePerformance">
+        UPDATE enterprise_profile
+        SET on_time_rate = #{onTimeRate},
+            accept_pass_rate = #{acceptPassRate},
+            return_count = #{returnCount},
+            perf_score = #{perfScore},
+            perf_sample_size = #{perfSampleSize}
+        WHERE tenant_id = #{tenantId} AND is_deleted = 0
+    </update>
+
+    <!-- 按画像完整度降序取 Top N 供应商（智能匹配候选池截断用） -->
+    <select id="selectAllSuppliersWithLimit" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM enterprise_profile
+        WHERE profile_type IN ('supplier', 'both') AND is_deleted = 0
+        ORDER BY completeness_score DESC
+        LIMIT #{limit}
+    </select>
+
+    <select id="countAllSuppliers" resultType="long">
+        SELECT COUNT(*) FROM enterprise_profile
+        WHERE profile_type IN ('supplier', 'both') AND is_deleted = 0
+    </select>
+
+    <!--
+      匹配召回：只取精排用得到的列。Java 品类/地域分两路调用，一次只带一个维度，避免 AND 绑死。
+      品类用 OR LIKE（逗号分隔无法走等值索引）；地域走省份/城市。
+      建议索引 idx_ep_match_recall (profile_type, is_deleted, completeness_score)。
+    -->
+    <select id="selectSuppliersForRecall" resultMap="BaseResultMap">
+        SELECT id, tenant_id, profile_type, company_name, province, city,
+               sup_categories, sup_capacity, sup_certs, sup_export,
+               main_products, industry, key_clients, lead_time,
+               completeness_score, perf_score, perf_sample_size,
+               reg_number, established_year
+        FROM enterprise_profile
+        WHERE profile_type IN ('supplier', 'both')
+          AND is_deleted = 0
+          <if test="excludeTenantId != null">
+              AND tenant_id != #{excludeTenantId}
+          </if>
+          <if test="categoryTokens != null and categoryTokens.size() &gt; 0">
+              AND (
+              <foreach collection="categoryTokens" item="tok" separator=" OR ">
+                  sup_categories LIKE CONCAT('%', #{tok}, '%')
+              </foreach>
+              )
+          </if>
+          <if test="region != null and region != ''">
+              AND (province LIKE CONCAT('%', #{region}, '%') OR city LIKE CONCAT('%', #{region}, '%'))
+          </if>
+        ORDER BY completeness_score DESC
+        LIMIT #{limit}
+    </select>
+
+    <!-- 分页查供应商（需求广场"找供应商"） -->
+    <select id="selectSuppliersPage" resultMap="BaseResultMap">
+        SELECT ep.id, ep.tenant_id, ep.profile_type, ep.company_name,
+               ep.industry, ep.province, ep.city,
+               ep.sup_categories, ep.sup_capacity, ep.sup_certs, ep.sup_export,
+               ep.main_products, ep.key_clients, ep.lead_time, ep.description,
+               ep.contact_name, ep.contact_phone, ep.contact_email,
+               ep.buy_categories, ep.buy_volume, ep.buy_volume_amount, ep.buy_volume_currency,
+               ep.fiscal_period_start, ep.fiscal_period_end,
+               ep.reg_number, ep.established_year,
+               ep.create_time, ep.update_time, ep.is_deleted
+        FROM enterprise_profile ep
+        WHERE ep.profile_type IN ('supplier', 'both') AND ep.is_deleted = 0
+        <if test="excludeTenantId != null">
+            AND ep.tenant_id != #{excludeTenantId}
+        </if>
+        <if test="keyword != null and keyword != ''">
+            AND (ep.company_name LIKE CONCAT('%', #{keyword}, '%')
+                 OR ep.industry LIKE CONCAT('%', #{keyword}, '%')
+                 OR ep.province LIKE CONCAT('%', #{keyword}, '%')
+                 OR ep.sup_categories LIKE CONCAT('%', #{keyword}, '%'))
+        </if>
+        ORDER BY ep.create_time DESC
+        LIMIT #{offset}, #{limit}
+    </select>
+
+    <select id="countSuppliers" resultType="long">
+        SELECT COUNT(*) FROM enterprise_profile
+        WHERE profile_type IN ('supplier', 'both') AND is_deleted = 0
+        <if test="excludeTenantId != null">
+            AND tenant_id != #{excludeTenantId}
+        </if>
+        <if test="keyword != null and keyword != ''">
+            AND (company_name LIKE CONCAT('%', #{keyword}, '%')
+                 OR industry LIKE CONCAT('%', #{keyword}, '%')
+                 OR province LIKE CONCAT('%', #{keyword}, '%')
+                 OR sup_categories LIKE CONCAT('%', #{keyword}, '%'))
+        </if>
+    </select>
+</mapper>

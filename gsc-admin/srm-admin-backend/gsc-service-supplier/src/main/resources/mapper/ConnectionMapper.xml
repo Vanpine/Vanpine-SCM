@@ -1,0 +1,185 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.greensmartplanet.gsc.supplier.mapper.ConnectionMapper">
+
+    <resultMap id="BaseResultMap" type="cn.greensmartplanet.gsc.supplier.entity.Connection">
+        <id column="id" property="id"/>
+        <result column="requirement_id" property="requirementId"/>
+        <result column="buyer_tenant_id" property="buyerTenantId"/>
+        <result column="supplier_tenant_id" property="supplierTenantId"/>
+        <result column="status" property="status"/>
+        <result column="message" property="message"/>
+        <result column="reply_message" property="replyMessage"/>
+        <result column="create_by" property="createBy"/>
+        <result column="update_by" property="updateBy"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+        <result column="is_deleted" property="isDeleted"/>
+    </resultMap>
+
+    <!-- 对接表基础列（selectMyConnections 传 ${p} 表别名前缀） -->
+    <sql id="Base_Column_List">
+        ${p}id, ${p}requirement_id, ${p}buyer_tenant_id, ${p}supplier_tenant_id,
+        ${p}status, ${p}message, ${p}reply_message, ${p}create_by, ${p}update_by,
+        ${p}create_time, ${p}update_time, ${p}is_deleted
+    </sql>
+
+    <!-- 统一查我的对接（合并买卖双方，支持关键词+角色筛选） -->
+    <select id="selectMyConnections" resultMap="BaseResultMap">
+        SELECT DISTINCT <include refid="Base_Column_List"><property name="p" value="c."/></include>
+        FROM connection c
+        LEFT JOIN procurement_requirement r ON c.requirement_id = r.id AND r.is_deleted = 0
+        LEFT JOIN enterprise_profile ep_b ON c.buyer_tenant_id = ep_b.tenant_id AND ep_b.is_deleted = 0
+        LEFT JOIN enterprise_profile ep_s ON c.supplier_tenant_id = ep_s.tenant_id AND ep_s.is_deleted = 0
+        WHERE c.is_deleted = 0
+          AND (c.buyer_tenant_id = #{tenantId} OR c.supplier_tenant_id = #{tenantId})
+        <if test="status != null and status != ''">
+            AND c.status = #{status}
+        </if>
+        <if test="role == 'buyer'">
+            AND c.buyer_tenant_id = #{tenantId}
+        </if>
+        <if test="role == 'supplier'">
+            AND c.supplier_tenant_id = #{tenantId}
+        </if>
+        <if test="keyword != null and keyword != ''">
+            AND (r.title LIKE CONCAT('%', #{keyword}, '%')
+                 OR ep_b.company_name LIKE CONCAT('%', #{keyword}, '%')
+                 OR ep_s.company_name LIKE CONCAT('%', #{keyword}, '%'))
+        </if>
+        <if test="requirementId != null">
+            AND c.requirement_id = #{requirementId}
+        </if>
+        ORDER BY c.create_time DESC
+        LIMIT #{offset}, #{limit}
+    </select>
+
+    <select id="countMyConnections" resultType="long">
+        SELECT COUNT(DISTINCT c.id)
+        FROM connection c
+        LEFT JOIN procurement_requirement r ON c.requirement_id = r.id AND r.is_deleted = 0
+        LEFT JOIN enterprise_profile ep_b ON c.buyer_tenant_id = ep_b.tenant_id AND ep_b.is_deleted = 0
+        LEFT JOIN enterprise_profile ep_s ON c.supplier_tenant_id = ep_s.tenant_id AND ep_s.is_deleted = 0
+        WHERE c.is_deleted = 0
+          AND (c.buyer_tenant_id = #{tenantId} OR c.supplier_tenant_id = #{tenantId})
+        <if test="status != null and status != ''">
+            AND c.status = #{status}
+        </if>
+        <if test="role == 'buyer'">
+            AND c.buyer_tenant_id = #{tenantId}
+        </if>
+        <if test="role == 'supplier'">
+            AND c.supplier_tenant_id = #{tenantId}
+        </if>
+        <if test="keyword != null and keyword != ''">
+            AND (r.title LIKE CONCAT('%', #{keyword}, '%')
+                 OR ep_b.company_name LIKE CONCAT('%', #{keyword}, '%')
+                 OR ep_s.company_name LIKE CONCAT('%', #{keyword}, '%'))
+        </if>
+        <if test="requirementId != null">
+            AND c.requirement_id = #{requirementId}
+        </if>
+    </select>
+
+    <!-- 按ID查单条 -->
+    <select id="selectById" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"><property name="p" value=""/></include>
+        FROM connection
+        WHERE id = #{id} AND is_deleted = 0
+    </select>
+
+    <!-- 插入对接记录 -->
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO connection (
+            requirement_id, buyer_tenant_id, supplier_tenant_id,
+            status, message, create_by
+        ) VALUES (
+            #{requirementId}, #{buyerTenantId}, #{supplierTenantId},
+            #{status}, #{message}, #{createBy}
+        )
+    </insert>
+
+    <!-- 按需求ID批量统计对接数 -->
+    <select id="countGroupByRequirementIds" resultType="cn.greensmartplanet.gsc.supplier.projection.ConnectionCountRow">
+        SELECT requirement_id AS requirementId, COUNT(*) AS cnt
+        FROM connection
+        WHERE buyer_tenant_id = #{buyerTenantId} AND is_deleted = 0
+          AND status = 'accepted'
+          AND requirement_id IN
+        <foreach collection="requirementIds" item="id" open="(" separator="," close=")">#{id}</foreach>
+        GROUP BY requirement_id
+    </select>
+
+    <select id="countAcceptedByRequirementIds" resultType="cn.greensmartplanet.gsc.supplier.projection.ConnectionCountRow">
+        SELECT requirement_id AS requirementId, COUNT(*) AS cnt
+        FROM connection
+        WHERE is_deleted = 0 AND status = 'accepted'
+          AND requirement_id IN
+        <foreach collection="requirementIds" item="id" open="(" separator="," close=")">#{id}</foreach>
+        GROUP BY requirement_id
+    </select>
+
+    <!-- 统计某需求下已接受的对接数 -->
+    <select id="countAcceptedByRequirement" resultType="long">
+        SELECT COUNT(*) FROM connection
+        WHERE requirement_id = #{requirementId} AND status = 'accepted' AND is_deleted = 0
+    </select>
+
+    <!-- 更新状态（接受/拒绝/关闭） -->
+    <update id="updateStatus">
+        UPDATE connection
+        SET status = #{status},
+            reply_message = #{replyMessage},
+            update_by = #{updateBy}
+        WHERE id = #{id} AND (supplier_tenant_id = #{tenantId} OR buyer_tenant_id = #{tenantId})
+          AND status = 'pending' AND is_deleted = 0
+    </update>
+
+    <!-- 批量按需求ID查某个租户的对接记录（供广场回填我的状态） -->
+    <select id="batchSelectByRequirementIds" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"><property name="p" value=""/></include>
+        FROM connection
+        WHERE is_deleted = 0
+          AND (buyer_tenant_id = #{tenantId} OR supplier_tenant_id = #{tenantId})
+          AND requirement_id IN
+        <foreach collection="requirementIds" item="rid" open="(" separator="," close=")">#{rid}</foreach>
+    </select>
+
+    <!-- 按需求ID+租户ID查单条对接记录 -->
+    <select id="selectByRequirementAndTenant" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"><property name="p" value=""/></include>
+        FROM connection
+        WHERE requirement_id = #{requirementId}
+          AND (buyer_tenant_id = #{tenantId} OR supplier_tenant_id = #{tenantId})
+          AND is_deleted = 0
+        LIMIT 1
+    </select>
+
+    <!-- 批量查当前采购商与多个供应商的最佳对接状态（accepted > pending > rejected） -->
+    <select id="selectStatusBySupplierIds" resultType="cn.greensmartplanet.gsc.supplier.projection.SupplierConnectionStatusRow">
+        SELECT c.supplier_tenant_id AS supplierTenantId,
+               COUNT(CASE WHEN c.status = 'accepted' THEN 1 END) AS connectionCount,
+               CASE
+                 WHEN SUM(CASE WHEN c.status = 'accepted' THEN 1 ELSE 0 END) > 0 THEN 'accepted'
+                 WHEN SUM(CASE WHEN c.status = 'pending' THEN 1 ELSE 0 END) > 0 THEN 'pending'
+                 WHEN SUM(CASE WHEN c.status = 'rejected' THEN 1 ELSE 0 END) > 0 THEN 'rejected'
+               END AS status
+        FROM connection c
+        WHERE c.buyer_tenant_id = #{buyerTenantId}
+          AND c.supplier_tenant_id IN
+          <foreach collection="supplierTenantIds" item="sid" open="(" separator="," close=")">#{sid}</foreach>
+          AND c.is_deleted = 0
+        GROUP BY c.supplier_tenant_id
+    </select>
+
+    <!-- 拒绝/取消后重新申请：重置 status=pending, 更新留言, 清空拒绝原因 -->
+    <update id="updateForReapply">
+        UPDATE connection
+        SET status = 'pending',
+            message = #{message},
+            reply_message = NULL,
+            update_by = #{updateBy}
+        WHERE id = #{id} AND status IN ('rejected', 'closed') AND is_deleted = 0
+    </update>
+</mapper>

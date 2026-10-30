@@ -1,0 +1,26 @@
+# ==================== 生产环境配置（上线时填充） ====================
+# 激活方式：java -jar xxx.jar --spring.profiles.active=prod
+# 生产环境所有配置走 Nacos（prod 命名空间），本文件仅作兜底
+# 上线前需填写：数据库、Redis、RabbitMQ、JWT 密钥等生产值（强制从环境变量读取，防止泄露）
+
+# 生产默认关闭 API 文档，避免接口结构外泄
+springdoc:
+  api-docs:
+    enabled: false
+  swagger-ui:
+    enabled: false
+knife4j:
+  enable: false
+
+# 生产日志降噪，排查问题时可在 Nacos 临时调高
+logging:
+  level:
+    cn.greensmartplanet: info
+    org.springframework.security: warn
+
+# 生产 JWT 密钥必须由环境变量注入，禁止回退到代码内置默认值
+gsc:
+  jwt:
+    secret: ${JWT_SECRET}
+  payment:
+    notify-url: ${GSC_PAYMENT_NOTIFY_URL:https://api.admin.gsc.greensmartplanet.cn/api/pub/payment/callback}

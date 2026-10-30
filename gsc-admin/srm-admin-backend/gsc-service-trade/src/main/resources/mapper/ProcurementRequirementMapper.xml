@@ -1,0 +1,196 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.greensmartplanet.gsc.trade.mapper.ProcurementRequirementMapper">
+
+    <resultMap id="BaseResultMap" type="cn.greensmartplanet.gsc.trade.entity.ProcurementRequirement">
+        <id column="id" property="id"/>
+        <result column="tenant_id" property="tenantId"/>
+        <result column="title" property="title"/>
+        <result column="category" property="category"/>
+        <result column="quantity" property="quantity"/>
+        <result column="unit" property="unit"/>
+        <result column="region" property="region"/>
+        <result column="cert_require" property="certRequire"/>
+        <result column="deadline" property="deadline"/>
+        <result column="budget" property="budget"/>
+        <result column="description" property="description"/>
+        <result column="status" property="status"/>
+        <result column="contact_name" property="contactName"/>
+        <result column="contact_phone" property="contactPhone"/>
+        <result column="contact_email" property="contactEmail"/>
+        <result column="target_supplier_count" property="targetSupplierCount"/>
+        <result column="is_public" property="isPublic"/>
+        <result column="create_by" property="createBy"/>
+        <result column="update_by" property="updateBy"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+        <result column="is_deleted" property="isDeleted"/>
+    </resultMap>
+
+    <!-- 采购需求表基础列（沿用原列表查询列集合，刻意不含 create_by/update_by 审计列，保持既有返回结构） -->
+    <sql id="Base_Column_List">
+        id, tenant_id, title, category, quantity, unit,
+        region, cert_require, deadline, budget, description,
+        status, target_supplier_count, is_public, contact_name, contact_phone, contact_email,
+        create_time, update_time, is_deleted
+    </sql>
+
+    <!-- 分页查我的需求 -->
+    <select id="selectMyPage" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM procurement_requirement
+        WHERE tenant_id = #{tenantId} AND is_deleted = 0
+        <if test="status != null and status != ''">
+            AND status = #{status}
+        </if>
+        <if test="keyword != null and keyword != ''">
+            AND (title LIKE CONCAT('%', #{keyword}, '%')
+                 OR category LIKE CONCAT('%', #{keyword}, '%')
+                 OR region LIKE CONCAT('%', #{keyword}, '%')
+                 OR budget LIKE CONCAT('%', #{keyword}, '%'))
+        </if>
+        ORDER BY create_time DESC
+        LIMIT #{offset}, #{limit}
+    </select>
+
+    <!-- 统计我的需求总数 -->
+    <select id="countMy" resultType="long">
+        SELECT COUNT(*) FROM procurement_requirement
+        WHERE tenant_id = #{tenantId} AND is_deleted = 0
+        <if test="status != null and status != ''">
+            AND status = #{status}
+        </if>
+        <if test="keyword != null and keyword != ''">
+            AND (title LIKE CONCAT('%', #{keyword}, '%')
+                 OR category LIKE CONCAT('%', #{keyword}, '%')
+                 OR region LIKE CONCAT('%', #{keyword}, '%')
+                 OR budget LIKE CONCAT('%', #{keyword}, '%'))
+        </if>
+    </select>
+
+    <!-- 按ID查单条 -->
+    <select id="selectById" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM procurement_requirement
+        WHERE id = #{id} AND is_deleted = 0
+    </select>
+
+    <!-- 插入需求 -->
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO procurement_requirement (
+            tenant_id, title, category, quantity, unit,
+            region, cert_require, deadline, budget, description,
+            status, target_supplier_count, is_public, contact_name, contact_phone, contact_email,
+            create_by
+        ) VALUES (
+            #{tenantId}, #{title}, #{category}, #{quantity}, #{unit},
+            #{region}, #{certRequire}, #{deadline}, #{budget}, #{description},
+            #{status}, #{targetSupplierCount}, #{isPublic}, #{contactName}, #{contactPhone}, #{contactEmail},
+            #{createBy}
+        )
+    </insert>
+
+    <!-- 编辑需求（仅 open 状态、发布方可编辑） -->
+    <update id="updateById">
+        UPDATE procurement_requirement
+        SET title = #{req.title},
+            category = #{req.category},
+            quantity = #{req.quantity},
+            unit = #{req.unit},
+            region = #{req.region},
+            cert_require = #{req.certRequire},
+            deadline = #{req.deadline},
+            budget = #{req.budget},
+            description = #{req.description},
+            target_supplier_count = #{req.targetSupplierCount},
+            is_public = #{req.isPublic},
+            contact_name = #{req.contactName},
+            contact_phone = #{req.contactPhone},
+            contact_email = #{req.contactEmail},
+            update_by = #{req.updateBy}
+        WHERE id = #{id} AND tenant_id = #{tenantId} AND status = 'open' AND is_deleted = 0
+    </update>
+
+    <!-- 关闭需求（open/completed → closed） -->
+    <update id="closeById">
+        UPDATE procurement_requirement
+        SET status = 'closed'
+        WHERE id = #{id} AND tenant_id = #{tenantId} AND status IN ('open', 'completed') AND is_deleted = 0
+    </update>
+
+    <!-- 更新需求状态 -->
+    <update id="updateStatus">
+        UPDATE procurement_requirement
+        SET status = #{status}
+        WHERE id = #{id} AND is_deleted = 0
+    </update>
+
+    <!-- 重新发布（closed/expired/completed → open） -->
+    <update id="republishById">
+        UPDATE procurement_requirement
+        SET status = 'open'
+        WHERE id = #{id} AND tenant_id = #{tenantId} AND status IN ('closed', 'expired', 'completed') AND is_deleted = 0
+    </update>
+
+    <!-- 扫描过期需求：open → expired -->
+    <update id="updateExpired">
+        UPDATE procurement_requirement
+        SET status = 'expired'
+        WHERE status = 'open' AND deadline IS NOT NULL AND deadline &lt; CURDATE() AND is_deleted = 0
+    </update>
+
+    <!-- 跨租户查公开需求（排除自己发布的，支持品类关键词搜索） -->
+    <select id="selectOpenListExcludeTenant" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM procurement_requirement
+        WHERE status = 'open' AND is_public = 1 AND is_deleted = 0
+          AND tenant_id != #{excludeTenantId}
+        <if test="keyword != null and keyword != ''">
+            AND (title LIKE CONCAT('%', #{keyword}, '%')
+                 OR category LIKE CONCAT('%', #{keyword}, '%')
+                 OR description LIKE CONCAT('%', #{keyword}, '%')
+                 OR region LIKE CONCAT('%', #{keyword}, '%')
+                 OR cert_require LIKE CONCAT('%', #{keyword}, '%'))
+        </if>
+        ORDER BY create_time DESC
+        LIMIT #{offset}, #{limit}
+    </select>
+
+    <!-- 统计公开需求总数（排除自己发布的，支持关键词搜索品类/描述/地域/资质） -->
+    <select id="countOpenExcludeTenant" resultType="long">
+        SELECT COUNT(*) FROM procurement_requirement
+        WHERE status = 'open' AND is_public = 1 AND is_deleted = 0
+          AND tenant_id != #{excludeTenantId}
+        <if test="keyword != null and keyword != ''">
+            AND (title LIKE CONCAT('%', #{keyword}, '%')
+                 OR category LIKE CONCAT('%', #{keyword}, '%')
+                 OR description LIKE CONCAT('%', #{keyword}, '%')
+                 OR region LIKE CONCAT('%', #{keyword}, '%')
+                 OR cert_require LIKE CONCAT('%', #{keyword}, '%'))
+        </if>
+    </select>
+
+    <!-- 找需求召回：一次只带品类或地域，Java 两路合并 -->
+    <select id="selectOpenForRecall" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM procurement_requirement
+        WHERE status = 'open' AND is_public = 1 AND is_deleted = 0
+          <if test="excludeTenantId != null">
+              AND tenant_id != #{excludeTenantId}
+          </if>
+          <if test="categoryTokens != null and categoryTokens.size() &gt; 0">
+              AND (
+              <foreach collection="categoryTokens" item="tok" separator=" OR ">
+                  category LIKE CONCAT('%', #{tok}, '%')
+              </foreach>
+              )
+          </if>
+          <if test="region != null and region != ''">
+              AND (region IS NULL OR region = '' OR region = '不限'
+                   OR region LIKE CONCAT('%', #{region}, '%'))
+          </if>
+        ORDER BY create_time DESC
+        LIMIT #{limit}
+    </select>
+</mapper>

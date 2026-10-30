@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.greensmartplanet.gsc.delivery.mapper.DeliveryPromiseDateMapper">
+
+    <!-- DeliveryPromiseDate 全字段（查询统一复用，禁止 SELECT *；${p} 为别名前缀参数，无别名传 value=""） -->
+    <sql id="Base_Column_List">
+        ${p}id, ${p}delivery_id, ${p}promised_date, ${p}reason, ${p}status,
+        ${p}confirm_user_id, ${p}confirm_time,
+        ${p}create_by, ${p}create_time, ${p}is_deleted
+    </sql>
+
+    <resultMap id="BaseResultMap" type="cn.greensmartplanet.gsc.delivery.entity.DeliveryPromiseDate">
+        <id column="id" property="id"/>
+        <result column="delivery_id" property="deliveryId"/>
+        <result column="promised_date" property="promisedDate"/>
+        <result column="reason" property="reason"/>
+        <result column="status" property="status"/>
+        <result column="confirm_user_id" property="confirmUserId"/>
+        <result column="confirm_time" property="confirmTime"/>
+        <result column="create_by" property="createBy"/>
+        <result column="create_time" property="createTime"/>
+        <result column="is_deleted" property="isDeleted"/>
+    </resultMap>
+
+    <!-- 插入承诺记录（雪花 id 由应用层生成显式传入，create_time/is_deleted 走 DB 默认值） -->
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO delivery_promise_date (
+            id, delivery_id, promised_date, reason, status, create_by
+        ) VALUES (
+            #{id}, #{deliveryId}, #{promisedDate}, #{reason}, #{status}, #{createBy}
+        )
+    </insert>
+
+    <!-- 按ID查单条 -->
+    <select id="selectById" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"><property name="p" value=""/></include> FROM delivery_promise_date WHERE id = #{id} AND is_deleted = 0
+    </select>
+
+    <!-- 按交付单查承诺记录（时间正序，历史留痕） -->
+    <select id="selectByDeliveryId" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"><property name="p" value=""/></include> FROM delivery_promise_date
+        WHERE delivery_id = #{deliveryId} AND is_deleted = 0
+        ORDER BY create_time ASC, id ASC
+    </select>
+
+    <!-- 按交付单查待确认承诺 -->
+    <select id="selectPendingByDeliveryId" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"><property name="p" value=""/></include> FROM delivery_promise_date
+        WHERE delivery_id = #{deliveryId} AND status = 'pending' AND is_deleted = 0
+        ORDER BY create_time ASC
+        LIMIT 1
+    </select>
+
+    <!-- 批量查待确认承诺（子查询取每单最新一条 pending；p 与子查询均有 delivery_id，需 p. 前缀） -->
+    <select id="selectPendingByDeliveryIds" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"><property name="p" value="p."/></include> FROM delivery_promise_date p
+        JOIN (
+            SELECT delivery_id, MAX(id) AS max_id
+            FROM delivery_promise_date
+            WHERE delivery_id IN
+            <foreach collection="deliveryIds" item="did" open="(" separator="," close=")">
+                #{did}
+            </foreach>
+            AND status = 'pending' AND is_deleted = 0
+            GROUP BY delivery_id
+        ) t ON p.id = t.max_id
+    </select>
+
+    <!-- 确认承诺：仅 pending 可确认 -->
+    <update id="confirm">
+        UPDATE delivery_promise_date
+        SET status = 'accepted', confirm_user_id = #{userId}, confirm_time = NOW()
+        WHERE id = #{id} AND status = 'pending' AND is_deleted = 0
+    </update>
+
+    <!-- 拒绝承诺：仅 pending 可拒绝 -->
+    <update id="reject">
+        UPDATE delivery_promise_date
+        SET status = 'rejected', confirm_user_id = #{userId}, confirm_time = NOW()
+        WHERE id = #{id} AND status = 'pending' AND is_deleted = 0
+    </update>
+</mapper>

@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.greensmartplanet.gsc.trade.mapper.InquiryAwardMapper">
+
+    <resultMap id="BaseResultMap" type="cn.greensmartplanet.gsc.trade.entity.InquiryAward">
+        <id column="id" property="id"/>
+        <result column="inquiry_id" property="inquiryId"/>
+        <result column="quote_id" property="quoteId"/>
+        <result column="supplier_tenant_id" property="supplierTenantId"/>
+        <result column="awarded_quantity" property="awardedQuantity"/>
+        <result column="awarded_by" property="awardedBy"/>
+        <result column="awarded_at" property="awardedAt"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+    </resultMap>
+
+    <!-- 询盘授标明细基础列 -->
+    <sql id="Base_Column_List">
+        id, inquiry_id, quote_id, supplier_tenant_id, awarded_quantity, awarded_by, awarded_at,
+        create_time, update_time
+    </sql>
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO inquiry_award (
+            inquiry_id, quote_id, supplier_tenant_id, awarded_quantity,
+            awarded_by, awarded_at
+        ) VALUES (
+            #{inquiryId}, #{quoteId}, #{supplierTenantId}, #{awardedQuantity},
+            #{awardedBy}, NOW()
+        )
+    </insert>
+
+    <select id="selectByInquiryId" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM inquiry_award
+        WHERE inquiry_id = #{inquiryId}
+        ORDER BY id ASC
+    </select>
+
+    <select id="selectByInquiryIds" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM inquiry_award
+        WHERE inquiry_id IN
+        <foreach collection="inquiryIds" item="id" open="(" close=")" separator=",">
+            #{id}
+        </foreach>
+        ORDER BY id ASC
+    </select>
+
+    <select id="selectByInquiryIdsAndSupplier" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM inquiry_award
+        WHERE inquiry_id IN
+        <foreach collection="inquiryIds" item="id" open="(" close=")" separator=",">
+            #{id}
+        </foreach>
+        AND supplier_tenant_id = #{supplierTenantId}
+        ORDER BY id ASC
+    </select>
+
+    <delete id="deleteByInquiryId">
+        DELETE FROM inquiry_award WHERE inquiry_id = #{inquiryId}
+    </delete>
+
+</mapper>

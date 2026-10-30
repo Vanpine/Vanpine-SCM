@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.greensmartplanet.gsc.platform.mapper.RoleMapper">
+
+    <!-- 分页查询（含平台系统角色，按 role_type 过滤） -->
+    <select id="selectPageByTenant" resultType="cn.greensmartplanet.gsc.platform.entity.Role">
+        SELECT id, tenant_id, role_code, role_name, role_desc, is_system, role_type, sort_order,
+               create_by, update_by, create_time, update_time
+        FROM role
+        WHERE (tenant_id = #{tenantId}
+               OR (tenant_id = 1 AND is_system = 1 AND role_code != 'SUPER_ADMIN'
+                   <if test="allowedRoleTypes != null and allowedRoleTypes.size() > 0">
+                       AND role_type IN
+                       <foreach collection="allowedRoleTypes" item="t" open="(" separator="," close=")">#{t}</foreach>
+                   </if>
+                  ))
+          AND is_deleted = 0
+        <if test="roleName != null and roleName != ''">
+            AND role_name LIKE CONCAT('%', #{roleName}, '%')
+        </if>
+        <if test="roleCode != null and roleCode != ''">
+            AND role_code LIKE CONCAT('%', #{roleCode}, '%')
+        </if>
+        ORDER BY id ASC
+    </select>
+
+    <!-- 查租户可用的所有角色（含平台系统角色，按 role_type 过滤） -->
+    <select id="selectByTenant" resultType="cn.greensmartplanet.gsc.platform.entity.Role">
+        SELECT id, tenant_id, role_code, role_name, role_desc, is_system, role_type, sort_order
+        FROM role
+        WHERE (tenant_id = #{tenantId}
+               OR (tenant_id = 1 AND is_system = 1 AND role_code != 'SUPER_ADMIN'
+                   <if test="allowedRoleTypes != null and allowedRoleTypes.size() > 0">
+                       AND role_type IN
+                       <foreach collection="allowedRoleTypes" item="t" open="(" separator="," close=")">#{t}</foreach>
+                   </if>
+                  ))
+          AND is_deleted = 0
+        ORDER BY id ASC
+    </select>
+
+    <!-- 查角色已分配的权限ID -->
+    <select id="selectPermIdsByRoleId" resultType="long">
+        SELECT perm_id FROM role_permission WHERE role_id = #{roleId}
+    </select>
+
+    <!-- 查角色已分配的菜单ID -->
+    <select id="selectMenuIdsByRoleId" resultType="long">
+        SELECT menu_id FROM role_menu WHERE role_id = #{roleId}
+    </select>
+
+    <!-- 删除角色所有权限关联 -->
+    <delete id="deleteRolePerms">
+        DELETE FROM role_permission WHERE role_id = #{roleId}
+    </delete>
+
+    <!-- 批量插入角色权限关联 -->
+    <insert id="insertRolePerms">
+        INSERT IGNORE INTO role_permission (role_id, perm_id) VALUES
+        <foreach collection="permIds" item="permId" separator=",">
+            (#{roleId}, #{permId})
+        </foreach>
+    </insert>
+
+    <!-- 删除角色所有菜单关联 -->
+    <delete id="deleteRoleMenus">
+        DELETE FROM role_menu WHERE role_id = #{roleId}
+    </delete>
+
+    <!-- 批量插入角色菜单关联 -->
+    <insert id="insertRoleMenus">
+        INSERT IGNORE INTO role_menu (role_id, menu_id) VALUES
+        <foreach collection="menuIds" item="menuId" separator=",">
+            (#{roleId}, #{menuId})
+        </foreach>
+    </insert>
+
+    <!-- 删除角色的所有用户关联（删角色时调用，防 user_role 残留） -->
+    <delete id="deleteUserRolesByRoleId">
+        DELETE FROM user_role WHERE role_id = #{roleId}
+    </delete>
+
+</mapper>

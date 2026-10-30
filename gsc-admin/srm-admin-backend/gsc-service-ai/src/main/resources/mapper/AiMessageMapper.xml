@@ -1,0 +1,210 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.greensmartplanet.gsc.ai.mapper.AiMessageMapper">
+
+    <!-- ai_messages 无 is_deleted：查询不加逻辑删除条件；删会话/覆盖重生成走物理 DELETE -->
+    <sql id="Base_Column_List">
+        id,
+        conversation_id,
+        tenant_id,
+        user_id,
+        role,
+        content,
+        citations_json,
+        tool_calls_json,
+        status,
+        feedback,
+        feedback_reason,
+        feedback_time,
+        create_time
+    </sql>
+
+    <!-- 按会话查历史消息（create_time 升序） -->
+    <select id="selectByConversation"
+            resultType="cn.greensmartplanet.gsc.ai.entity.AiMessage">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM ai_messages
+        WHERE conversation_id = #{conversationId}
+          AND tenant_id = #{tenantId}
+        ORDER BY create_time ASC
+    </select>
+
+    <!-- 按会话查最近 N 条（先倒序截断再升序，供 LLM 上下文） -->
+    <select id="selectRecentByConversation"
+            resultType="cn.greensmartplanet.gsc.ai.entity.AiMessage">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM (
+            SELECT
+            <include refid="Base_Column_List"/>
+            FROM ai_messages
+            WHERE conversation_id = #{conversationId}
+              AND tenant_id = #{tenantId}
+            ORDER BY create_time DESC
+            LIMIT #{limit}
+        ) t
+        ORDER BY create_time ASC
+    </select>
+
+    <!-- 按角色取该会话最新一条：create_time DESC LIMIT 1，调用方只当「当前轮」用 -->
+    <select id="selectLatestByRole"
+            resultType="cn.greensmartplanet.gsc.ai.entity.AiMessage">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM ai_messages
+        WHERE conversation_id = #{conversationId}
+          AND tenant_id = #{tenantId}
+          AND role = #{role}
+        ORDER BY create_time DESC
+        LIMIT 1
+    </select>
+
+    <!-- 物理删除会话下全部消息（删会话时同步清理，本表无逻辑删除字段） -->
+    <delete id="deleteByConversation">
+        DELETE FROM ai_messages
+        WHERE conversation_id = #{conversationId}
+          AND tenant_id = #{tenantId}
+    </delete>
+
+    <!-- 重生成：物理删上一轮已完成的助手消息，必须带会话+租户防越权。
+         ⚠️ 不带状态守卫，只能用于删「已完成」的旧回答；
+         删「生成中占位」用 deleteStreamingByIdAndConversation（带 status 守卫）。 -->
+    <delete id="deleteByIdAndConversation">
+        DELETE FROM ai_messages
+        WHERE id = #{id}
+          AND conversation_id = #{conversationId}
+          AND tenant_id = #{tenantId}
+    </delete>
+
+    <!-- 删除「仍在生成中」的占位：带 status 守卫。
+         SELECT 与 DELETE 之间流可能已完成（CAS 成 complete 并写入正文），
+         无守卫会误删完整回答；守卫命中 0 行即表示已被收尾，调用方不应再删。 -->
+    <delete id="deleteStreamingByIdAndConversation">
+        DELETE FROM ai_messages
+        WHERE id = #{id}
+          AND conversation_id = #{conversationId}
+          AND tenant_id = #{tenantId}
+          AND status = 'streaming'
+    </delete>
+
+    <!-- 流式轮询：主键 + 租户，确认占位还在 streaming -->
+    <select id="selectByIdAndTenant"
+            resultType="cn.greensmartplanet.gsc.ai.entity.AiMessage">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM ai_messages
+        WHERE id = #{id}
+          AND tenant_id = #{tenantId}
+    </select>
+
+    <!-- 停止生成：找到当前进行中的助手占位 -->
+    <select id="selectLatestStreaming"
+            resultType="cn.greensmartplanet.gsc.ai.entity.AiMessage">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM ai_messages
+        WHERE conversation_id = #{conversationId}
+          AND tenant_id = #{tenantId}
+          AND role = 'assistant'
+          AND status = 'streaming'
+        ORDER BY create_time DESC
+        LIMIT 1
+    </select>
+
+    <!-- 新一轮开始前清掉上次未收尾的 streaming，避免占位堆积 -->
+    <delete id="deleteStreamingByConversation">
+        DELETE FROM ai_messages
+        WHERE conversation_id = #{conversationId}
+          AND tenant_id = #{tenantId}
+          AND role = 'assistant'
+          AND status = 'streaming'
+    </delete>
+
+    <!-- 只清超时残留，进行中的占位留给另一页签继续跑 -->
+    <delete id="deleteStaleStreamingByConversation">
+        DELETE FROM ai_messages
+        WHERE conversation_id = #{conversationId}
+          AND tenant_id = #{tenantId}
+          AND role = 'assistant'
+          AND status = 'streaming'
+          AND create_time &lt; #{before}
+    </delete>
+
+    <!-- 生成中途写入引用来源，停止落库时占位行上已有 citations -->
+    <update id="updateStreamingCitations">
+        UPDATE ai_messages
+        SET citations_json = #{citationsJson}
+        WHERE id = #{id}
+          AND tenant_id = #{tenantId}
+          AND status = 'streaming'
+    </update>
+
+    <!-- CAS：只有还是 streaming 才能写成终态，挡住停止后再被 complete 覆盖 -->
+    <update id="finalizeStreaming">
+        UPDATE ai_messages
+        SET content = #{content},
+            citations_json = #{citationsJson},
+            tool_calls_json = #{toolCallsJson},
+            status = #{status}
+        WHERE id = #{id}
+          AND conversation_id = #{conversationId}
+          AND tenant_id = #{tenantId}
+          AND status = 'streaming'
+    </update>
+
+    <!-- 覆盖写占位气泡文案：确认/取消落库后把「已发起操作」占位改成最终文案 -->
+    <update id="updateContentById">
+        UPDATE ai_messages
+        SET content = #{content}
+        WHERE id = #{id}
+          AND tenant_id = #{tenantId}
+    </update>
+
+    <!-- 写用户反馈：仅 assistant 消息，tenant 过滤防越权；再次反馈即覆盖（改主意） -->
+    <update id="updateFeedback">
+        UPDATE ai_messages
+        SET feedback        = #{feedback},
+            feedback_reason = #{feedbackReason},
+            feedback_time   = NOW()
+        WHERE id = #{id}
+          AND tenant_id = #{tenantId}
+          AND role = 'assistant'
+    </update>
+
+    <!-- 反馈统计：显式反馈（like/dislike）与行为信号（cancelled=中途停止）一次查出 -->
+    <select id="selectFeedbackStats" resultType="cn.greensmartplanet.gsc.ai.vo.FeedbackStatsVO">
+        SELECT
+            SUM(role = 'assistant' AND feedback = 'like')    AS likeCount,
+            SUM(role = 'assistant' AND feedback = 'dislike') AS dislikeCount,
+            SUM(role = 'assistant' AND feedback IS NOT NULL) AS feedbackCount,
+            SUM(role = 'assistant' AND status = 'cancelled') AS cancelledCount,
+            SUM(role = 'assistant' AND status = 'complete')  AS answerCount
+        FROM ai_messages
+        WHERE tenant_id = #{tenantId}
+    </select>
+    <!-- 取可压缩的老消息：摘要覆盖点之后、滑动窗口起点之前。
+         beforeId = 本轮滑动窗口里最早那条消息的 id。窗口内的原文必须排除，否则同一条消息
+         会既作为原文喂给模型、又已压进摘要，上下文重复。beforeId 为 null（窗口为空）时不设上界。
+         按 create_time 升序取最老的 limit 条，limit 由调用方按单次压缩上限传。 -->
+    <select id="selectCompactable" resultType="cn.greensmartplanet.gsc.ai.entity.AiMessage">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM ai_messages
+        WHERE conversation_id = #{conversationId}
+          AND tenant_id = #{tenantId}
+          AND (role = 'user' OR (role = 'assistant' AND status = 'complete'))
+          AND content IS NOT NULL
+          AND content &lt;&gt; ''
+        <if test="afterId != null">
+            AND id &gt; #{afterId}
+        </if>
+        <if test="beforeId != null">
+            AND id &lt; #{beforeId}
+        </if>
+        ORDER BY create_time ASC, id ASC
+        LIMIT #{limit}
+    </select>
+
+</mapper>

@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.greensmartplanet.gsc.trade.mapper.TradeStatsMapper">
+
+    <!-- ⚠️ 阶段 8.1：以下 SQL 从旧单体 DashboardMapper.xml 按表归属原样迁入，禁止改动语义 -->
+
+    <!-- 采购方：按状态统计询盘 -->
+    <select id="countInquiryByBuyer" resultType="long">
+        SELECT COUNT(*) FROM inquiry
+        WHERE buyer_tenant_id = #{tenantId}
+          AND status IN
+        <foreach collection="statuses" item="s" open="(" separator="," close=")">#{s}</foreach>
+          AND is_deleted = 0
+    </select>
+
+    <!-- 采购方：按状态统计合同 -->
+    <select id="countContractByBuyer" resultType="long">
+        SELECT COUNT(*) FROM contract
+        WHERE buyer_tenant_id = #{tenantId}
+          AND status IN
+        <foreach collection="statuses" item="s" open="(" separator="," close=")">#{s}</foreach>
+          AND is_deleted = 0
+    </select>
+
+    <!-- 供应方：按状态统计合同 -->
+    <select id="countContractBySupplier" resultType="long">
+        SELECT COUNT(*) FROM contract
+        WHERE supplier_tenant_id = #{tenantId}
+          AND status IN
+        <foreach collection="statuses" item="s" open="(" separator="," close=")">#{s}</foreach>
+          AND is_deleted = 0
+    </select>
+
+    <!-- 供应方：待报价询盘（邀请已接受 + 询盘在报价期 + 该供应商尚未提交有效报价） -->
+    <select id="countPendingQuote" resultType="long">
+        SELECT COUNT(*)
+        FROM inquiry_invite inv
+        JOIN inquiry i ON i.id = inv.inquiry_id AND i.is_deleted = 0
+        WHERE inv.supplier_tenant_id = #{supplierTenantId}
+          AND inv.invite_status = 'accepted'
+          AND inv.is_deleted = 0
+          AND i.status IN ('open', 'quoting')
+          AND NOT EXISTS (
+              SELECT 1 FROM quote q
+              WHERE q.inquiry_id = inv.inquiry_id
+                AND q.supplier_tenant_id = #{supplierTenantId}
+                AND q.status != 'withdrawn'
+                AND q.is_deleted = 0
+          )
+    </select>
+
+    <!-- 供应方：已中标询盘数（按询盘去重） -->
+    <select id="countAwardBySupplier" resultType="long">
+        SELECT COUNT(DISTINCT inquiry_id) FROM inquiry_award
+        WHERE supplier_tenant_id = #{supplierTenantId}
+    </select>
+
+    <!-- 超管：平台合同总数 -->
+    <select id="countAllContract" resultType="long">
+        SELECT COUNT(*) FROM contract WHERE is_deleted = 0
+    </select>
+
+</mapper>

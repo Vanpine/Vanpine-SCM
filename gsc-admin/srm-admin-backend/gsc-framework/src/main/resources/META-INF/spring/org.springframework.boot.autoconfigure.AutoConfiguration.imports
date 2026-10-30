@@ -1,0 +1,4 @@
+cn.greensmartplanet.gsc.framework.GscFrameworkAutoConfiguration
+cn.greensmartplanet.gsc.framework.web.JacksonConfig
+cn.greensmartplanet.gsc.framework.web.Knife4jAutoConfiguration
+cn.greensmartplanet.gsc.framework.persistence.MyBatisPlusAutoConfiguration

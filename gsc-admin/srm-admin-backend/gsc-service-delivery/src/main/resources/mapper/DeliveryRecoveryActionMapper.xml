@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.greensmartplanet.gsc.delivery.mapper.DeliveryRecoveryActionMapper">
+
+    <!-- delivery_recovery_action 全字段（查询统一复用，禁止 SELECT *） -->
+    <sql id="Base_Column_List">
+        id, risk_id, action_type, action_name, recommendation,
+        expected_eta, expected_cost, expected_recovery_qty,
+        status, owner_user_id, deadline,
+        execution_remark, completed_time, result,
+        create_time, update_time, is_deleted
+    </sql>
+
+    <resultMap id="BaseResultMap" type="cn.greensmartplanet.gsc.delivery.entity.DeliveryRecoveryAction">
+        <id column="id" property="id"/>
+        <result column="risk_id" property="riskId"/>
+        <result column="action_type" property="actionType"/>
+        <result column="action_name" property="actionName"/>
+        <result column="recommendation" property="recommendation"/>
+        <result column="expected_eta" property="expectedEta"/>
+        <result column="expected_cost" property="expectedCost"/>
+        <result column="expected_recovery_qty" property="expectedRecoveryQty"/>
+        <result column="status" property="status"/>
+        <result column="owner_user_id" property="ownerUserId"/>
+        <result column="deadline" property="deadline"/>
+        <result column="execution_remark" property="executionRemark"/>
+        <result column="completed_time" property="completedTime"/>
+        <result column="result" property="result"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+        <result column="is_deleted" property="isDeleted"/>
+    </resultMap>
+
+    <!-- 插入补救工单（create_time/update_time/is_deleted 走 DB 默认值） -->
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO delivery_recovery_action (
+            risk_id, action_type, action_name, recommendation,
+            expected_eta, expected_cost, expected_recovery_qty,
+            status, owner_user_id, deadline
+        ) VALUES (
+            #{riskId}, #{actionType}, #{actionName}, #{recommendation},
+            #{expectedEta}, #{expectedCost}, #{expectedRecoveryQty},
+            #{status}, #{ownerUserId}, #{deadline}
+        )
+    </insert>
+
+    <!-- 按ID查单条 -->
+    <select id="selectById" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/> FROM delivery_recovery_action WHERE id = #{id} AND is_deleted = 0
+    </select>
+
+    <!-- 按风险查补救工单（时间倒序） -->
+    <select id="selectByRiskId" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM delivery_recovery_action
+        WHERE risk_id = #{riskId} AND is_deleted = 0
+        ORDER BY create_time DESC
+    </select>
+
+    <!-- 按风险查已完成工单数 -->
+    <select id="countCompletedByRiskId" resultType="int">
+        SELECT COUNT(*) FROM delivery_recovery_action
+        WHERE risk_id = #{riskId} AND status = 'completed' AND is_deleted = 0
+    </select>
+
+    <!-- 开始执行：pending → executing，指派责任人 -->
+    <update id="start">
+        UPDATE delivery_recovery_action
+        SET status = 'executing', owner_user_id = #{ownerUserId}
+        WHERE id = #{id} AND status = 'pending' AND is_deleted = 0
+    </update>
+
+    <!-- 完成工单：executing → completed，填回执/结果 -->
+    <update id="complete">
+        UPDATE delivery_recovery_action
+        SET status = 'completed',
+            execution_remark = #{executionRemark},
+            result = #{result},
+            completed_time = #{completedTime}
+        WHERE id = #{id} AND status = 'executing' AND is_deleted = 0
+    </update>
+</mapper>

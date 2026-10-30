@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.greensmartplanet.gsc.ai.mapper.AiChatImageMapper">
+
+    <!-- 校验图片归属（租户 + 上传人，防越权引用他人图片） -->
+    <select id="selectByIdAndOwner" resultType="cn.greensmartplanet.gsc.ai.entity.AiChatImage">
+        SELECT id,
+               tenant_id,
+               uploader_user_id,
+               oss_key,
+               file_name,
+               content_type,
+               file_size,
+               status,
+               description,
+               create_time,
+               update_time,
+               is_deleted
+        FROM ai_chat_images
+        WHERE id = #{id}
+          AND tenant_id = #{tenantId}
+          AND uploader_user_id = #{uploaderUserId}
+          AND is_deleted = 0
+    </select>
+
+    <!-- 按图片ID批量查（租户过滤，供消息历史回显 + 图片描述注入上下文） -->
+    <select id="selectByIdsAndTenant" resultType="cn.greensmartplanet.gsc.ai.entity.AiChatImage">
+        SELECT id,
+               tenant_id,
+               uploader_user_id,
+               oss_key,
+               file_name,
+               content_type,
+               file_size,
+               status,
+               description,
+               create_time,
+               update_time,
+               is_deleted
+        FROM ai_chat_images
+        WHERE tenant_id = #{tenantId}
+          AND is_deleted = 0
+          AND id IN
+        <foreach collection="ids" item="item" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </select>
+
+</mapper>

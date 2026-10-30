@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.greensmartplanet.gsc.platform.mapper.SanctionScreenRecordMapper">
+
+    <resultMap id="BaseResultMap" type="cn.greensmartplanet.gsc.platform.entity.SanctionScreenRecord">
+        <id column="id" property="id"/>
+        <result column="application_id" property="applicationId"/>
+        <result column="tenant_id" property="tenantId"/>
+        <result column="query_name" property="queryName"/>
+        <result column="query_reg_no" property="queryRegNo"/>
+        <result column="hit_count" property="hitCount"/>
+        <result column="status" property="status"/>
+        <result column="matches_json" property="matchesJson"/>
+        <result column="screened_at" property="screenedAt"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+        <result column="is_deleted" property="isDeleted"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id, application_id, tenant_id, query_name, query_reg_no, hit_count, status,
+        matches_json, screened_at, create_time, update_time, is_deleted
+    </sql>
+
+    <!-- 按申请查最近一条筛查记录 -->
+    <select id="selectLatestByApplicationId" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/> FROM sanction_screen_record
+        WHERE application_id = #{applicationId} AND is_deleted = 0
+        ORDER BY screened_at DESC, id DESC
+        LIMIT 1
+    </select>
+
+    <!-- 批量按申请ID查最近一条（子查询取每申请最新 id） -->
+    <select id="selectLatestByApplicationIds" resultMap="BaseResultMap">
+        SELECT r.id, r.application_id, r.tenant_id, r.query_name, r.query_reg_no, r.hit_count,
+               r.status, r.matches_json, r.screened_at, r.create_time, r.update_time, r.is_deleted
+        FROM sanction_screen_record r
+        JOIN (
+            SELECT application_id, MAX(id) AS max_id
+            FROM sanction_screen_record
+            WHERE application_id IN
+            <foreach collection="applicationIds" item="aid" open="(" separator="," close=")">
+                #{aid}
+            </foreach>
+              AND is_deleted = 0
+            GROUP BY application_id
+        ) t ON r.id = t.max_id
+    </select>
+
+</mapper>

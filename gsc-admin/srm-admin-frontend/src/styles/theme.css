@@ -1,0 +1,32 @@
+/* ========================================
+ * 暗色主题 CSS 变量
+ * html.dark 时自动生效
+ * ======================================== */
+
+html.dark {
+  --login-bg-right: #1a1d2e;
+  --login-card-bg: #252836;
+  --login-text-primary: #e8e9f0;
+  --login-text-secondary: #8b8fa8;
+  --login-input-bg: #2a2d3e;
+  --login-input-border: #3a3d52;
+  --login-input-focus-border: #5d87ff;
+  --login-input-text: #e8e9f0;
+  --login-input-placeholder: #5c6080;
+  --login-demo-bg: #2a2d3e;
+  --login-demo-border: #3a3d52;
+}
+
+html:not(.dark) {
+  --login-bg-right: #ffffff;
+  --login-card-bg: #ffffff;
+  --login-text-primary: #1d1d2e;
+  --login-text-secondary: #8b8fa8;
+  --login-input-bg: #f5f6fa;
+  --login-input-border: #e4e7f0;
+  --login-input-focus-border: #5d87ff;
+  --login-input-text: #1d1d2e;
+  --login-input-placeholder: #b8bcc8;
+  --login-demo-bg: #f5f6fa;
+  --login-demo-border: #e4e7f0;
+}

@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.greensmartplanet.gsc.platform.mapper.MenuMapper">
+
+    <!-- 查用户有权限的菜单 + 这些菜单的父菜单（确保父目录不丢失） -->
+    <select id="selectByUserId" resultType="cn.greensmartplanet.gsc.platform.entity.Menu">
+        SELECT DISTINCT
+            m.id, m.parent_id, m.menu_type, m.menu_name,
+            m.menu_path, m.menu_icon, m.perm_code,
+            m.is_visible, m.is_cache, m.sort_order,
+            m.create_time, m.update_time
+        FROM menu m
+        WHERE m.is_deleted = 0
+          AND m.id IN (
+              -- 用户角色直接分配的菜单
+              SELECT rm.menu_id FROM role_menu rm
+              JOIN user_role ur ON ur.role_id = rm.role_id
+              WHERE ur.user_id = #{userId}
+              UNION
+              -- 上述菜单的父菜单（确保目录结构完整）
+              SELECT DISTINCT m2.parent_id FROM menu m2
+              WHERE m2.id IN (
+                  SELECT rm2.menu_id FROM role_menu rm2
+                  JOIN user_role ur2 ON ur2.role_id = rm2.role_id
+                  WHERE ur2.user_id = #{userId}
+              ) AND m2.parent_id IS NOT NULL AND m2.parent_id != 0
+          )
+        ORDER BY m.parent_id ASC, m.sort_order ASC
+    </select>
+
+    <!-- 查所有未删除的菜单 -->
+    <select id="selectAll" resultType="cn.greensmartplanet.gsc.platform.entity.Menu">
+        SELECT id, parent_id, menu_type, menu_name, menu_path,
+               menu_icon, perm_code, is_visible, is_cache, sort_order,
+               create_time, update_time
+        FROM menu
+        WHERE is_deleted = 0
+        ORDER BY parent_id ASC, sort_order ASC
+    </select>
+
+    <!-- 新增菜单 -->
+    <insert id="insertMenu" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO menu (parent_id, menu_type, menu_name, menu_path,
+                          menu_icon, perm_code, is_visible, is_cache, sort_order, create_time)
+        VALUES (#{parentId}, #{menuType}, #{menuName}, #{menuPath},
+                #{menuIcon}, #{permCode}, #{isVisible}, #{isCache}, #{sortOrder}, NOW())
+    </insert>
+
+    <!-- 更新菜单 -->
+    <update id="updateMenu">
+        UPDATE menu
+        SET parent_id = #{parentId}, menu_type = #{menuType}, menu_name = #{menuName},
+            menu_path = #{menuPath}, menu_icon = #{menuIcon},
+            perm_code = #{permCode}, is_visible = #{isVisible}, is_cache = #{isCache},
+            sort_order = #{sortOrder}, update_time = NOW()
+        WHERE id = #{id} AND is_deleted = 0
+    </update>
+
+    <!-- 逻辑删除菜单 -->
+    <update id="softDelete">
+        UPDATE menu SET is_deleted = 1, update_time = NOW()
+        WHERE id = #{id} AND is_deleted = 0
+    </update>
+
+    <!-- 查子菜单数量 -->
+    <select id="countByParentId" resultType="int">
+        SELECT COUNT(*) FROM menu
+        WHERE parent_id = #{parentId} AND is_deleted = 0
+    </select>
+
+    <!-- 自动给 SUPER_ADMIN 分配权限码（INSERT IGNORE，已存在则跳过） -->
+    <insert id="insertRolePermissionForSuperAdmin">
+        INSERT IGNORE INTO role_permission (role_id, perm_id, create_time)
+        SELECT 1, p.id, NOW()
+        FROM permission p
+        WHERE p.perm_code = #{permCode}
+    </insert>
+
+    <insert id="insertRoleMenuForSuperAdmin">
+        INSERT IGNORE INTO role_menu (role_id, menu_id, create_time)
+        VALUES (1, #{menuId}, NOW())
+    </insert>
+
+</mapper>

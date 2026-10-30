@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.greensmartplanet.gsc.supplier.mapper.DdChecklistMapper">
+
+    <resultMap id="BaseResultMap" type="cn.greensmartplanet.gsc.supplier.entity.DdChecklist">
+        <id column="id" property="id"/>
+        <result column="dd_id" property="ddId"/>
+        <result column="item_code" property="itemCode"/>
+        <result column="item_name" property="itemName"/>
+        <result column="group_name" property="groupName"/>
+        <result column="checked" property="checked"/>
+        <result column="remark" property="remark"/>
+        <result column="create_by" property="createBy"/>
+        <result column="update_by" property="updateBy"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+        <result column="is_deleted" property="isDeleted"/>
+    </resultMap>
+
+    <!-- 尽调核查清单基础列 -->
+    <sql id="Base_Column_List">
+        id, dd_id, item_code, item_name, group_name, checked, remark,
+        create_by, update_by, create_time, update_time, is_deleted
+    </sql>
+
+    <!-- 按尽调ID查核查清单 -->
+    <select id="selectByDdId" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM dd_checklist WHERE dd_id = #{ddId} AND is_deleted = 0 ORDER BY id
+    </select>
+
+</mapper>

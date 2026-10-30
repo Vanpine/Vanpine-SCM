@@ -1,0 +1,37 @@
+# 依赖与构建产物
+node_modules/
+target/
+dist/
+build/
+out/
+.next/
+
+# 环境变量（保留 .env.example）
+.env
+.env.*
+!.env.example
+
+# 编辑器 / 系统
+.idea/
+.vscode/
+.DS_Store
+*.iml
+
+# worktree 工作副本
+.worktrees/
+
+# 子仓库 .git 的临时备份名
+.git-local-backup*
+
+# 日志与临时文件
+*.log
+logs/
+*.pid
+tmp/
+
+# 密钥与证书
+*.pem
+*.key
+*.p12
+*.jks
+id_rsa*

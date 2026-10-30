@@ -1,0 +1,450 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.greensmartplanet.gsc.delivery.mapper.DeliveryMapper">
+
+    <!-- delivery 全字段（查询统一复用，禁止 SELECT *） -->
+    <sql id="Base_Column_List">
+        id, delivery_no, contract_id, inquiry_id, batch_no,
+        buyer_tenant_id, supplier_tenant_id,
+        quantity, amount, currency,
+        delivery_terms, delivery_place, delivery_date,
+        status, ship_company, ship_tracking_no, ship_qty, ship_date,
+        ship_attachment_key, ship_time,
+        receive_time, receive_qty, receive_diff_remark, receive_attachment_key,
+        accept_result, accept_time, accept_remark, defective_qty, reship_from,
+        return_reason, confirmed_delivery_date,
+        penalty_days, penalty_amount, penalty_calculated_at,
+        return_attachment_key, return_ship_company, return_ship_tracking_no,
+        create_by, update_by, create_time, update_time, is_deleted
+    </sql>
+
+    <!-- delivery_trace 全字段（查询统一复用，禁止 SELECT *） -->
+    <sql id="Trace_Column_List">
+        id, delivery_id, action, action_desc, operator_tenant_id, operator_user_id,
+        remark, create_time
+    </sql>
+
+    <resultMap id="BaseResultMap" type="cn.greensmartplanet.gsc.delivery.entity.Delivery">
+        <id column="id" property="id"/>
+        <result column="delivery_no" property="deliveryNo"/>
+        <result column="contract_id" property="contractId"/>
+        <result column="inquiry_id" property="inquiryId"/>
+        <result column="batch_no" property="batchNo"/>
+        <result column="buyer_tenant_id" property="buyerTenantId"/>
+        <result column="supplier_tenant_id" property="supplierTenantId"/>
+        <result column="quantity" property="quantity"/>
+        <result column="amount" property="amount"/>
+        <result column="currency" property="currency"/>
+        <result column="delivery_terms" property="deliveryTerms"/>
+        <result column="delivery_place" property="deliveryPlace"/>
+        <result column="delivery_date" property="deliveryDate"/>
+        <result column="status" property="status"/>
+        <result column="ship_company" property="shipCompany"/>
+        <result column="ship_tracking_no" property="shipTrackingNo"/>
+        <result column="ship_qty" property="shipQty"/>
+        <result column="ship_date" property="shipDate"/>
+        <result column="ship_attachment_key" property="shipAttachmentKey"/>
+        <result column="ship_time" property="shipTime"/>
+        <result column="receive_time" property="receiveTime"/>
+        <result column="receive_qty" property="receiveQty"/>
+        <result column="receive_diff_remark" property="receiveDiffRemark"/>
+        <result column="receive_attachment_key" property="receiveAttachmentKey"/>
+        <result column="accept_result" property="acceptResult"/>
+        <result column="accept_time" property="acceptTime"/>
+        <result column="accept_remark" property="acceptRemark"/>
+        <result column="defective_qty" property="defectiveQty"/>
+        <result column="reship_from" property="reshipFrom"/>
+        <result column="return_reason" property="returnReason"/>
+        <result column="confirmed_delivery_date" property="confirmedDeliveryDate"/>
+        <result column="penalty_days" property="penaltyDays"/>
+        <result column="penalty_amount" property="penaltyAmount"/>
+        <result column="penalty_calculated_at" property="penaltyCalculatedAt"/>
+        <result column="return_attachment_key" property="returnAttachmentKey"/>
+        <result column="return_ship_company" property="returnShipCompany"/>
+        <result column="return_ship_tracking_no" property="returnShipTrackingNo"/>
+        <result column="create_by" property="createBy"/>
+        <result column="update_by" property="updateBy"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+        <result column="is_deleted" property="isDeleted"/>
+    </resultMap>
+
+    <resultMap id="TraceResultMap" type="cn.greensmartplanet.gsc.delivery.entity.DeliveryTrace">
+        <id column="id" property="id"/>
+        <result column="delivery_id" property="deliveryId"/>
+        <result column="action" property="action"/>
+        <result column="action_desc" property="actionDesc"/>
+        <result column="operator_tenant_id" property="operatorTenantId"/>
+        <result column="operator_user_id" property="operatorUserId"/>
+        <result column="remark" property="remark"/>
+        <result column="create_time" property="createTime"/>
+    </resultMap>
+
+    <!-- 采购方分页查交付单 -->
+    <select id="selectByBuyer" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/> FROM delivery
+        WHERE buyer_tenant_id = #{tenantId} AND is_deleted = 0
+        <if test="statuses != null and statuses.size() > 0">
+            AND status IN
+            <foreach collection="statuses" item="s" open="(" separator="," close=")">#{s}</foreach>
+        </if>
+        <if test="keyword != null and keyword != ''">
+            AND (delivery_no LIKE CONCAT('%', #{keyword}, '%')
+                 OR ship_tracking_no LIKE CONCAT('%', #{keyword}, '%'))
+        </if>
+        ORDER BY create_time DESC
+        LIMIT #{offset}, #{limit}
+    </select>
+
+    <select id="countByBuyer" resultType="long">
+        SELECT COUNT(*) FROM delivery
+        WHERE buyer_tenant_id = #{tenantId} AND is_deleted = 0
+        <if test="statuses != null and statuses.size() > 0">
+            AND status IN
+            <foreach collection="statuses" item="s" open="(" separator="," close=")">#{s}</foreach>
+        </if>
+        <if test="keyword != null and keyword != ''">
+            AND (delivery_no LIKE CONCAT('%', #{keyword}, '%')
+                 OR ship_tracking_no LIKE CONCAT('%', #{keyword}, '%'))
+        </if>
+    </select>
+
+    <!-- 供应方分页查交付单 -->
+    <select id="selectBySupplier" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/> FROM delivery
+        WHERE supplier_tenant_id = #{tenantId} AND is_deleted = 0
+        <if test="statuses != null and statuses.size() > 0">
+            AND status IN
+            <foreach collection="statuses" item="s" open="(" separator="," close=")">#{s}</foreach>
+        </if>
+        <if test="keyword != null and keyword != ''">
+            AND (delivery_no LIKE CONCAT('%', #{keyword}, '%')
+                 OR ship_tracking_no LIKE CONCAT('%', #{keyword}, '%'))
+        </if>
+        ORDER BY create_time DESC
+        LIMIT #{offset}, #{limit}
+    </select>
+
+    <select id="countBySupplier" resultType="long">
+        SELECT COUNT(*) FROM delivery
+        WHERE supplier_tenant_id = #{tenantId} AND is_deleted = 0
+        <if test="statuses != null and statuses.size() > 0">
+            AND status IN
+            <foreach collection="statuses" item="s" open="(" separator="," close=")">#{s}</foreach>
+        </if>
+        <if test="keyword != null and keyword != ''">
+            AND (delivery_no LIKE CONCAT('%', #{keyword}, '%')
+                 OR ship_tracking_no LIKE CONCAT('%', #{keyword}, '%'))
+        </if>
+    </select>
+
+    <!-- 按ID查单条 -->
+    <select id="selectById" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/> FROM delivery WHERE id = #{id} AND is_deleted = 0
+    </select>
+
+    <!-- 插入交付单 -->
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO delivery (
+            delivery_no, contract_id, inquiry_id, batch_no,
+            buyer_tenant_id, supplier_tenant_id,
+            quantity, amount, currency,
+            delivery_terms, delivery_place, delivery_date,
+            status, ship_company, ship_tracking_no, ship_qty, ship_date,
+            ship_attachment_key, ship_time, create_by, reship_from
+        ) VALUES (
+            #{deliveryNo}, #{contractId}, #{inquiryId}, #{batchNo},
+            #{buyerTenantId}, #{supplierTenantId},
+            #{quantity}, #{amount}, #{currency},
+            #{deliveryTerms}, #{deliveryPlace}, #{deliveryDate},
+            #{status}, #{shipCompany}, #{shipTrackingNo}, #{shipQty}, #{shipDate},
+            #{shipAttachmentKey}, #{shipTime}, #{createBy}, #{reshipFrom}
+        )
+    </insert>
+
+    <!-- 供应商发货：pending_shipment/returned → shipped，填物流/数量/凭证，清退回收货痕迹 -->
+    <update id="ship">
+        UPDATE delivery
+        SET status = 'shipped',
+            ship_company = #{shipCompany},
+            ship_tracking_no = #{shipTrackingNo},
+            ship_qty = #{shipQty},
+            ship_date = #{shipDate},
+            ship_attachment_key = #{shipAttachmentKey},
+            ship_time = NOW(),
+            receive_time = NULL,
+            receive_qty = NULL,
+            receive_diff_remark = NULL,
+            receive_attachment_key = NULL,
+            accept_result = NULL,
+            accept_remark = NULL,
+            return_reason = NULL,
+            return_attachment_key = NULL,
+            update_by = #{updateBy}
+        WHERE id = #{id} AND supplier_tenant_id = #{tenantId}
+          AND status IN ('pending_shipment', 'returned', 'reship_pending') AND is_deleted = 0
+    </update>
+
+    <!-- 采购商收货：shipped → received -->
+    <update id="receive">
+        UPDATE delivery
+        SET status = 'received',
+            receive_time = NOW(),
+            receive_qty = #{receiveQty},
+            receive_diff_remark = #{receiveDiffRemark},
+            receive_attachment_key = #{receiveAttachmentKey},
+            update_by = #{updateBy}
+        WHERE id = #{id} AND buyer_tenant_id = #{tenantId}
+          AND status = 'shipped' AND is_deleted = 0
+    </update>
+
+    <!-- 采购商验收合格：received → accepted -->
+    <update id="accept">
+        UPDATE delivery
+        SET status = 'accepted', accept_result = 'accepted',
+            accept_time = NOW(), accept_remark = #{acceptRemark}, update_by = #{updateBy}
+        WHERE id = #{id} AND buyer_tenant_id = #{tenantId}
+          AND status = 'received' AND is_deleted = 0
+    </update>
+
+    <!-- 采购商验收不合格：received → return_pending，填原因+凭证 -->
+    <update id="rejectDelivery">
+        UPDATE delivery
+        SET status = 'return_pending', accept_result = 'returned',
+            accept_time = NOW(), return_reason = #{returnReason},
+            return_attachment_key = #{returnAttachmentKey},
+            update_by = #{updateBy}
+        WHERE id = #{id} AND buyer_tenant_id = #{tenantId}
+          AND status = 'received' AND is_deleted = 0
+    </update>
+
+    <!-- 采购商部分残次：received → accepted(partial)，记录残次数量，仅普通批可发起 -->
+    <update id="partialReject">
+        UPDATE delivery
+        SET status = 'accepted', accept_result = 'partial',
+            accept_time = NOW(), defective_qty = #{defectiveQty},
+            return_reason = #{returnReason},
+            return_attachment_key = #{returnAttachmentKey},
+            update_by = #{updateBy}
+        WHERE id = #{id} AND buyer_tenant_id = #{tenantId}
+          AND status = 'received' AND reship_from IS NULL AND is_deleted = 0
+    </update>
+
+    <!-- 供应商确认退回：return_pending → return_confirmed -->
+    <update id="confirmReturn">
+        UPDATE delivery
+        SET status = 'return_confirmed', update_by = #{updateBy}
+        WHERE id = #{id} AND supplier_tenant_id = #{tenantId}
+          AND status = 'return_pending' AND is_deleted = 0
+    </update>
+
+    <!-- 供应商异议：return_pending → received，清空退回痕迹 -->
+    <update id="disputeReturn">
+        UPDATE delivery
+        SET status = 'received', accept_result = NULL,
+            return_reason = NULL, return_attachment_key = NULL,
+            return_ship_company = NULL, return_ship_tracking_no = NULL,
+            update_by = #{updateBy}
+        WHERE id = #{id} AND supplier_tenant_id = #{tenantId}
+          AND status = 'return_pending' AND is_deleted = 0
+    </update>
+
+    <!-- 采购商填写退货物流：return_confirmed → return_shipping -->
+    <update id="fillReturnLogistics">
+        UPDATE delivery
+        SET status = 'return_shipping',
+            return_ship_company = #{returnShipCompany},
+            return_ship_tracking_no = #{returnShipTrackingNo},
+            update_by = #{updateBy}
+        WHERE id = #{id} AND buyer_tenant_id = #{tenantId}
+          AND status = 'return_confirmed' AND is_deleted = 0
+    </update>
+
+    <!-- 供应商确认收到退货：return_shipping → returned -->
+    <update id="confirmReturnReceipt">
+        UPDATE delivery
+        SET status = 'returned', update_by = #{updateBy}
+        WHERE id = #{id} AND supplier_tenant_id = #{tenantId}
+          AND status = 'return_shipping' AND is_deleted = 0
+    </update>
+
+    <!-- 供应商更正运单：仅 shipped，保留原发货时间 -->
+    <update id="correctTracking">
+        UPDATE delivery
+        SET ship_company = #{shipCompany},
+            ship_tracking_no = #{shipTrackingNo},
+            update_by = #{updateBy}
+        WHERE id = #{id} AND supplier_tenant_id = #{tenantId}
+          AND status = 'shipped' AND is_deleted = 0
+    </update>
+
+    <!-- 按合同统计交付单数（幂等） -->
+    <select id="countByContract" resultType="int">
+        SELECT COUNT(*) FROM delivery WHERE contract_id = #{contractId} AND is_deleted = 0
+    </select>
+
+    <!-- 按合同统计进行中（非 accepted）交付单数 -->
+    <select id="countActiveByContract" resultType="int">
+        SELECT COUNT(*) FROM delivery
+        WHERE contract_id = #{contractId} AND status != 'accepted' AND is_deleted = 0
+    </select>
+
+    <select id="countTotalByContract" resultType="long">
+        SELECT COUNT(*) FROM delivery WHERE contract_id = #{contractId} AND is_deleted = 0
+    </select>
+
+    <select id="countAcceptedByContract" resultType="long">
+        SELECT COUNT(*) FROM delivery
+        WHERE contract_id = #{contractId} AND status = 'accepted' AND is_deleted = 0
+    </select>
+
+    <!-- 按合同查已有交付单的批次号集合（未发货分批计划判定：service 层与交易域分批计划对比） -->
+    <select id="selectBatchNosByContract" resultType="int">
+        SELECT DISTINCT batch_no FROM delivery
+        WHERE contract_id = #{contractId} AND is_deleted = 0
+    </select>
+
+    <!-- 按合同取当前最大批次号（拆批时据此生成下一批），无记录返回 0 -->
+    <select id="selectMaxBatchNo" resultType="int">
+        SELECT COALESCE(MAX(batch_no), 0) FROM delivery
+        WHERE contract_id = #{contractId} AND is_deleted = 0
+    </select>
+
+    <!-- 按合同汇总累计已发数量，排除当前批（当前批本次发货量由调用方单独累加） -->
+    <select id="sumShippedQtyByContract" resultType="int">
+        SELECT COALESCE(SUM(ship_qty), 0) FROM delivery
+        WHERE contract_id = #{contractId} AND id != #{excludeId}
+          AND reship_from IS NULL AND ship_qty IS NOT NULL AND is_deleted = 0
+    </select>
+
+    <!-- 按合同汇总已建各批次的应发数量（手动建单时算剩余可分配量，补发批不计入） -->
+    <select id="sumQuantityByContract" resultType="int">
+        SELECT COALESCE(SUM(quantity), 0) FROM delivery
+        WHERE contract_id = #{contractId} AND reship_from IS NULL AND is_deleted = 0
+    </select>
+
+    <!-- 按合同汇总已建各批次金额（收尾批用减法兜底，补发批金额为 NULL 且被排除） -->
+    <select id="sumAmountByContract" resultType="java.math.BigDecimal">
+        SELECT COALESCE(SUM(amount), 0) FROM delivery
+        WHERE contract_id = #{contractId} AND reship_from IS NULL AND is_deleted = 0
+    </select>
+
+    <!--
+      按合同ID批量查交付单（发货排期 Java 组装用）。
+      原 selectShipmentPlan UNION JOIN 交易域 contract/contract_batch_plan，改造后本查询只取本域交付单
+      （含补发批 reship_from 非空行），合同/分批计划信息由 trade Feign 契约提供，在 service 层组装。
+    -->
+    <select id="selectByContractIds" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM delivery
+        WHERE contract_id IN
+        <foreach collection="contractIds" item="cid" open="(" close=")" separator=",">
+            #{cid}
+        </foreach>
+          AND is_deleted = 0
+        ORDER BY contract_id ASC, batch_no ASC
+    </select>
+
+    <!--
+      按合同ID批量查本域分配量聚合（可建交付单合同判定用）。
+      原 selectCreatableContracts JOIN 交易域 contract 表，改造后合同信息走 Feign（trade.listSignedBySupplier），
+      本查询只对 delivery 表按合同分组：已分配量（排除补发批）+ 待发货批次最大可让出量。
+    -->
+    <select id="selectAllocationStatsByContractIds" resultType="cn.greensmartplanet.gsc.delivery.projection.ContractAllocationRow">
+        SELECT contract_id           AS contractId,
+               COALESCE(SUM(CASE WHEN reship_from IS NULL THEN quantity END), 0) AS allocatedQty,
+               COALESCE(MAX(CASE WHEN status = 'pending_shipment' AND reship_from IS NULL THEN quantity END), 0) AS maxPendingQty
+        FROM delivery
+        WHERE contract_id IN
+        <foreach collection="contractIds" item="cid" open="(" close=")" separator=",">
+            #{cid}
+        </foreach>
+          AND is_deleted = 0
+        GROUP BY contract_id
+    </select>
+
+    <!-- 取拆分源：待发货批次中数量最大的一个，让可让出的额度最大 -->
+    <select id="selectLargestPendingByContract" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/> FROM delivery
+        WHERE contract_id = #{contractId}
+          AND status = 'pending_shipment'
+          AND is_deleted = 0
+        ORDER BY quantity DESC, batch_no DESC
+        LIMIT 1
+    </select>
+
+    <!-- 拆批时收窄本批数量与金额，剩余部分转入新批次 -->
+    <update id="shrinkBatch">
+        UPDATE delivery
+        SET quantity = #{quantity}, amount = #{amount}, update_by = #{updateBy}
+        WHERE id = #{id} AND is_deleted = 0
+    </update>
+
+    <!-- 逻辑删除批次，数量随之退回合同未分配额度 -->
+    <update id="deleteById">
+        UPDATE delivery
+        SET is_deleted = 1, update_by = #{updateBy}
+        WHERE id = #{id} AND is_deleted = 0
+    </update>
+
+    <!-- 插入履约时间线 -->
+    <insert id="insertTrace">
+        INSERT INTO delivery_trace (delivery_id, action, action_desc, operator_tenant_id, operator_user_id, remark)
+        VALUES (#{deliveryId}, #{action}, #{actionDesc}, #{operatorTenantId}, #{operatorUserId}, #{remark})
+    </insert>
+
+    <!-- 查交付单时间线（时间正序） -->
+    <select id="selectTraceByDeliveryId" resultMap="TraceResultMap">
+        SELECT <include refid="Trace_Column_List"/> FROM delivery_trace WHERE delivery_id = #{deliveryId} ORDER BY id ASC
+    </select>
+
+    <select id="countByContractAndBatchNo" resultType="int">
+        SELECT COUNT(*) FROM delivery
+        WHERE contract_id = #{contractId} AND batch_no = #{batchNo}
+          AND is_deleted = 0
+    </select>
+
+    <!-- 供应商履约统计：样本=已验收普通批（补发批 reship_from 非空排除），用于履约画像回写。
+         准时判断以考核基准为准：已确认承诺交期优先，无则回退合同交期 -->
+    <select id="selectPerformanceStat" resultType="cn.greensmartplanet.gsc.delivery.projection.PerformanceStatRow">
+        SELECT
+            COUNT(*) AS sample_size,
+            COALESCE(SUM(CASE WHEN accept_result IN ('accepted','partial') THEN 1 ELSE 0 END), 0) AS pass_count,
+            COALESCE(SUM(CASE WHEN accept_result = 'returned' THEN 1 ELSE 0 END), 0) AS return_count,
+            COALESCE(SUM(CASE WHEN ship_date &lt;= COALESCE(confirmed_delivery_date, delivery_date) THEN 1 ELSE 0 END), 0) AS on_time_count
+        FROM delivery
+        WHERE supplier_tenant_id = #{tenantId}
+          AND reship_from IS NULL
+          AND accept_result IS NOT NULL
+          AND is_deleted = 0
+    </select>
+
+    <!-- 交期延误预警候选：未闭环 + 考核基准（承诺优先）临期/超期 + 未预警过（无 delay_warning 时间线） -->
+    <select id="selectDelayWarningCandidates" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/> FROM delivery d
+        WHERE d.status IN ('pending_shipment','shipped','received','reship_pending')
+          AND COALESCE(d.confirmed_delivery_date, d.delivery_date) &lt;= #{deadline}
+          AND d.is_deleted = 0
+          AND NOT EXISTS (
+              SELECT 1 FROM delivery_trace t
+              WHERE t.delivery_id = d.id AND t.action = 'delay_warning'
+          )
+    </select>
+
+    <!-- 确认承诺交期写回（考核基准：OTD/预警/风险扫描 COALESCE 回退合同交期） -->
+    <update id="updateConfirmedDeliveryDate">
+        UPDATE delivery
+        SET confirmed_delivery_date = #{confirmedDeliveryDate}, update_by = #{updateBy}
+        WHERE id = #{id} AND is_deleted = 0
+    </update>
+
+    <!-- 违约金计算落库（验收时计算一次快照） -->
+    <update id="updatePenalty">
+        UPDATE delivery
+        SET penalty_days = #{penaltyDays},
+            penalty_amount = #{penaltyAmount},
+            penalty_calculated_at = NOW()
+        WHERE id = #{id} AND is_deleted = 0
+    </update>
+</mapper>

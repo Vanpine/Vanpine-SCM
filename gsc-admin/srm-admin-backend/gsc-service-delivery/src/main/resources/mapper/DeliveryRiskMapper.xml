@@ -1,0 +1,281 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.greensmartplanet.gsc.delivery.mapper.DeliveryRiskMapper">
+
+    <!-- DeliveryRisk 全字段（查询统一复用，禁止 SELECT *；${p} 为别名前缀参数，无别名传 value=""） -->
+    <sql id="Base_Column_List">
+        ${p}id, ${p}delivery_id, ${p}contract_id, ${p}risk_type, ${p}risk_level, ${p}risk_status,
+        ${p}estimated_arrival_time, ${p}promised_delivery_date, ${p}production_need_date,
+        ${p}impact_qty, ${p}impact_amount, ${p}risk_score, ${p}evidence,
+        ${p}first_detected_time, ${p}due_time, ${p}owner_user_id,
+        ${p}create_time, ${p}update_time, ${p}is_deleted
+    </sql>
+
+    <resultMap id="BaseResultMap" type="cn.greensmartplanet.gsc.delivery.entity.DeliveryRisk">
+        <id column="id" property="id"/>
+        <result column="delivery_id" property="deliveryId"/>
+        <result column="contract_id" property="contractId"/>
+        <result column="risk_type" property="riskType"/>
+        <result column="risk_level" property="riskLevel"/>
+        <result column="risk_status" property="riskStatus"/>
+        <result column="estimated_arrival_time" property="estimatedArrivalTime"/>
+        <result column="promised_delivery_date" property="promisedDeliveryDate"/>
+        <result column="production_need_date" property="productionNeedDate"/>
+        <result column="impact_qty" property="impactQty"/>
+        <result column="impact_amount" property="impactAmount"/>
+        <result column="risk_score" property="riskScore"/>
+        <result column="evidence" property="evidence"/>
+        <result column="first_detected_time" property="firstDetectedTime"/>
+        <result column="due_time" property="dueTime"/>
+        <result column="owner_user_id" property="ownerUserId"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+        <result column="is_deleted" property="isDeleted"/>
+    </resultMap>
+
+    <!-- 插入风险（create_time/update_time/is_deleted 走 DB 默认值） -->
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO delivery_risk (delivery_id, contract_id, risk_type, risk_level, risk_status,
+                                   estimated_arrival_time, promised_delivery_date, production_need_date,
+                                   impact_qty, impact_amount, risk_score, evidence,
+                                   first_detected_time, due_time, owner_user_id)
+        VALUES (#{deliveryId}, #{contractId}, #{riskType}, #{riskLevel}, #{riskStatus},
+                #{estimatedArrivalTime}, #{promisedDeliveryDate}, #{productionNeedDate},
+                #{impactQty}, #{impactAmount}, #{riskScore}, #{evidence},
+                #{firstDetectedTime}, #{dueTime}, #{ownerUserId})
+    </insert>
+
+    <!-- 按ID查单条 -->
+    <select id="selectById" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"><property name="p" value=""/></include>
+        FROM delivery_risk
+        WHERE id = #{id}
+          AND is_deleted = 0
+    </select>
+
+    <!-- 按交付单查未关闭风险（定时扫描去重） -->
+    <select id="selectActiveByDelivery" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"><property name="p" value=""/></include>
+        FROM delivery_risk
+        WHERE delivery_id = #{deliveryId}
+          AND risk_status NOT IN ('closed')
+          AND is_deleted = 0
+    </select>
+
+    <!-- 采购方视角分页查风险 -->
+    <select id="selectByBuyer" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"><property name="p" value="r."/></include> FROM delivery_risk r
+        JOIN delivery d ON d.id = r.delivery_id
+        WHERE d.buyer_tenant_id = #{tenantId} AND r.is_deleted = 0
+        <if test="riskStatus != null and riskStatus != ''">
+            AND r.risk_status = #{riskStatus}
+        </if>
+        <if test="riskLevel != null and riskLevel != ''">
+            AND r.risk_level = #{riskLevel}
+        </if>
+        ORDER BY r.create_time DESC
+        LIMIT #{offset}, #{limit}
+    </select>
+
+    <select id="countByBuyer" resultType="long">
+        SELECT COUNT(*) FROM delivery_risk r
+        JOIN delivery d ON d.id = r.delivery_id
+        WHERE d.buyer_tenant_id = #{tenantId} AND r.is_deleted = 0
+        <if test="riskStatus != null and riskStatus != ''">
+            AND r.risk_status = #{riskStatus}
+        </if>
+        <if test="riskLevel != null and riskLevel != ''">
+            AND r.risk_level = #{riskLevel}
+        </if>
+    </select>
+
+    <!-- 供应方视角分页查风险 -->
+    <select id="selectBySupplier" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"><property name="p" value="r."/></include> FROM delivery_risk r
+        JOIN delivery d ON d.id = r.delivery_id
+        WHERE d.supplier_tenant_id = #{tenantId} AND r.is_deleted = 0
+        <if test="riskStatus != null and riskStatus != ''">
+            AND r.risk_status = #{riskStatus}
+        </if>
+        <if test="riskLevel != null and riskLevel != ''">
+            AND r.risk_level = #{riskLevel}
+        </if>
+        ORDER BY r.create_time DESC
+        LIMIT #{offset}, #{limit}
+    </select>
+
+    <select id="countBySupplier" resultType="long">
+        SELECT COUNT(*) FROM delivery_risk r
+        JOIN delivery d ON d.id = r.delivery_id
+        WHERE d.supplier_tenant_id = #{tenantId} AND r.is_deleted = 0
+        <if test="riskStatus != null and riskStatus != ''">
+            AND r.risk_status = #{riskStatus}
+        </if>
+        <if test="riskLevel != null and riskLevel != ''">
+            AND r.risk_level = #{riskLevel}
+        </if>
+    </select>
+
+    <!-- 更新风险等级/状态/ETA/证据/截止时间 -->
+    <update id="updateRiskState">
+        UPDATE delivery_risk
+        SET risk_level             = #{riskLevel},
+            risk_status            = #{riskStatus},
+            estimated_arrival_time = #{estimatedArrivalTime},
+            evidence               = #{evidence},
+            due_time               = #{dueTime}
+        WHERE id = #{id}
+          AND is_deleted = 0
+    </update>
+
+    <!-- 关闭风险 -->
+    <update id="close">
+        UPDATE delivery_risk
+        SET risk_status = #{riskStatus}
+        WHERE id = #{id}
+          AND is_deleted = 0
+    </update>
+
+    <!-- 按交付单查主表行（含 closed/mitigated，一单最多一行） -->
+    <select id="selectByDeliveryId" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"><property name="p" value=""/></include>
+        FROM delivery_risk
+        WHERE delivery_id = #{deliveryId}
+          AND is_deleted = 0 LIMIT 1
+    </select>
+
+    <!-- 更新风险当前快照（扫描就地更新/复用重启） -->
+    <update id="updateCurrent">
+        UPDATE delivery_risk
+        SET risk_type              = #{riskType},
+            risk_level             = #{riskLevel},
+            risk_status            = #{riskStatus},
+            estimated_arrival_time = #{estimatedArrivalTime},
+            evidence               = #{evidence},
+            risk_score             = #{riskScore},
+            first_detected_time    = #{firstDetectedTime}
+        WHERE id = #{id}
+          AND is_deleted = 0
+    </update>
+
+    <!-- 风险扫描候选：未闭环交付单ID（本域查询，不再 JOIN 交易域 contract；signed 过滤由 service 层 Feign 批量判断） -->
+    <select id="selectScanCandidates" resultType="long">
+        SELECT d.id
+        FROM delivery d
+        WHERE d.is_deleted = 0
+          AND d.status IN ('pending_shipment', 'shipped', 'received', 'reship_pending')
+    </select>
+
+    <!-- 驾驶舱聚合结果映射：一行一交付单，风险类型用 GROUP_CONCAT 收集 -->
+    <resultMap id="DashboardVOMap" type="cn.greensmartplanet.gsc.delivery.vo.DeliveryRiskDashboardVO">
+        <result column="id" property="id"/>
+        <result column="delivery_id" property="deliveryId"/>
+        <result column="delivery_no" property="deliveryNo"/>
+        <result column="contract_id" property="contractId"/>
+        <result column="contract_title" property="contractTitle"/>
+        <result column="risk_level" property="riskLevel"/>
+        <result column="risk_status" property="riskStatus"/>
+        <result column="risk_score" property="riskScore"/>
+        <result column="estimated_arrival_time" property="estimatedArrivalTime"/>
+        <result column="promised_delivery_date" property="promisedDeliveryDate"/>
+        <result column="risk_count" property="riskCount"/>
+        <result column="risk_types_raw" property="riskTypesRaw"/>
+    </resultMap>
+
+    <!-- 驾驶舱聚合 SQL（采购/供应共用片段）：活跃风险按交付单聚合，等级取最高、分取最高、状态取最严重、类型收集 -->
+    <sql id="dashboardAggSelect">
+        SELECT
+            CAST(SUBSTRING_INDEX(GROUP_CONCAT(r.id ORDER BY
+                CASE r.risk_level WHEN 'high' THEN 0 WHEN 'medium' THEN 1 ELSE 2 END, r.risk_score DESC), ',', 1) AS UNSIGNED) AS id,
+            r.delivery_id,
+            d.delivery_no,
+            r.contract_id,
+            c.title AS contract_title,
+            CASE WHEN SUM(r.risk_level = 'high') > 0 THEN 'high'
+                 WHEN SUM(r.risk_level = 'medium') > 0 THEN 'medium'
+                 ELSE 'low' END AS risk_level,
+            CASE WHEN SUM(r.risk_status = 'high') > 0 THEN 'high'
+                 WHEN SUM(r.risk_status = 'disposing') > 0 THEN 'disposing'
+                 WHEN SUM(r.risk_status = 'warned') > 0 THEN 'warned'
+                 ELSE 'active' END AS risk_status,
+            MAX(r.risk_score) AS risk_score,
+            MAX(r.estimated_arrival_time) AS estimated_arrival_time,
+            MAX(r.promised_delivery_date) AS promised_delivery_date,
+            COUNT(*) AS risk_count,
+            GROUP_CONCAT(DISTINCT r.risk_type ORDER BY r.risk_type SEPARATOR ',') AS risk_types_raw
+        FROM delivery_risk r
+        JOIN delivery d ON d.id = r.delivery_id AND d.is_deleted = 0
+        JOIN contract c ON c.id = r.contract_id AND c.is_deleted = 0
+        WHERE r.is_deleted = 0
+          AND r.risk_status IN ('active', 'warned', 'high', 'disposing')
+    </sql>
+
+    <!-- 驾驶舱聚合：采购方视角 -->
+    <select id="selectDashboardByBuyer" resultMap="DashboardVOMap">
+        <include refid="dashboardAggSelect"/>
+          AND d.buyer_tenant_id = #{tenantId}
+        <if test="riskStatus != null and riskStatus != ''">
+          AND r.risk_status = #{riskStatus}
+        </if>
+        <if test="riskLevel != null and riskLevel != ''">
+          AND r.risk_level = #{riskLevel}
+        </if>
+        GROUP BY r.delivery_id, d.delivery_no, r.contract_id, c.title
+        ORDER BY risk_score DESC
+        LIMIT #{offset}, #{limit}
+    </select>
+
+    <select id="countDashboardByBuyer" resultType="long">
+        SELECT COUNT(*) FROM (
+            <include refid="dashboardAggSelect"/>
+              AND d.buyer_tenant_id = #{tenantId}
+            <if test="riskStatus != null and riskStatus != ''">
+              AND r.risk_status = #{riskStatus}
+            </if>
+            <if test="riskLevel != null and riskLevel != ''">
+              AND r.risk_level = #{riskLevel}
+            </if>
+            GROUP BY r.delivery_id, d.delivery_no, r.contract_id, c.title
+        ) t
+    </select>
+
+    <!-- 驾驶舱聚合：供应方视角 -->
+    <select id="selectDashboardBySupplier" resultMap="DashboardVOMap">
+        <include refid="dashboardAggSelect"/>
+          AND d.supplier_tenant_id = #{tenantId}
+        <if test="riskStatus != null and riskStatus != ''">
+          AND r.risk_status = #{riskStatus}
+        </if>
+        <if test="riskLevel != null and riskLevel != ''">
+          AND r.risk_level = #{riskLevel}
+        </if>
+        GROUP BY r.delivery_id, d.delivery_no, r.contract_id, c.title
+        ORDER BY risk_score DESC
+        LIMIT #{offset}, #{limit}
+    </select>
+
+    <select id="countDashboardBySupplier" resultType="long">
+        SELECT COUNT(*) FROM (
+            <include refid="dashboardAggSelect"/>
+              AND d.supplier_tenant_id = #{tenantId}
+            <if test="riskStatus != null and riskStatus != ''">
+              AND r.risk_status = #{riskStatus}
+            </if>
+            <if test="riskLevel != null and riskLevel != ''">
+              AND r.risk_level = #{riskLevel}
+            </if>
+            GROUP BY r.delivery_id, d.delivery_no, r.contract_id, c.title
+        ) t
+    </select>
+
+    <!-- 类型切换收口：当前风险类型变化时，同交付单其他类型的未关闭风险自动缓解 -->
+    <update id="mitigateOtherTypes">
+        UPDATE delivery_risk
+        SET risk_status = #{riskStatus}
+        WHERE delivery_id = #{deliveryId}
+          AND risk_type != #{currentType}
+          AND risk_status NOT IN ('closed', 'mitigated')
+          AND is_deleted = 0
+    </update>
+</mapper>

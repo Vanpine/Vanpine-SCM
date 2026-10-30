@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.greensmartplanet.gsc.ai.mapper.AiDocParentChunkMapper">
+
+    <!-- 按 parent_key 批量取父块（检索回填，租户隔离） -->
+    <select id="selectByKeys"
+            resultType="cn.greensmartplanet.gsc.ai.entity.AiDocParentChunk">
+        SELECT id,
+               tenant_id,
+               document_id,
+               parent_key,
+               content,
+               heading_path,
+               token_count,
+               create_time,
+               update_time,
+               is_deleted
+        FROM ai_doc_parent_chunks
+        WHERE tenant_id = #{tenantId}
+          AND is_deleted = 0
+          AND parent_key IN
+        <foreach collection="keys" item="k" open="(" separator="," close=")">
+            #{k}
+        </foreach>
+    </select>
+
+    <!-- 按文档ID逻辑删除全部父块 -->
+    <update id="deleteByDocument">
+        UPDATE ai_doc_parent_chunks
+        SET is_deleted  = 1,
+            update_time = NOW()
+        WHERE document_id = #{documentId}
+          AND tenant_id = #{tenantId}
+          AND is_deleted = 0
+    </update>
+
+</mapper>

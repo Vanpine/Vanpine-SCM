@@ -1,0 +1,243 @@
+server:
+  port: 18080
+
+spring:
+  output:
+    ansi:
+      enabled: always
+  application:
+    name: gsc-gateway
+  # Nacos 配置导入：网关与业务服务保持同一套共享配置，避免 Zipkin/CORS/JWT 配置漂移
+  config:
+    import:
+      - optional:nacos:gsc-shared.yaml
+      - optional:nacos:gsc-gateway.yaml
+  cloud:
+    nacos:
+      discovery:
+        server-addr: ${NACOS_ADDR}
+        username: ${NACOS_USERNAME}
+        password: ${NACOS_PASSWORD}
+        namespace: ${NACOS_NAMESPACE}
+      config:
+        server-addr: ${NACOS_ADDR}
+        username: ${NACOS_USERNAME}
+        password: ${NACOS_PASSWORD}
+        namespace: ${NACOS_NAMESPACE}
+        file-extension: yaml
+    gateway:
+      # 全局 CORS：放在网关统一处理跨域，后面不再让业务服务重复配
+      globalcors:
+        cors-configurations:
+          '[/**]':
+            allowed-origins: "${GSC_CORS_ALLOWED_ORIGINS}"
+            allowed-methods: GET,POST,PUT,DELETE,OPTIONS
+            allowed-headers: Authorization,Content-Type,X-Requested-With,X-Tenant-Id,X-Tenant-Code
+            allow-credentials: true
+            max-age: 3600
+      # 网关统一返回 CORS 响应头；转发前删除 Origin，避免下游业务服务再追加一次 CORS 头
+      default-filters:
+        - RemoveRequestHeader=Origin
+      # 下游转发 HTTP 客户端：主动回收空闲连接 + 超时，避免复用被后端关闭的连接导致 Connection reset
+      httpclient:
+        pool:
+          max-idle-time: 15000ms       # 15s 空闲回收（< 后端 Tomcat 60s keepAliveTimeout）
+          evict-in-background: 5000ms  # 每 5s 后台检查一轮
+          max-life-time: 30000ms
+        connect-timeout: 3000            # 单位 ms（Integer），3s
+        response-timeout: 10s
+      routes:
+        # 路由命中顺序：
+        # 1. 先按 Path 匹配请求路径
+        # 2. 再把 lb://服务名 交给 Nacos 找实例
+        # 3. 最后由网关做负载均衡转发到某个具体实例
+
+        # 平台域：认证 / 入驻 / 后台管理
+        - id: platform-auth
+          uri: lb://gsc-service-platform
+          predicates:
+            # /api/auth/** -> gsc-service-platform
+            - Path=/api/auth/**
+        - id: platform-passport
+          uri: lb://gsc-service-platform
+          predicates:
+            # /api/passport/** -> gsc-service-platform
+            - Path=/api/passport/**
+        - id: platform-public-applications
+          uri: lb://gsc-service-platform
+          predicates:
+            # /api/applications -> gsc-service-platform
+            - Path=/api/applications
+        - id: platform-public-payment
+          uri: lb://gsc-service-platform
+          predicates:
+            # 支付中台回调，不走登录
+            - Path=/api/pub/payment/**
+        - id: platform-users
+          uri: lb://gsc-service-platform
+          predicates:
+            # /api/admin/users/** -> gsc-service-platform
+            - Path=/api/admin/users/**
+        - id: platform-roles
+          uri: lb://gsc-service-platform
+          predicates:
+            # /api/admin/roles/**、/api/admin/permissions、/api/admin/menus -> gsc-service-platform
+            - Path=/api/admin/roles/**,/api/admin/permissions,/api/admin/menus
+        - id: platform-menu-manage
+          uri: lb://gsc-service-platform
+          predicates:
+            # /api/admin/menu-manage/** -> gsc-service-platform
+            - Path=/api/admin/menu-manage/**
+        - id: platform-tenants
+          uri: lb://gsc-service-platform
+          predicates:
+            # /api/admin/tenants/** -> gsc-service-platform
+            - Path=/api/admin/tenants/**
+        # 尽调端点按归属精确路由（顺序敏感：必须先于通用 applications 路由匹配）
+        # 平台域：支付/事务所流程（与申请状态、用户角色强耦合）
+        - id: platform-dd-packages
+          uri: lb://gsc-service-platform
+          predicates:
+            - Path=/api/admin/dd-packages
+        - id: platform-dd-pay
+          uri: lb://gsc-service-platform
+          predicates:
+            - Path=/api/admin/applications/*/pay,/api/admin/applications/*/pay-status
+        - id: platform-dd-confirm
+          uri: lb://gsc-service-platform
+          predicates:
+            - Path=/api/admin/applications/*/confirm-dd
+        - id: platform-dd-assign-firm
+          uri: lb://gsc-service-platform
+          predicates:
+            - Path=/api/admin/applications/*/assign-firm
+        - id: platform-dd-firm
+          uri: lb://gsc-service-platform
+          predicates:
+            - Path=/api/admin/firm/**
+        - id: platform-dd-firms-search
+          uri: lb://gsc-service-platform
+          predicates:
+            - Path=/api/admin/firms/search
+        # 供应商域：尽调记录查/改/报告（due_diligence/dd_checklist 自表）
+        - id: supplier-dd-info
+          uri: lb://gsc-service-supplier
+          predicates:
+            - Path=/api/admin/applications/*/dd-info,/api/admin/applications/*/dd-detail,/api/admin/applications/*/generate-report
+        - id: platform-applications
+          uri: lb://gsc-service-platform
+          predicates:
+            # /api/admin/applications/** -> gsc-service-platform
+            - Path=/api/admin/applications/**
+        - id: platform-sanction
+          uri: lb://gsc-service-platform
+          predicates:
+            # /api/admin/sanction/** -> gsc-service-platform（制裁名单库 + 筛查）
+            - Path=/api/admin/sanction/**
+        - id: platform-audit-upload-notification
+          uri: lb://gsc-service-platform
+          predicates:
+            # /api/admin/audit-logs、/api/admin/upload、/api/admin/notification/** -> gsc-service-platform
+            - Path=/api/admin/audit-logs,/api/admin/upload,/api/admin/notification/**
+          filters:
+            # 幂等 GET 自动重试：下游瞬时 Connection reset / 503 / 504 时换连接重发，前端无感
+            - name: Retry
+              args:
+                retries: 2
+                methods: GET
+                statuses: SERVICE_UNAVAILABLE, GATEWAY_TIMEOUT
+        # 工作台 BFF（阶段 8.1：platform 聚合本域 + Feign trade/delivery 统计）
+        - id: platform-dashboard
+          uri: lb://gsc-service-platform
+          predicates:
+            - Path=/api/admin/dashboard
+
+        # 交易域
+        - id: trade-procurement
+          uri: lb://gsc-service-trade
+          predicates:
+            # /api/admin/procurement/** -> gsc-service-trade
+            - Path=/api/admin/procurement/**
+          # 比价分析/授标理由等 AI 端点走同步 LLM 调用，耗时可达数十秒；
+          # 单路由放宽响应超时到 120s，避免全局 httpclient.response-timeout=10s 掐断返回 504
+          metadata:
+            response-timeout: 120000
+            connect-timeout: 3000
+
+        # 交易域（阶段 9 归属纠正：采购需求域迁回 trade，须排在 supplier-match 兜底前精确路由）
+        - id: trade-match-requirement
+          uri: lb://gsc-service-trade
+          predicates:
+            # /api/admin/match/requirement/** -> gsc-service-trade（match/plaza 与 declined 除外，仍归供应商域）
+            - Path=/api/admin/match/requirement,/api/admin/match/requirement/*,/api/admin/match/requirement/*/republish,/api/admin/match/requirement/*/close,/api/admin/match/requirement/plaza
+
+        # 供应商域（阶段 7：画像/智能匹配/对接/需求广场全量接管；阶段 9 需求域端点迁出后剩余画像/匹配/对接）
+        - id: supplier-match
+          uri: lb://gsc-service-supplier
+          predicates:
+            # /api/admin/match/** -> gsc-service-supplier
+            - Path=/api/admin/match/**
+          # 智能匹配/广场推荐可能调 Python AI，与询盘 AI 一样放宽到 120s，避免网关 10s 掐断
+          metadata:
+            response-timeout: 120000
+            connect-timeout: 3000
+
+        # 交付域
+        - id: delivery-main
+          uri: lb://gsc-service-delivery
+          predicates:
+            # /api/admin/delivery/** -> gsc-service-delivery
+            - Path=/api/admin/delivery/**
+        - id: delivery-risk
+          uri: lb://gsc-service-delivery
+          predicates:
+            # /api/admin/delivery-risk/** -> gsc-service-delivery
+            - Path=/api/admin/delivery-risk/**
+
+        # AI 域：对话机器人（会话/消息/知识库文档/流式对话）
+        - id: ai-chat
+          uri: lb://gsc-service-ai
+          predicates:
+            # /api/admin/ai/chat -> 流式 SSE，需独立超时
+            - Path=/api/admin/ai/chat
+          # SSE 长连接不能被全局 httpclient.response-timeout=10s 掐断，单独放宽到 120s。
+          # 注意：单路由超时用 metadata（毫秒整数），不是 filters（无 SetResponseTimeout 这个过滤器工厂）
+          metadata:
+            response-timeout: 120000
+            connect-timeout: 3000
+        - id: ai-main
+          uri: lb://gsc-service-ai
+          predicates:
+            # /api/admin/ai/** -> gsc-service-ai
+            - Path=/api/admin/ai/**
+
+        # 阶段 8 切流完成：legacy-monolith 兜底路由已删除。
+        # 所有 /api/** 端点均已精确路由到四个微服务，未命中路由的请求返回 404
+        # （若发现遗漏端点，在此补精确路由，不再回退旧单体）。
+
+# 网关 JWT 密钥：与全栈保持一致，通常从 Nacos 公共配置读取
+gsc:
+  jwt:
+    secret: ${JWT_SECRET}
+  internal:
+    secret: ${INTERNAL_SECRET}
+  limit:
+    qps: ${GATEWAY_LIMIT_QPS}
+
+logging:
+  pattern:
+    console: '%d{yyyy-MM-dd HH:mm:ss.SSS} %highlight(%-5level) %logger{36} - %msg%n'
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+  tracing:
+    # 默认关闭 Zipkin 上报；需要开启时通过 GSC_ZIPKIN_ENABLED=true 覆盖
+    enabled: ${GSC_ZIPKIN_ENABLED}
+    sampling:
+      probability: ${TRACING_SAMPLE_RATE}   # 采样率：本地全采样看全链路；生产可调低
+  zipkin:
+    tracing:
+      endpoint: ${ZIPKIN_ENDPOINT}

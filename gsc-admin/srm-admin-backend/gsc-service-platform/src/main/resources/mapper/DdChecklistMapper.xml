@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.greensmartplanet.gsc.platform.mapper.DdChecklistMapper">
+
+    <resultMap id="BaseResultMap" type="cn.greensmartplanet.gsc.platform.entity.DdChecklist">
+        <id column="id" property="id"/>
+        <result column="dd_id" property="ddId"/>
+        <result column="item_code" property="itemCode"/>
+        <result column="item_name" property="itemName"/>
+        <result column="group_name" property="groupName"/>
+        <result column="checked" property="checked"/>
+        <result column="remark" property="remark"/>
+        <result column="create_by" property="createBy"/>
+        <result column="update_by" property="updateBy"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+        <result column="is_deleted" property="isDeleted"/>
+    </resultMap>
+
+    <!-- 按尽调ID查核查清单 -->
+    <select id="selectByDdId" resultMap="BaseResultMap">
+        SELECT * FROM dd_checklist WHERE dd_id = #{ddId} AND is_deleted = 0 ORDER BY id
+    </select>
+
+    <!-- 批量按尽调ID查核查清单（用于事务所工作台避免 N+1） -->
+    <select id="selectByDdIds" resultMap="BaseResultMap">
+        SELECT * FROM dd_checklist
+        WHERE dd_id IN
+        <foreach collection="ddIds" item="ddId" open="(" separator="," close=")">
+            #{ddId}
+        </foreach>
+        AND is_deleted = 0
+        ORDER BY id
+    </select>
+
+    <!-- 批量插入核查项 -->
+    <insert id="insertBatch" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO dd_checklist (dd_id, item_code, item_name, group_name) VALUES
+        <foreach collection="list" item="item" separator=",">
+            (#{item.ddId}, #{item.itemCode}, #{item.itemName}, #{item.groupName})
+        </foreach>
+    </insert>
+
+    <!-- 按ID查单条核查项 -->
+    <select id="selectById" resultMap="BaseResultMap">
+        SELECT * FROM dd_checklist WHERE id = #{id} AND is_deleted = 0
+    </select>
+
+    <!-- 按尽调ID逻辑删除所有核查项（重新分配事务所时先清旧数据） -->
+    <update id="deleteByDdId">
+        UPDATE dd_checklist SET is_deleted = 1 WHERE dd_id = #{ddId} AND is_deleted = 0
+    </update>
+
+    <!-- 更新核查项（打勾/取消 + 备注） -->
+    <update id="update">
+        UPDATE dd_checklist SET checked = #{checked}, remark = #{remark}, update_by = #{updateBy}
+        WHERE id = #{id} AND is_deleted = 0
+    </update>
+
+</mapper>

@@ -1,0 +1,34 @@
+{
+  "name": "global-scm-vue",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "prebuild": "node scripts/compress-images.js",
+    "preview": "vite preview",
+    "compress-images": "node scripts/compress-images.js"
+  },
+  "dependencies": {
+    "@vueuse/core": "^14.3.0",
+    "@vueuse/motion": "^3.0.3",
+    "clsx": "^2.1.1",
+    "gsap": "^3.15.0",
+    "leaflet": "^1.9.4",
+    "lenis": "^1.3.25",
+    "lucide-vue-next": "^0.577.0",
+    "tailwind-merge": "^3.6.0",
+    "tw-animate-css": "^1.3.8",
+    "vue": "^3.5.38",
+    "vue-i18n": "10",
+    "vue-router": "^4.6.4"
+  },
+  "devDependencies": {
+    "@tailwindcss/vite": "^4.3.1",
+    "@vitejs/plugin-vue": "^6.0.7",
+    "sharp": "^0.35.3",
+    "tailwindcss": "^4.3.1",
+    "vite": "^8.1.0"
+  }
+}

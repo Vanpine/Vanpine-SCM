@@ -1,0 +1,33 @@
+server:
+  port: 3084
+
+spring:
+  application:
+    name: gsc-service-delivery
+  profiles:
+    active: dev
+  cloud:
+    nacos:
+      discovery:
+        server-addr: ${NACOS_ADDR}
+        username: ${NACOS_USERNAME}
+        password: ${NACOS_PASSWORD}
+        namespace: ${NACOS_NAMESPACE}
+      config:
+        server-addr: ${NACOS_ADDR}
+        username: ${NACOS_USERNAME}
+        password: ${NACOS_PASSWORD}
+        namespace: ${NACOS_NAMESPACE}
+        file-extension: yaml
+  # Nacos 配置导入（三层结构：共享 + 本服务专属）
+  # optional: 前缀 = Nacos 不可用时不阻塞启动，回退本地兜底
+  config:
+    import:
+      - optional:nacos:gsc-shared.yaml
+      - optional:nacos:gsc-delivery.yaml
+
+# 雪花主键 workerId 兜底（Nacos 可用时以 gsc-delivery.yaml 为准；多实例用 GSC_WORKER_ID 环境变量覆盖）
+mybatis-plus:
+  global-config:
+    sequence:
+      worker-id: ${GSC_WORKER_ID:4}

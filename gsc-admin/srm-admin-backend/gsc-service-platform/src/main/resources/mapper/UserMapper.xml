@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.greensmartplanet.gsc.platform.mapper.UserMapper">
+
+    <!-- 根据租户ID+用户名查用户（用于登录校验） -->
+    <select id="selectByTenantAndUsername"
+            resultType="cn.greensmartplanet.gsc.platform.entity.User">
+        SELECT id,
+               tenant_id,
+               passport_uuid,
+               passport_name,
+               passport_email,
+               passport_phone,
+               username,
+               password_hash,
+               real_name,
+               email,
+               phone,
+               avatar_key,
+               dept_id,
+               status,
+               last_login_ip,
+               last_login_time,
+               sort_order,
+               create_by,
+               update_by,
+               firm_id,
+               create_time,
+               update_time
+        FROM user
+        WHERE tenant_id = #{tenantId}
+          AND BINARY username = #{username}
+          AND is_deleted = 0
+    </select>
+
+    <!-- 根据租户ID+邮箱查用户（用于忘记密码） -->
+    <select id="selectByTenantAndEmail"
+            resultType="cn.greensmartplanet.gsc.platform.entity.User">
+        SELECT id,
+               tenant_id,
+               username,
+               password_hash,
+               real_name,
+               email,
+               phone,
+               status
+        FROM user
+        WHERE tenant_id = #{tenantId}
+          AND email = #{email}
+          AND is_deleted = 0
+    </select>
+
+    <!-- 按邮箱查用户（不限租户） -->
+    <select id="selectByEmail" resultType="cn.greensmartplanet.gsc.platform.entity.User">
+        SELECT * FROM user WHERE email = #{email} AND is_deleted = 0 LIMIT 1
+    </select>
+
+    <!-- 查用户的所有权限标识（join role 排除已删角色，否则删角色后权限残留） -->
+    <select id="selectPermissionsByUserId" resultType="string">
+        SELECT DISTINCT p.perm_code
+        FROM permission p
+        INNER JOIN role_permission rp ON rp.perm_id = p.id
+        INNER JOIN user_role ur ON ur.role_id = rp.role_id
+        INNER JOIN role r ON r.id = ur.role_id
+        WHERE ur.user_id = #{userId}
+          AND p.is_deleted = 0
+          AND r.is_deleted = 0
+    </select>
+
+    <!-- 查用户的所有角色 -->
+    <select id="selectRolesByUserId" resultType="cn.greensmartplanet.gsc.platform.entity.Role">
+        SELECT r.role_code, r.role_name
+        FROM role r
+                 INNER JOIN user_role ur ON ur.role_id = r.id
+        WHERE ur.user_id = #{userId}
+          AND r.is_deleted = 0
+    </select>
+
+    <!-- 更新最后登录信息 -->
+    <update id="updateLoginInfo">
+        UPDATE user
+        SET last_login_ip   = #{lastLoginIp},
+            last_login_time = #{lastLoginTime},
+            update_time     = NOW()
+        WHERE id = #{userId}
+          AND is_deleted = 0
+    </update>
+
+    <!-- 更新密码 -->
+    <update id="updatePassword">
+        UPDATE user
+        SET password_hash = #{passwordHash},
+            update_time   = NOW()
+        WHERE id = #{userId}
+          AND is_deleted = 0
+    </update>
+
+    <!-- 查用户的角色ID列表 -->
+    <select id="selectRoleIdsByUserId" resultType="long">
+        SELECT role_id FROM user_role WHERE user_id = #{userId}
+    </select>
+
+    <!-- 删除用户所有角色关联 -->
+    <delete id="deleteUserRoles">
+        DELETE FROM user_role WHERE user_id = #{userId}
+    </delete>
+
+    <!-- 批量插入用户角色关联 -->
+    <insert id="insertUserRoles">
+        INSERT INTO user_role (user_id, role_id) VALUES
+        <foreach collection="roleIds" item="roleId" separator=",">
+            (#{userId}, #{roleId})
+        </foreach>
+    </insert>
+
+    <!-- 查拥有某角色的所有用户ID（用于权限变更后清除 Redis 缓存） -->
+    <select id="selectUserIdsByRoleId" resultType="long">
+        SELECT user_id FROM user_role WHERE role_id = #{roleId}
+    </select>
+
+</mapper>
