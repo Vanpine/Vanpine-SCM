@@ -1,6 +1,6 @@
 # SRM AI Service
 
-SRM AI Service 是全球供应链管理平台（Global SCM / SRM）的 Python AI 服务，负责供应商画像向量化、采购需求智能匹配、报价分析、授标理由生成和询盘内容辅助等 AI 能力。Java 后端通过内网 HTTP 接口调用本服务，本服务再组合 Embedding、Milvus 向量检索与 DeepSeek 大模型完成语义计算和结果解释。
+SRM AI Service 是 VANPINE SRM 全球供应商管理平台的 Python AI 服务，负责供应商画像向量化、采购需求智能匹配、报价分析、授标理由生成和询盘内容辅助等 AI 能力。Java 后端通过内网 HTTP 接口调用本服务，本服务再组合 Embedding、Milvus 向量检索与 DeepSeek 大模型完成语义计算和结果解释。
 
 ## 核心能力
 
