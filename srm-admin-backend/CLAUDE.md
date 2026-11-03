@@ -59,7 +59,7 @@
 ---
 
 ## 一、项目概述
-Global SCM 后台管理系统，Spring Boot 3.3.7 + Spring Cloud 2023 + Spring Cloud Alibaba 2023 微服务架构，多租户 SAAS。
+VANPINE SRM 后台管理系统，Spring Boot 3.3.7 + Spring Cloud 2023 + Spring Cloud Alibaba 2023 微服务架构，多租户 SAAS。
 
 - **包名：** `cn.greensmartplanet.gsc`
 - **JDK：** 17+ / **Maven：** 3.9+
