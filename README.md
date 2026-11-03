@@ -13,7 +13,7 @@
 | 项目类型 | B2B 跨境供应链协同平台（Glboal SRM） |
 | 业务闭环 | 入驻审核 → 供应商画像 → 智能匹配 → 询盘报价 → 比价授标 → 电子合同 → 交付验收 → 风险监控 |
 | 服务对象 | 采购企业、供应企业、第三方尽调机构、平台运营方 |
-| 系统形态 | 后台管理系统 + Java 微服务后端 + Python AI 服务 + 官网 |
+| 系统形态 | 后台管理系统 + Java 微服务后端 + Python AI 服务 |
 | 核心难点 | 多租户数据隔离、多角色权限模型、AI 与业务流程解耦、外部风险信号整合 |
 
 ## 解决什么问题
@@ -102,7 +102,7 @@ AI 服务独立部署，负责"计算与生成"，业务数据由后端通过内
 
 ### 工程规模
 
-553 个 Java 源文件（含测试 583）、53 个 REST Controller、9 个 Maven 模块；70 个 Vue 单文件组件（后台 55 + 官网 15）；Python AI 服务 65 个源文件（应用 35 + 测试 30）。
+553 个 Java 源文件（含测试 583）、53 个 REST Controller、9 个 Maven 模块；55 个 Vue 单文件组件；Python AI 服务 65 个源文件（应用 35 + 测试 30）。
 
 ### 设计取舍
 
@@ -115,12 +115,9 @@ AI 服务独立部署，负责"计算与生成"，业务数据由后端通过内
 
 ```
 vanpine-srm/
-├── gsc-admin/
-│   ├── srm-admin-backend     # Java 微服务后端（Spring Cloud Alibaba）
-│   ├── srm-admin-frontend    # 后台管理前端（Vue 3）
-│   └── srm-ai-service        # Python AI 服务（FastAPI）
-└── gsc-fronted/
-    └── srm-official-website  # 官网前端（Vue 3）
+├── srm-admin-backend     # Java 微服务后端（Spring Cloud Alibaba）
+├── srm-admin-frontend    # 后台管理前端（Vue 3）
+└── srm-ai-service        # Python AI 服务（FastAPI）
 ```
 
 ## 项目一览
@@ -130,7 +127,6 @@ vanpine-srm/
 | srm-admin-backend | Java 17 · Spring Boot 3.3.7 · Spring Cloud Alibaba · MyBatis-Plus · MySQL 8 · Redis · RabbitMQ · Nacos | 网关 18080<br>业务服务 3081–3085 | 多模块微服务单体仓库 |
 | srm-admin-frontend | Vue 3 · Vite · Element Plus · Pinia · Vue Router · Vue I18n · Tailwind CSS 4 | 5173（Vite） | 后台管理系统 |
 | srm-ai-service | Python · FastAPI · LangChain · Milvus · DeepSeek · Embedding API | 8100 | 供应商匹配、报价分析、授标理由生成 |
-| srm-official-website | Vue 3 · Vite · Tailwind CSS 4 · GSAP · Lenis · Leaflet · Vue I18n | 5173（Vite） | 公司官网 |
 
 ### srm-admin-backend 模块
 
@@ -155,7 +151,7 @@ gsc-backend
 
 ```bash
 # 1. 启动基础设施（MySQL / Redis / RabbitMQ / Nacos）
-cd gsc-admin/srm-admin-backend/deploy
+cd srm-admin-backend/deploy
 docker compose up -d
 
 # 2. 编译并启动网关与服务
@@ -167,7 +163,7 @@ java -jar gsc-gateway/target/*.jar
 ### 后台前端
 
 ```bash
-cd gsc-admin/srm-admin-frontend
+cd srm-admin-frontend
 npm install
 npm run dev
 ```
@@ -175,19 +171,11 @@ npm run dev
 ### AI 服务
 
 ```bash
-cd gsc-admin/srm-ai-service
+cd srm-ai-service
 python -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
 cp .env.example .env          # 填入 EMBEDDING_API_KEY / DEEPSEEK_API_KEY 等
 uvicorn app.main:app --host 127.0.0.1 --port 8100
-```
-
-### 官网
-
-```bash
-cd gsc-fronted/srm-official-website
-npm install
-npm run dev
 ```
 
 ## 环境变量

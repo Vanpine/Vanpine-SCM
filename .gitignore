@@ -20,6 +20,9 @@ out/
 # worktree 工作副本
 .worktrees/
 
+# 本地保留、不上传到仓库的官网项目
+gsc-fronted/
+
 # 子仓库 .git 的临时备份名
 .git-local-backup*
 
