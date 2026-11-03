@@ -26,7 +26,7 @@ public class Knife4jAutoConfiguration {
     @ConditionalOnMissingBean
     public OpenAPI openAPI() {
         return new OpenAPI()
-                .info(new Info().title("Global SCM 后台管理系统").version("1.0.0"))
+                .info(new Info().title("Vanpine SRM 后台管理系统").version("1.0.0"))
                 .components(new Components()
                         .addSecuritySchemes("bearer", new SecurityScheme()
                                 .type(SecurityScheme.Type.HTTP)

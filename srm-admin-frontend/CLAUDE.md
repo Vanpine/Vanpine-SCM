@@ -251,11 +251,11 @@ public R<...> listInquiries(...) { }
 ## 项目位置
 
 ```
-Global SCM _backend/
+Vanpine SRM _backend/
 ├── srm-admin-frontend/   # 当前（管理后台）
 └── srm-admin-backend/    # 后端 API
 
-Global SCM_fontend/
+Vanpine SRM_fontend/
 └── srm-official-website/ # 前台官网（Nuxt，端口 5174）
 ```
 

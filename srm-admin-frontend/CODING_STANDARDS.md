@@ -1181,11 +1181,11 @@ SET dd.applicant_role = a.applicant_role WHERE dd.applicant_role IS NULL;
 三个项目分别在两个父目录下：
 
 ```
-Global SCM _backend/           # 后台管理系统（管理后台 + 后端 API）
+Vanpine SRM _backend/           # 后台管理系统（管理后台 + 后端 API）
 ├── srm-admin-frontend/        # 后台管理前端（Vue 3，当前项目）
 └── srm-admin-backend/         # 后端 API 服务（Spring Boot）
 
-Global SCM_fontend/            # 前台官网
+Vanpine SRM_fontend/            # 前台官网
 └── srm-official-website/      # 官网前端（Vue 3，面向公众展示）
 ```
 
@@ -1224,7 +1224,7 @@ Global SCM_fontend/            # 前台官网
 
 ## D.五、前台官网（srm-official-website）
 
-**本地路径**：`C:\Users\Administrator\Desktop\Global SCM_fontend\srm-official-website`
+**本地路径**：`C:\Users\Administrator\Desktop\Vanpine SRM_fontend\srm-official-website`
 
 面向公众展示的官网项目，与技术文档/博客无关，纯前端展示。
 

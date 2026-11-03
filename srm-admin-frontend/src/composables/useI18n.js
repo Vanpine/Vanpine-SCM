@@ -57,7 +57,7 @@ const messages = {
     dualRole: 'Dual Role',
     rememberPwd: 'Remember Me',
     forgotPwd: 'Forgot Password?',
-    brandTitle: 'Global SCM AI Empowerment Platform',
+    brandTitle: 'Vanpine SRM AI Empowerment Platform',
     brandSubtitle: 'No Decoupling, No Disruption — Trust in Every Link',
     forgotTitle: 'Forgot Password',
     forgotSubtitle: 'Enter your tenant code and email',

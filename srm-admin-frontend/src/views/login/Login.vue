@@ -10,7 +10,7 @@
         alt="logo"
         class="header-logo"
       >
-      <span class="header-name">GLOBAL SCM</span>
+      <span class="header-name">Vanpine SRM</span>
     </div>
 
     <!-- ========== 右上角：主题切换 + 语言切换 ========== -->

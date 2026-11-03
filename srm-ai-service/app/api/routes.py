@@ -285,7 +285,7 @@ async def chat_endpoint(req: ChatRequest) -> StreamingResponse:
                 return
             if intent.intent == "identity_assistant":
                 yield _sse("chunk", {"content": (
-                    "我是 Global SCM AI 助手，可以帮你查询供应商、合同、询盘、交付单等业务数据，"
+                    "我是 Vanpine SRM AI 助手，可以帮你查询供应商、合同、询盘、交付单等业务数据，"
                     "也能执行一些需要你确认的写操作。想看完整能力可以问我「你能做什么」。"
                 )})
                 yield _sse("done", {})
@@ -312,7 +312,7 @@ async def chat_endpoint(req: ChatRequest) -> StreamingResponse:
                 yield _sse("done", {})
                 return
             if intent.intent == "smalltalk":
-                yield _sse("chunk", {"content": "你好，我是 Global SCM AI 助手，可以帮你查询供应商、合同、询盘、交付单，也能执行一些需确认的写操作。有什么可以帮你？"})
+                yield _sse("chunk", {"content": "你好，我是 Vanpine SRM AI 助手，可以帮你查询供应商、合同、询盘、交付单，也能执行一些需确认的写操作。有什么可以帮你？"})
                 yield _sse("done", {})
                 return
             if intent.intent == "personal_fact":

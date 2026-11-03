@@ -56,7 +56,7 @@ logger.info("SRM AI Service starting...")  # 启动日志
 app = FastAPI(
     title="SRM AI Service",  # Swagger 文档标题
     version="1.0.0",  # 语义版本号
-    description="Global SCM AI Platform - Smart Matching, Risk Prediction, Inventory Alert",
+    description="Vanpine SRM AI Platform - Smart Matching, Risk Prediction, Inventory Alert",
 )
 
 # 注册 X-API-Key 鉴权中间件（/api/health 豁免，其余端点须带 token）

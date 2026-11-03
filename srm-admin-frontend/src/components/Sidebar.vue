@@ -16,7 +16,7 @@
         <span
           v-if="!isCollapse"
           class="logo-title"
-        >GLOBAL SCM</span>
+        >Vanpine SRM</span>
       </transition>
     </router-link>
 

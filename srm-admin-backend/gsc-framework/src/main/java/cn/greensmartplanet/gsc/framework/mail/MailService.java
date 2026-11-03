@@ -60,7 +60,7 @@ public class MailService {
                     .setAddressType(1)
                     .setReplyToAddress(true)
                     .setToAddress(to)
-                    .setSubject("GLOBAL SCM - 入驻申请已通过")
+                    .setSubject("Vanpine SRM - 入驻申请已通过")
                     .setHtmlBody(String.format(
                             "<div style='max-width:480px;margin:0 auto;font-family:-apple-system,BlinkMacSystemFont,sans-serif'>" +
                                     "<h2 style='color:#1a1a2e'>入驻申请已通过</h2>" +
@@ -73,7 +73,7 @@ public class MailService {
                                     "</div>" +
                                     "<p style='color:#ef4444;font-size:13px'>请尽快登录并修改密码。</p>" +
                                     "<hr style='border:none;border-top:1px solid #e8ecf1;margin:24px 0'>" +
-                                    "<p style='color:#94a3b8;font-size:12px'>GreenSmartPlanet · GLOBAL SCM 团队</p>" +
+                                    "<p style='color:#94a3b8;font-size:12px'>GreenSmartPlanet · Vanpine SRM 团队</p>" +
                                     "</div>", companyName, loginUrl, tenantCode, username, password));
             client.singleSendMail(request);
             log.info("入驻审核通过通知已发送至 {}", to);
@@ -96,7 +96,7 @@ public class MailService {
                     .setAddressType(1)
                     .setReplyToAddress(true)
                     .setToAddress(to)
-                    .setSubject("GLOBAL SCM - 入驻申请审核结果")
+                    .setSubject("Vanpine SRM - 入驻申请审核结果")
                     .setHtmlBody(String.format(
                             "<div style='max-width:480px;margin:0 auto;font-family:-apple-system,BlinkMacSystemFont,sans-serif'>" +
                                     "<h2 style='color:#1a1a2e'>入驻申请审核结果</h2>" +
@@ -107,7 +107,7 @@ public class MailService {
                                     "<p style='color:#64748b;font-size:13px'>您可以根据驳回原因修改资料后重新提交申请。</p>" +
                                     "<a href='%s' target='_blank' style='display:inline-block;margin-top:12px;padding:12px 28px;background:#2563eb;color:#fff;text-decoration:none;border-radius:8px;font-size:14px'>前往官网重新提交</a>" +
                                     "<hr style='border:none;border-top:1px solid #e8ecf1;margin:24px 0'>" +
-                                    "<p style='color:#94a3b8;font-size:12px'>GreenSmartPlanet · GLOBAL SCM 团队</p>" +
+                                    "<p style='color:#94a3b8;font-size:12px'>GreenSmartPlanet · Vanpine SRM 团队</p>" +
                                     "</div>", companyName, reason, websiteUrl));
             client.singleSendMail(request);
             log.info("入驻审核驳回通知已发送至 {}", to);
@@ -130,15 +130,15 @@ public class MailService {
                     .setAddressType(1)
                     .setReplyToAddress(true)
                     .setToAddress(to)
-                    .setSubject("GLOBAL SCM - 密码重置验证码")
+                    .setSubject("Vanpine SRM - 密码重置验证码")
                     .setHtmlBody(String.format(
                             "<div style='max-width:480px;margin:0 auto;font-family:-apple-system,BlinkMacSystemFont,sans-serif'>" +
-                                    "<h2 style='color:#1a1a2e'>GLOBAL SCM</h2>" +
+                                    "<h2 style='color:#1a1a2e'>Vanpine SRM</h2>" +
                                     "<p>您正在重置平台登录密码，验证码如下：</p>" +
                                     "<p style='font-size:32px;font-weight:700;letter-spacing:6px;color:#2563eb;margin:20px 0'>%s</p>" +
                                     "<p style='color:#94a3b8;font-size:13px'>有效期 5 分钟，如非本人操作请忽略。</p>" +
                                     "<hr style='border:none;border-top:1px solid #e8ecf1;margin:24px 0'>" +
-                                    "<p style='color:#94a3b8;font-size:12px'>GreenSmartPlanet · GLOBAL SCM 团队</p>" +
+                                    "<p style='color:#94a3b8;font-size:12px'>GreenSmartPlanet · Vanpine SRM 团队</p>" +
                                     "</div>", code));
 
             client.singleSendMail(request);
@@ -160,7 +160,7 @@ public class MailService {
                     .setAddressType(1)
                     .setReplyToAddress(true)
                     .setToAddress(to)
-                    .setSubject("GLOBAL SCM - 事务所尽调账号已开通")
+                    .setSubject("Vanpine SRM - 事务所尽调账号已开通")
                     .setHtmlBody(String.format(
                             "<div style='max-width:480px;margin:0 auto;font-family:-apple-system,BlinkMacSystemFont,sans-serif'>" +
                                     "<h2 style='color:#1a1a2e'>事务所尽调账号已开通</h2>" +
@@ -173,7 +173,7 @@ public class MailService {
                                     "<p style='color:#64748b;font-size:13px'>首次登录后请尽快修改密码。</p>" +
                                     "<a href='%s' target='_blank' style='display:inline-block;margin-top:12px;padding:12px 28px;background:#2563eb;color:#fff;text-decoration:none;border-radius:8px;font-size:14px'>前往登录</a>" +
                                     "<hr style='border:none;border-top:1px solid #e8ecf1;margin:24px 0'>" +
-                                    "<p style='color:#94a3b8;font-size:12px'>GreenSmartPlanet · GLOBAL SCM 团队</p>" +
+                                    "<p style='color:#94a3b8;font-size:12px'>GreenSmartPlanet · Vanpine SRM 团队</p>" +
                                     "</div>", firmName, username, password, loginUrl));
             client.singleSendMail(request);
             log.info("事务所账号通知已发送至 {}, firmName={}", to, firmName);
@@ -197,7 +197,7 @@ public class MailService {
                     .setAddressType(1)
                     .setReplyToAddress(true)
                     .setToAddress(to)
-                    .setSubject("GLOBAL SCM - 尽调已完成，您的企业管理后台已开通")
+                    .setSubject("Vanpine SRM - 尽调已完成，您的企业管理后台已开通")
                     .setHtmlBody(String.format(
                             "<div style='max-width:480px;margin:0 auto;font-family:-apple-system,BlinkMacSystemFont,sans-serif'>" +
                                     "<h2 style='color:#1a1a2e'>尽调已完成</h2>" +
@@ -205,7 +205,7 @@ public class MailService {
                                     "<p style='color:#64748b;font-size:13px'>您现在拥有企业管理员权限，可登录后台进行用户管理、角色分配等操作。</p>" +
                                     "<a href='%s' target='_blank' style='display:inline-block;margin-top:12px;padding:12px 28px;background:#2563eb;color:#fff;text-decoration:none;border-radius:8px;font-size:14px'>前往登录</a>" +
                                     "<hr style='border:none;border-top:1px solid #e8ecf1;margin:24px 0'>" +
-                                    "<p style='color:#94a3b8;font-size:12px'>GreenSmartPlanet · GLOBAL SCM 团队</p>" +
+                                    "<p style='color:#94a3b8;font-size:12px'>GreenSmartPlanet · Vanpine SRM 团队</p>" +
                                     "</div>", companyName, loginUrl));
             client.singleSendMail(request);
             log.info("尽调完成通知已发送至 {}, companyName={}", to, companyName);
@@ -231,7 +231,7 @@ public class MailService {
                     .setAddressType(1)
                     .setReplyToAddress(true)
                     .setToAddress(to)
-                    .setSubject("GLOBAL SCM - 尽调资料需补充，请登录完善")
+                    .setSubject("Vanpine SRM - 尽调资料需补充，请登录完善")
                     .setHtmlBody(String.format(
                             "<div style='max-width:480px;margin:0 auto;font-family:-apple-system,BlinkMacSystemFont,sans-serif'>" +
                                     "<h2 style='color:#dc2626'>尽调资料需补充</h2>" +
@@ -242,7 +242,7 @@ public class MailService {
                                     "<p style='color:#64748b;font-size:13px'>请登录后台进入尽调页面，根据退回原因补充或修正相应材料。保存后系统将自动通知事务所重新核查。</p>" +
                                     "<a href='%s' target='_blank' style='display:inline-block;margin-top:12px;padding:12px 28px;background:#dc2626;color:#fff;text-decoration:none;border-radius:8px;font-size:14px'>前往登录补充</a>" +
                                     "<hr style='border:none;border-top:1px solid #e8ecf1;margin:24px 0'>" +
-                                    "<p style='color:#94a3b8;font-size:12px'>GreenSmartPlanet · GLOBAL SCM 团队</p>" +
+                                    "<p style='color:#94a3b8;font-size:12px'>GreenSmartPlanet · Vanpine SRM 团队</p>" +
                                     "</div>", companyName, returnReason, loginUrl));
             client.singleSendMail(request);
             log.info("尽调退回通知已发送至 {}, companyName={}", to, companyName);
@@ -269,7 +269,7 @@ public class MailService {
                     .setAddressType(1)
                     .setReplyToAddress(true)
                     .setToAddress(to)
-                    .setSubject("GLOBAL SCM - 企业已重新提交尽调资料，请核查")
+                    .setSubject("Vanpine SRM - 企业已重新提交尽调资料，请核查")
                     .setHtmlBody(String.format(
                             "<div style='max-width:480px;margin:0 auto;font-family:-apple-system,BlinkMacSystemFont,sans-serif'>" +
                                     "<h2 style='color:#2563eb'>企业已重新提交资料</h2>" +
@@ -277,7 +277,7 @@ public class MailService {
                                     "<p style='color:#64748b;font-size:13px'>事务所：%s</p>" +
                                     "<a href='%s' target='_blank' style='display:inline-block;margin-top:12px;padding:12px 28px;background:#2563eb;color:#fff;text-decoration:none;border-radius:8px;font-size:14px'>前往工作台核查</a>" +
                                     "<hr style='border:none;border-top:1px solid #e8ecf1;margin:24px 0'>" +
-                                    "<p style='color:#94a3b8;font-size:12px'>GreenSmartPlanet · GLOBAL SCM 团队</p>" +
+                                    "<p style='color:#94a3b8;font-size:12px'>GreenSmartPlanet · Vanpine SRM 团队</p>" +
                                     "</div>", companyName, firmName, loginUrl));
             client.singleSendMail(request);
             log.info("企业重新提交通知已发送至 {}, companyName={}", to, companyName);

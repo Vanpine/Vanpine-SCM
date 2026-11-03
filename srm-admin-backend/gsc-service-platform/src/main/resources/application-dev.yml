@@ -48,7 +48,7 @@ spring:
       access-key-id: ${ALIYUN_ACCESS_KEY_ID}
       access-key-secret: ${ALIYUN_ACCESS_KEY_SECRET}
       account-name: srm@mail.greensmartplanet.cn
-      from-alias: GLOBAL SCM
+      from-alias: Vanpine SRM
 
 mybatis-plus:
   mapper-locations: classpath*:/mapper/**/*.xml
