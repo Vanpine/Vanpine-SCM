@@ -128,22 +128,68 @@ vanpine-srm/
 | srm-admin-frontend | Vue 3 · Vite · Element Plus · Pinia · Vue Router · Vue I18n · Tailwind CSS 4 | 5173（Vite） | 后台管理系统 |
 | srm-ai-service | Python · FastAPI · LangChain · Milvus · DeepSeek · Embedding API | 8100 | 供应商匹配、报价分析、授标理由生成 |
 
-### srm-admin-backend 模块
+### Java 微服务项目结构
 
 ```
-gsc-backend
-├── gsc-common              # 公共工具、异常、枚举、R 响应体
-├── gsc-api                 # Feign 契约接口 + DTO
-├── gsc-framework           # 安全、MQ、Redis、CORS、日志等公共配置
-├── gsc-gateway             # API 网关（路由、CORS、内部接口拦截）
-├── gsc-service-platform    # 平台域：认证、入驻、用户/角色/权限、通知、审计
-├── gsc-service-trade       # 交易域：采购需求、询盘、合同
-├── gsc-service-delivery    # 交付域：发货、验收、风险扫描
-├── gsc-service-supplier    # 供应商域：画像、尽调、智能匹配
-└── gsc-service-ai          # AI 域：对接 srm-ai-service
+srm-admin-backend/
+├── pom.xml                     # 父 POM：统一依赖版本与模块管理
+├── gsc-common/                 # 公共基础：工具类、异常、枚举、R 统一响应体
+├── gsc-api/                    # 服务间契约：Feign 接口 + 共享 DTO
+├── gsc-framework/              # 公共框架：安全/JWT、MQ、Redis、CORS、日志、自动装配
+├── gsc-gateway/                # API 网关：路由转发、鉴权、CORS、内部接口拦截
+├── gsc-service-platform/       # 平台域：认证、入驻审核、用户/角色/权限、通知、审计
+├── gsc-service-trade/          # 交易域：采购需求、询盘、报价、比价、授标、合同
+├── gsc-service-delivery/       # 交付域：发货、收货、验收、物流、风险扫描
+├── gsc-service-supplier/       # 供应商域：画像、尽调、制裁筛查、智能匹配
+├── gsc-service-ai/             # AI 域：对接 Python AI 服务、对话与知识库
+└── deploy/                     # 部署：docker-compose、Nacos 配置、systemd 服务
 ```
 
-业务服务端口：platform 3081、supplier 3082、trade 3083、delivery 3084、ai 3085，统一经网关 18080 访问。
+### 单个微服务的分层结构
+
+```
+gsc-service-xxx/
+├── src/main/java/cn/greensmartplanet/gsc/<domain>/
+│   ├── controller/     # REST 接口层
+│   ├── service/        # 业务接口
+│   │   └── impl/       # 业务实现
+│   ├── mapper/         # MyBatis-Plus Mapper
+│   ├── entity/         # 数据库实体
+│   ├── dto/            # 服务内部传输对象
+│   ├── vo/             # 接口返回视图对象
+│   ├── client/         # Feign 调用其他微服务
+│   ├── mq/             # 消息生产 / 消费
+│   ├── scheduler/      # 定时任务
+│   ├── config/         # 服务配置
+│   └── support/        # 辅助组件（租户守卫、数据权限等）
+└── src/main/resources/
+    ├── application.yml        # 端口、服务名、公共配置
+    ├── application-dev.yml    # 环境相关配置
+    └── mapper/               # MyBatis XML
+```
+
+### 服务拓扑
+
+```
+                           ┌──────────────────┐
+   浏览器 / 前端  ────────▶ │   gsc-gateway    │  :18080
+                           └────────┬─────────┘
+          ┌───────────────┬─────────┼─────────────┬───────────────┐
+          ▼               ▼         ▼             ▼               ▼
+   gsc-service-     gsc-service-  gsc-service-  gsc-service-   gsc-service-
+     platform          trade        supplier      delivery          ai
+      :3081           :3083         :3082         :3084          :3085
+          │               │             │             │               │
+          └───────────────┴─────────────┴─────────────┘               │
+                          │  OpenFeign 服务间调用                       │ HTTP
+                          ▼                                           ▼
+                ┌──────────────────┐                    ┌──────────────────────┐
+                │ MySQL / Redis /  │                    │  Python AI Service   │
+                │ RabbitMQ / Nacos │                    │  FastAPI  :8100      │
+                └──────────────────┘                    └──────────────────────┘
+```
+
+业务服务端口：platform 3081、supplier 3082、trade 3083、delivery 3084、ai 3085，统一经网关 18080 访问。五个业务服务均连接 MySQL / Redis / RabbitMQ / Nacos；AI 域额外通过内网 HTTP 调用 Python AI 服务（8100），由后者完成向量检索与大模型推理。
 
 ## 快速开始
 
