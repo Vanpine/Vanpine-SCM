@@ -82,6 +82,190 @@
 
 **8. 平台治理** — 多租户管理、用户/角色/菜单权限、审计日志、文件服务、消息通知、支付回调。
 
+## 采购到签约流程
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor Buyer as 采购员
+    actor Supplier as 供应商
+    participant Web as 后台前端
+    participant GW as API 网关
+    participant Trade as 交易服务
+    participant MQ as RabbitMQ
+    participant AI as AI 服务
+    participant Python as Python AI 服务
+
+    Buyer->>Web: 发布采购需求
+    Web->>GW: 提交需求
+    GW->>Trade: 校验 JWT / tenant_id 后转发
+    Trade-->>Web: 需求创建成功
+
+    Buyer->>Web: 选择候选供应商，发起询盘
+    Web->>Trade: 创建询盘 + 邀请记录
+    Trade->>MQ: 发布询盘通知
+    MQ-->>Supplier: 待办 / 站内通知
+    Supplier->>Web: 查看询盘并提交报价
+    Web->>Trade: 保存报价
+
+    Buyer->>Web: 进入比价页
+    Web->>AI: 请求报价分析
+    AI->>Python: HTTP 调用分析接口
+    Python->>Trade: Feign 拉取报价数据
+    Trade-->>Python: 返回报价明细
+    Python-->>AI: 排名、风险点、授标建议
+    AI-->>Web: 分析结果
+
+    Buyer->>Web: 确认授标
+    Web->>Trade: 创建授标记录
+    Trade->>AI: 生成授标理由
+    AI->>Python: 请求理由生成
+    Python-->>AI: 授标说明
+    Trade->>MQ: 通知中标 / 未中标供应商
+
+    Buyer->>Web: 创建并签署合同
+    Web->>Trade: 保存合同
+    Trade-->>Buyer: 合同生效，进入交付履约
+```
+
+## 核心数据模型
+
+```mermaid
+erDiagram
+    TENANT ||--o{ USER : "拥有"
+    TENANT ||--o{ ROLE : "定义角色"
+    USER }o--o{ ROLE : "user_role"
+    TENANT ||--o| ENTERPRISE_PROFILE : "企业画像"
+    APPLICATION ||--o| DUE_DILIGENCE : "审核通过发起尽调"
+    DUE_DILIGENCE ||--o{ DD_CHECKLIST : "核查项"
+    APPLICATION ||--o{ SANCTION_SCREEN_RECORD : "制裁筛查"
+    TENANT ||--o{ PROCUREMENT_REQUIREMENT : "发布需求"
+    PROCUREMENT_REQUIREMENT ||--o{ CONNECTION : "供需对接"
+    PROCUREMENT_REQUIREMENT ||--o{ INQUIRY : "发起询盘"
+    INQUIRY ||--o{ INQUIRY_INVITE : "邀请供应商"
+    INQUIRY ||--o{ QUOTE : "供应商报价"
+    QUOTE ||--o| INQUIRY_AWARD : "中标"
+    INQUIRY ||--o| CONTRACT : "签约"
+    CONTRACT ||--o{ DELIVERY : "分批交付"
+    DELIVERY ||--o{ DELIVERY_LOGISTICS_EVENT : "物流事件"
+    DELIVERY ||--o{ DELIVERY_RISK : "风险预警"
+
+    TENANT {
+        bigint id PK
+        varchar tenant_code
+        varchar tenant_name
+        varchar status
+    }
+    USER {
+        bigint id PK
+        bigint tenant_id FK
+        varchar username
+        varchar status
+    }
+    ROLE {
+        bigint id PK
+        varchar role_code
+        varchar role_name
+    }
+    APPLICATION {
+        bigint id PK
+        varchar applicant_role
+        varchar company_name
+        varchar status
+    }
+    ENTERPRISE_PROFILE {
+        bigint id PK
+        bigint tenant_id FK
+        varchar profile_type
+        varchar sup_categories
+    }
+    DUE_DILIGENCE {
+        bigint id PK
+        bigint application_id FK
+        bigint tenant_id FK
+        varchar company_name
+    }
+    DD_CHECKLIST {
+        bigint id PK
+        bigint dd_id FK
+        varchar item_name
+        boolean checked
+    }
+    SANCTION_SCREEN_RECORD {
+        bigint id PK
+        bigint application_id FK
+        varchar query_name
+        int hit_count
+    }
+    PROCUREMENT_REQUIREMENT {
+        bigint id PK
+        bigint tenant_id FK
+        varchar title
+        varchar category
+        varchar status
+    }
+    CONNECTION {
+        bigint id PK
+        bigint requirement_id FK
+        bigint buyer_tenant_id FK
+        bigint supplier_tenant_id FK
+        varchar status
+    }
+    INQUIRY {
+        bigint id PK
+        bigint requirement_id FK
+        bigint connection_id FK
+        varchar inquiry_no
+        varchar status
+    }
+    INQUIRY_INVITE {
+        bigint id PK
+        bigint inquiry_id FK
+        bigint supplier_tenant_id FK
+        varchar invite_status
+    }
+    QUOTE {
+        bigint id PK
+        bigint inquiry_id FK
+        bigint supplier_tenant_id FK
+        decimal unit_price
+        boolean is_winning
+    }
+    INQUIRY_AWARD {
+        bigint id PK
+        bigint inquiry_id FK
+        bigint quote_id FK
+        int awarded_quantity
+    }
+    CONTRACT {
+        bigint id PK
+        bigint inquiry_id FK
+        bigint buyer_tenant_id FK
+        bigint supplier_tenant_id FK
+        decimal amount
+    }
+    DELIVERY {
+        bigint id PK
+        bigint contract_id FK
+        varchar delivery_no
+        varchar status
+    }
+    DELIVERY_LOGISTICS_EVENT {
+        bigint id PK
+        bigint delivery_id FK
+        varchar event_type
+        datetime event_time
+    }
+    DELIVERY_RISK {
+        bigint id PK
+        bigint delivery_id FK
+        varchar risk_level
+        int risk_score
+    }
+```
+
+> 以上为核心链路实体，实际库表还包括权限、菜单、通知、AI 对话与知识库、尽调附件等辅助表。
+
 ## AI 能力
 
 AI 服务独立部署，负责"计算与生成"，业务数据由后端通过内网接口提供。
