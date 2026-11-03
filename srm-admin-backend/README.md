@@ -1,4 +1,4 @@
-# GSC Backend (Global SCM)
+# VANPINE SRM Backend
 
 Spring Cloud Alibaba 微服务后端，从单体 `srm-admin-backend` 拆分而来。
 
