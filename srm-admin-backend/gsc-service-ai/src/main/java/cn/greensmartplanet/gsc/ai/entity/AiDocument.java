@@ -46,6 +46,9 @@ public class AiDocument {
      *  <p>访问时据此现签短效 URL，不持久化签名 URL（签名会过期且无法续期）。 */
     private String ossKey;
 
+    /** 文件内容 SHA-256（十六进制）。同租户同哈希视为重复上传，直接复用已有文档。 */
+    private String contentHash;
+
     /** 分块数量 */
     private Integer chunkCount;
 

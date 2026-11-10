@@ -25,4 +25,16 @@ public interface AiDocumentMapper extends BaseMapper<AiDocument> {
      */
     AiDocument selectByIdAndTenant(@Param("id") Long id,
                                    @Param("tenantId") Long tenantId);
+
+    /**
+     * 按租户 + 内容哈希查未删除文档（重复上传去重）。
+     * <p>
+     * 依赖唯一索引 uk_tenant_active_hash 保证同租户同内容至多一条未删除记录。
+     *
+     * @param tenantId    租户ID
+     * @param contentHash 文件内容 SHA-256（十六进制）
+     * @return 命中的文档；不存在返回 null
+     */
+    AiDocument selectByTenantAndHash(@Param("tenantId") Long tenantId,
+                                     @Param("contentHash") String contentHash);
 }

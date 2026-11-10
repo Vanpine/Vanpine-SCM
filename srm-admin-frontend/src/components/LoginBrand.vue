@@ -636,7 +636,7 @@
 
 <script setup>
 defineProps({
-  title: { type: String, default: '全球供应链 AI 赋能平台' },
+  title: { type: String, default: '全球供应商 AI 赋能平台' },
   subtitle: { type: String, default: '' },
 })
 </script>

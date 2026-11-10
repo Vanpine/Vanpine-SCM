@@ -38,6 +38,7 @@ from app.services.quote_analysis import (  # 比价分析服务
     suggest_inquiry_fields as do_suggest_inquiry_fields,
 )
 from app.services import rag, chat  # RAG 检索与流式对话
+from app.docparse.types import DocumentParseError  # 带原因码的解析异常
 from app.services.intent import classify  # 意图预路由（元问题直答，防业务大表劫持）
 from app.services.query_rewriter import rewrite as rewrite_query  # 查询改写与指代消解
 from app.store.milvus_store import get_count  # 向量库统计
@@ -443,9 +444,20 @@ def parse_document_endpoint(req: DocumentParseRequest) -> dict:
         logger.info("文档解析成功: document_id=%s, chunks=%d, parents=%d",
                     req.document_id, chunk_count, len(parents))
         return {"chunk_count": chunk_count, "parents": parents}
+    except DocumentParseError as e:
+        # 可预期的解析失败：带原因码返回，Java 侧据码给用户可读提示
+        logger.warning("文档解析被拒绝: document_id=%s, code=%s, message=%s",
+                       req.document_id, e.code.value, e.message)
+        raise HTTPException(
+            status_code=422,
+            detail={"code": e.code.value, "message": e.message},
+        ) from e
     except Exception as e:
         logger.error("文档解析异常: document_id=%s, error=%s", req.document_id, e, exc_info=True)
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(
+            status_code=500,
+            detail={"code": "PARSE_ERROR", "message": f"文档解析异常: {e}"},
+        ) from e
 
 
 # ==================== AI 对话机器人：删除文档向量 ====================

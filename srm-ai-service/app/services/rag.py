@@ -1,7 +1,8 @@
 """
 RAG 知识库服务模块
-负责文档切分（chunk_document）、语义检索（retrieve）、文档解析索引（parse_and_index）
-复用 embedding.py 的在线 Embedding 与 milvus_store.py 的 ai_doc_chunks 集合
+负责文档切分（chunk_document）、混合检索（retrieve）、文档解析索引（parse_and_index）
+复用 embedding.py 的在线 Embedding 与 milvus_store.py 的 ai_doc_chunks_v2 集合
+（dense 语义召回 + Milvus 原生 BM25 关键词召回，RRF 融合）
 """
 import re  # 正则：按段落/句子切分
 import io  # 内存字节流
@@ -73,7 +74,8 @@ def retrieve(query: str, tenant_id: int, top_k: int = RETRIEVE_TOP_K,
     # 初召回扩大候选池 → 子块 rerank 粗筛 → 父块回填 → 父块二次 rerank 定序
     # 关键：先回填父块、再对「注入的内容」打分——否则 rerank 用子块打分、
     # 注入却是父块全文，排序与实际喂给 LLM 的内容不一致，排序不可信。
-    candidates = query_chunks(query_embedding, tenant_id, max(top_k, RETRIEVE_PREFETCH))
+    # 召回用 dense + BM25 混合（RRF 融合），query 原文供 BM25 分词。
+    candidates = query_chunks(query, query_embedding, tenant_id, max(top_k, RETRIEVE_PREFETCH))
     ranked = _rerank(query, candidates, max(top_k, RETRIEVE_PREFETCH))
     filled = _backfill_parents(ranked, tool_token)
     results = _rerank_parents(query, filled, top_k)
@@ -138,8 +140,8 @@ def _truncate_tokens(text: str, max_tokens: int) -> str:
 def _rerank(query: str, candidates: list[dict], top_k: int) -> list[dict]:
     """交叉编码器重排（含置信度阈值过滤）。
 
-    rerank 失败时返回空（不回退原序——弱相关候选注入会污染回答），
-    由上层据此走低置信拒答。
+    精排是增强层：rerank 模块内部已对网络/格式失败做原序降级；这里再兜一层，
+    防止模块级意外异常把候选清空——空结果会被上层判为「知识库没有资料」而拒答。
     """
     if not candidates:
         return []
@@ -147,8 +149,13 @@ def _rerank(query: str, candidates: list[dict], top_k: int) -> list[dict]:
         from app.services.rerank import rerank
         return rerank(query, candidates, top_k)
     except Exception as e:
-        logger.warning("rerank 调用异常，返回空（交上层低置信拒答）: %s", e)
-        return []
+        logger.warning("rerank 调用异常，回退召回原序(top_k=%d): %s", top_k, e)
+        out = []
+        for cand in candidates[:top_k]:
+            item = dict(cand)
+            item["rerank_degraded"] = True
+            out.append(item)
+        return out
 
 
 def _backfill_parents(children: list[dict], tool_token: str = "") -> list[dict]:
@@ -213,7 +220,8 @@ def parse_and_index(document_id: int, tenant_id: int, oss_url: str,
     if not children:
         raise ValueError("文档切分后无有效内容")
     # 4. 批量向量化 + 组装 payload（批量摊薄在线 HTTP 往返）
-    #    embed_text = 文件名 > 章节路径 + 正文（章节路径进向量提升定位语义）
+    #    embed_text = 文件名 > 章节路径 + 正文（同一份文本既做向量、也做 BM25 输入，
+    #    文档名/章节名因此也能被关键词命中）
     #    content 存正文原样，供引用展示；parent_id 供检索侧回填父块全文
     embed_texts = []
     for chunk in children:
@@ -231,6 +239,8 @@ def parse_and_index(document_id: int, tenant_id: int, oss_url: str,
             # 用 UUID5 从 (document_id, chunk_index) 生成确定性 UUID，重跑幂等
             "id": str(uuid.uuid5(uuid.NAMESPACE_URL, f"{document_id}-{idx}")),
             "vector": vectors[idx],
+            # BM25 输入文本（Milvus 侧由 chinese analyzer 分词后生成 sparse 向量）
+            "text": embed_texts[idx],
             "payload": {
                 "tenant_id": str(tenant_id),
                 "document_id": str(document_id),
@@ -286,55 +296,22 @@ def _download(url: str) -> bytes:
 
 
 def _extract_blocks(raw_bytes: bytes, file_type: str) -> list:
-    """按文件类型抽取结构块列表。
+    """按真实类型抽取结构块（委托 docparse 统一管线）。
 
-    - txt/md：解码为纯文本，走正则结构识别（chunker.extract_blocks）
-    - docx：走 python-docx 样式层级（docx_parser.extract_docx_blocks）
-    - pdf：pypdf 逐页抽文本，再走正则结构识别（页码暂不保留，P4 升级）
+    Pipeline 负责：魔数识别真实类型 → 选解析器 → 页眉页脚清洗 → 质量门禁。
+    失败抛 DocumentParseError（带原因码），由 API 层转结构化 detail。
 
     Args:
         raw_bytes: 文件字节
-        file_type: txt / md / docx / pdf
+        file_type: 上传扩展名（只作兜底，内容优先）
 
     Returns:
         Block 列表
 
     Raises:
-        ValueError: 类型不支持或内容为空
-        RuntimeError: 依赖未安装
+        DocumentParseError: 不支持类型 / 空文档 / 扫描件 / 加密 / 解析异常
+        RuntimeError: 解析依赖未安装
     """
-    from app.services.chunker import Block  # 局部导入避免循环依赖
+    from app.docparse.pipeline import parse_document
 
-    ft = (file_type or "").lower()
-    if ft in ("txt", "md"):
-        text = _decode_text(raw_bytes)
-        return extract_blocks(text)
-    if ft == "docx":
-        try:
-            from app.services.docx_parser import extract_docx_blocks
-        except ImportError:
-            raise RuntimeError("python-docx 未安装，无法解析 docx") from None
-        return extract_docx_blocks(raw_bytes)
-    if ft in ("xlsx", "xls"):
-        try:
-            from app.services.excel_parser import extract_excel_blocks
-        except ImportError:
-            raise RuntimeError("openpyxl 未安装，无法解析 Excel") from None
-        return extract_excel_blocks(raw_bytes)
-    if ft == "pdf":
-        try:
-            from app.services.pdf_parser import extract_pdf_blocks
-        except ImportError:
-            raise RuntimeError("pypdf 未安装，无法解析 PDF") from None
-        return extract_pdf_blocks(raw_bytes)
-    raise ValueError(f"不支持的文件类型: {file_type}")
-
-
-def _decode_text(raw_bytes: bytes) -> str:
-    """按 UTF-8 → GBK → Latin-1 依次尝试解码文本文件。"""
-    for encoding in ("utf-8", "gbk", "latin-1"):
-        try:
-            return raw_bytes.decode(encoding)
-        except (UnicodeDecodeError, LookupError):
-            continue
-    raise ValueError("文档编码无法识别")
+    return parse_document(raw_bytes, file_type).blocks

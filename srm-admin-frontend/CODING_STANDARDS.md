@@ -1233,7 +1233,7 @@ Vanpine SRM_fontend/            # 前台官网
 | 前台官网 | Vue 3 + Nuxt + Tailwind CSS | 默认 `http://localhost:5174` |
 
 ```bash
-cd /c/Users/Administrator/Desktop/Global\ SCM_fontend/srm-official-website
+cd /c/Users/Administrator/Desktop/Vanpine\ SRM_fontend/srm-official-website
 npm install
 npm run dev    # 启动在 localhost:5174
 npm run build  # 生产构建

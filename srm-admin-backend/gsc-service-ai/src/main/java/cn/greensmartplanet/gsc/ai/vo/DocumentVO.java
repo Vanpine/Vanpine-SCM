@@ -35,4 +35,7 @@ public class DocumentVO {
 
     /** 创建时间 */
     private LocalDateTime createTime;
+
+    /** 是否为重复上传（true 表示本次未新建文档，直接复用了已有文档） */
+    private Boolean duplicate;
 }

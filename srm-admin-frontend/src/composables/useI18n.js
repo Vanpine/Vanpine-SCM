@@ -19,7 +19,7 @@ const messages = {
     dualRole: '双向角色',
     rememberPwd: '记住密码',
     forgotPwd: '忘记密码？',
-    brandTitle: '全球供应链 AI 赋能平台',
+    brandTitle: '全球供应商 AI 赋能平台',
     brandSubtitle: '不脱钩、不断供 — 让每一次链接都值得信赖',
     forgotTitle: '忘记密码',
     forgotSubtitle: '请输入租户编码和注册邮箱',
