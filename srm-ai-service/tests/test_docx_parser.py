@@ -89,6 +89,87 @@ def test_docx_order_preserved():
         "表格被挪到文档末尾（顺序错乱）"
 
 
+def _add_styled_paragraph(doc, text: str, style_name: str):
+    """给段落套一个自定义样式（模板里已存在则复用）。"""
+    from docx.enum.style import WD_STYLE_TYPE
+
+    try:
+        style = doc.styles.add_style(style_name, WD_STYLE_TYPE.PARAGRAPH)
+    except ValueError:
+        style = doc.styles[style_name]
+    para = doc.add_paragraph(text)
+    para.style = style
+    return para
+
+
+def _make_docx_with_styled_toc(style_name: str) -> bytes:
+    """构造带 Word 自动目录（TOC 样式）的文档。"""
+    from docx import Document
+
+    doc = Document()
+    for text in ("第一章 总则\t1", "第二章 采购\t2", "第三章 交付\t3"):
+        _add_styled_paragraph(doc, text, style_name)
+    doc.add_heading("第一章 总则", level=1)
+    doc.add_paragraph("本章规定供应商准入的总则内容。")
+
+    buf = io.BytesIO()
+    doc.save(buf)
+    return buf.getvalue()
+
+
+def _make_docx_with_manual_toc() -> bytes:
+    """构造手工录入的目录（普通段落 + 点线 + 页码，没有 TOC 样式）。"""
+    from docx import Document
+
+    doc = Document()
+    for text in ("第一章 总则.........1", "第二章 采购.........2", "第三章 交付.........3"):
+        doc.add_paragraph(text)
+    doc.add_heading("第一章 总则", level=1)
+    doc.add_paragraph("本章规定供应商准入的总则内容。")
+
+    buf = io.BytesIO()
+    doc.save(buf)
+    return buf.getvalue()
+
+
+def test_docx_toc_style_not_indexed():
+    """Word 自动目录（TOC 1~9 样式）标记为 toc，切分时丢弃。"""
+    blocks = extract_docx_blocks(_make_docx_with_styled_toc("TOC 1"))
+    assert sum(1 for b in blocks if b.kind == "toc") == 3, [b.kind for b in blocks]
+
+    texts = [c["content"] for c in build_chunks(blocks)]
+    assert not any("第二章 采购" in t for t in texts), texts
+    assert any("本章规定供应商准入" in t for t in texts), texts
+
+
+def test_docx_chinese_toc_style_not_indexed():
+    """中文 Word 的目录样式（目录 1）同样识别。"""
+    blocks = extract_docx_blocks(_make_docx_with_styled_toc("目录 1"))
+    assert any(b.kind == "toc" for b in blocks), [b.kind for b in blocks]
+
+
+def test_docx_manual_toc_run_not_indexed():
+    """无 TOC 样式、但连续 ≥3 行目录特征的手工目录也要丢弃。"""
+    blocks = extract_docx_blocks(_make_docx_with_manual_toc())
+    texts = [c["content"] for c in build_chunks(blocks)]
+    assert not any("........" in t for t in texts), texts
+    assert any("本章规定供应商准入" in t for t in texts), texts
+
+
+def test_docx_short_toc_like_lines_kept():
+    """不足 3 行的目录特征不触发手工目录过滤，避免误删正文。"""
+    from docx import Document
+
+    doc = Document()
+    doc.add_paragraph("详见附录 A 测试清单.........123")
+    doc.add_paragraph("本章规定供应商准入的总则内容。")
+
+    buf = io.BytesIO()
+    doc.save(buf)
+    blocks = extract_docx_blocks(buf.getvalue())
+    assert not any(b.kind == "toc" for b in blocks), [b.kind for b in blocks]
+
+
 if __name__ == "__main__":
     import traceback
     passed = failed = 0

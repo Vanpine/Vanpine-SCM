@@ -13,6 +13,7 @@
                file_type,
                file_size,
                oss_key,
+               content_hash,
                chunk_count,
                status,
                error_message,
@@ -35,6 +36,7 @@
                file_type,
                file_size,
                oss_key,
+               content_hash,
                chunk_count,
                status,
                error_message,
@@ -45,6 +47,30 @@
         WHERE id = #{id}
           AND tenant_id = #{tenantId}
           AND is_deleted = 0
+    </select>
+
+    <!-- 按租户 + 内容哈希查未删除文档（重复上传去重，命中唯一索引 uk_tenant_active_hash） -->
+    <select id="selectByTenantAndHash"
+            resultType="cn.greensmartplanet.gsc.ai.entity.AiDocument">
+        SELECT id,
+               tenant_id,
+               uploader_user_id,
+               file_name,
+               file_type,
+               file_size,
+               oss_key,
+               content_hash,
+               chunk_count,
+               status,
+               error_message,
+               create_time,
+               update_time,
+               is_deleted
+        FROM ai_documents
+        WHERE tenant_id = #{tenantId}
+          AND content_hash = #{contentHash}
+          AND is_deleted = 0
+        LIMIT 1
     </select>
 
 </mapper>

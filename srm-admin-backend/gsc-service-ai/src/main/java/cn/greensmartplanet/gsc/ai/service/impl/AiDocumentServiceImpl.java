@@ -6,6 +6,7 @@ import cn.greensmartplanet.gsc.ai.entity.AiDocument;
 import cn.greensmartplanet.gsc.ai.mapper.AiDocParentChunkMapper;
 import cn.greensmartplanet.gsc.ai.mapper.AiDocumentMapper;
 import cn.greensmartplanet.gsc.ai.service.AiDocumentService;
+import cn.greensmartplanet.gsc.ai.support.ParseErrorSupport;
 import cn.greensmartplanet.gsc.ai.vo.DocumentVO;
 import cn.greensmartplanet.gsc.common.exception.BizException;
 import cn.greensmartplanet.gsc.common.exception.ErrorCode;
@@ -14,13 +15,18 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
+import java.util.HexFormat;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
@@ -30,9 +36,9 @@ import java.util.Set;
 /**
  * AI 知识库文档服务实现
  * <p>
- * 上传流程（闭环）：校验类型 → 落 OSS → 插 processing 记录 → 同步调 Python 切分向量化 →
- * 回写 status(ready/failed) 与 chunk_count。
- * 删除：逻辑删文档 + 物理删分块 + 删 Qdrant 向量。
+ * 上传流程（闭环）：校验类型 → 内容哈希去重 → 落 OSS → 插 processing 记录 →
+ * 同步调 Python 切分向量化 → 回写 status(ready/failed) 与 chunk_count。
+ * 删除：逻辑删文档 + 物理删分块 + 删 Milvus 向量。
  * 重试解析：对 failed 文档重新走解析流程。
  *
  * @author gsc
@@ -83,10 +89,19 @@ public class AiDocumentServiceImpl implements AiDocumentService {
             throw new BizException(ErrorCode.AI_DOCUMENT_TYPE_INVALID);
         }
 
-        // 1. 原始文件落 OSS，只保留 object key（不存签名 URL——签名会过期且无法续期）
+        // 1. 计算内容指纹：同租户同内容直接复用，避免重复落 OSS、重复解析、重复建向量
+        String contentHash = sha256Hex(file);
+        AiDocument existing = documentMapper.selectByTenantAndHash(tenantId, contentHash);
+        if (existing != null) {
+            log.info("检测到重复上传，复用已有文档: id={}, tenantId={}, fileName={}",
+                    existing.getId(), tenantId, existing.getFileName());
+            return reuseExisting(existing);
+        }
+
+        // 2. 原始文件落 OSS，只保留 object key（不存签名 URL——签名会过期且无法续期）
         String ossKey = ossService.upload(file, OSS_DIR);
 
-        // 2. 插 processing 记录（chunk_count 先置 0）
+        // 3. 插 processing 记录（chunk_count 先置 0）
         AiDocument entity = AiDocument.builder()
                 .tenantId(tenantId)
                 .uploaderUserId(userId)
@@ -94,19 +109,87 @@ public class AiDocumentServiceImpl implements AiDocumentService {
                 .fileType(fileType)
                 .fileSize(file.getSize())
                 .ossKey(ossKey)
+                .contentHash(contentHash)
                 .chunkCount(0)
                 .status("processing")
                 .build();
-        documentMapper.insert(entity);
+        try {
+            documentMapper.insert(entity);
+        } catch (DuplicateKeyException e) {
+            // 并发上传同一文件：唯一索引 uk_tenant_active_hash 兜底，对方已插入成功。
+            // 本次 OSS 对象成为孤儿，删除后回查并复用对方记录。
+            log.warn("并发重复上传，复用已存在文档: tenantId={}, contentHash={}", tenantId, contentHash);
+            try {
+                ossService.deleteObject(ossKey);
+            } catch (Exception deleteEx) {
+                log.warn("清理重复上传的 OSS 对象失败(不影响复用): ossKey={}", ossKey, deleteEx);
+            }
+            AiDocument winner = documentMapper.selectByTenantAndHash(tenantId, contentHash);
+            if (winner != null) {
+                return reuseExisting(winner);
+            }
+            throw e;
+        }
         log.info("知识库文档已上传, id={}, fileName={}, tenantId={}", entity.getId(), originalName, tenantId);
 
-        // 3. 同步调 Python 解析（下载 OSS → 切分 → 向量化），回写状态
+        // 4. 同步调 Python 解析（下载 OSS → 切分 → 向量化），回写状态
         parseAndWriteback(entity);
 
-        // 4. 重新查询，返回最新状态（含 chunk_count / status）
+        // 5. 重新查询，返回最新状态（含 chunk_count / status）
         // 解析结果由 parseAndWriteback 回写数据库，因此这里重查而不是直接返回内存对象
         AiDocument latest = documentMapper.selectByIdAndTenant(entity.getId(), tenantId);
         return toVO(latest);
+    }
+
+    /**
+     * 复用已存在的同内容文档。
+     * <p>
+     * ready / processing 直接返回；failed 记录复用原行重跑解析（OssKey 仍有效），
+     * 避免用户因一次解析失败而反复上传产生多份记录。
+     *
+     * @param existing 命中的已有文档
+     * @return 带 duplicate=true 标记的文档 VO
+     */
+    private DocumentVO reuseExisting(AiDocument existing) {
+        // failed：复用原行重跑解析，不新建记录；解析后重查拿最终状态
+        if ("failed".equals(existing.getStatus())) {
+            existing.setStatus("processing");
+            existing.setChunkCount(0);
+            existing.setErrorMessage(null);
+            documentMapper.updateById(existing);
+            parseAndWriteback(existing);
+            existing = documentMapper.selectByIdAndTenant(existing.getId(), existing.getTenantId());
+        }
+        // 统一标记：本次请求没有新建文档
+        DocumentVO vo = toVO(existing);
+        vo.setDuplicate(true);
+        return vo;
+    }
+
+    /**
+     * 流式计算文件内容 SHA-256（十六进制）。
+     * <p>
+     * 用流式读取而不是 getBytes()，避免 10MB 上限文件在大并发下额外占用堆内存。
+     *
+     * @param file 上传文件
+     * @return 64 位小写十六进制哈希
+     * @throws IOException 读取上传流失败
+     */
+    private String sha256Hex(MultipartFile file) throws IOException {
+        try {
+            MessageDigest digest = MessageDigest.getInstance("SHA-256");
+            try (InputStream in = file.getInputStream()) {
+                byte[] buffer = new byte[8192];
+                int read;
+                while ((read = in.read(buffer)) != -1) {
+                    digest.update(buffer, 0, read);
+                }
+            }
+            return HexFormat.of().formatHex(digest.digest());
+        } catch (NoSuchAlgorithmException e) {
+            // SHA-256 是 JDK 必备算法，缺失说明运行环境异常
+            throw new IllegalStateException("SHA-256 算法不可用", e);
+        }
     }
 
     /**
@@ -233,7 +316,8 @@ public class AiDocumentServiceImpl implements AiDocumentService {
             log.error("文档解析失败: id={}, fileName={}", doc.getId(), doc.getFileName(), e);
             doc.setChunkCount(0);
             doc.setStatus("failed");
-            doc.setErrorMessage("文档解析失败，请检查文件内容后重试");
+            // Python 返回的 {code,message} 转成可操作提示（如扫描件提示上传 OCR 版本）
+            doc.setErrorMessage(ParseErrorSupport.toErrorMessage(e));
             documentMapper.updateById(doc);
         }
     }
@@ -376,6 +460,8 @@ public class AiDocumentServiceImpl implements AiDocumentService {
         vo.setStatus(entity.getStatus());
         vo.setErrorMessage(entity.getErrorMessage());
         vo.setCreateTime(entity.getCreateTime());
+        // 默认非重复；仅 upload 命中已有文档时由 reuseExisting 置 true
+        vo.setDuplicate(false);
         return vo;
     }
 }

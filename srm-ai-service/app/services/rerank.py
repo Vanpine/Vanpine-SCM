@@ -5,8 +5,9 @@
 rerank 用 query+doc 联合注意力精排，是「短问句 vs 长条款」最对症的杠杆。
 
 走硅基流动 /v1/rerank（bge-reranker-v2-m3），复用 EMBEDDING_API_KEY。
-关键：超时/失败不再回退原序——原序是弱相关候选，注入只会污染回答；
-改为返回空（宁缺毋滥），由上层走低置信拒答。
+关键：精排是「增强」不是「闸门」——超时/失败/返回异常时回退召回原序并标记
+rerank_degraded，不能返回空列表；返回空会被上层误判为「知识库没有相关资料」
+而直接拒答，用户明明有资料却得到"未找到依据"。
 """
 import logging
 import os
@@ -19,7 +20,7 @@ logger = logging.getLogger("srm-ai.rerank")
 RERANK_ENABLED = os.environ.get("RERANK_ENABLED", "true").lower() in ("1", "true", "yes")
 # 重排模型
 RERANK_MODEL = os.environ.get("RERANK_MODEL", "BAAI/bge-reranker-v2-m3")
-# 超时（秒）：短，失败即返回空，不拖垮问答
+# 超时（秒）：短，失败即回退召回原序（标记 degraded），不拖垮问答
 RERANK_TIMEOUT = float(os.environ.get("RERANK_TIMEOUT", "8"))
 # 复用 embedding 的 API 配置
 _BASE_URL = os.environ.get("EMBEDDING_BASE_URL", "https://api.siliconflow.cn/v1")
@@ -34,12 +35,37 @@ MAX_CANDIDATES = int(os.environ.get("RERANK_MAX_CANDIDATES", "20"))
 RERANK_SCORE_THRESHOLD = float(os.environ.get("RERANK_SCORE_THRESHOLD", "0.05"))
 
 
+def _degraded(candidates: list[dict], top_n: int) -> list[dict]:
+    """精排不可用时的降级结果：按召回原序返回 top_n，并标记 rerank_degraded。
+
+    为什么不返回空：上层（rag.retrieve → tools.search_knowledge_base）把空结果
+    当作「知识库没有相关资料」，会让模型拒答。精排服务抖动不应该等于没有资料，
+    召回原序虽不如精排准，但至少是相关候选。
+
+    为什么不伪造 rerank_score：下游按 rerank_score 做阈值过滤/观测，
+    编一个分数会污染日志和门禁判断；降级用独立字段标识。
+
+    Args:
+        candidates: 召回原序候选（dense/BM25 融合后）
+        top_n: 返回条数上限
+
+    Returns:
+        带 rerank_degraded=True 标记的候选副本
+    """
+    out = []
+    for cand in candidates[:top_n]:
+        item = dict(cand)
+        item["rerank_degraded"] = True
+        out.append(item)
+    return out
+
+
 def rerank(query: str, candidates: list[dict], top_n: int) -> list[dict]:
     """对候选块按与 query 的相关性重排，返回前 top_n 条（并过滤低置信块）。
 
     置信度门禁：分数低于 RERANK_SCORE_THRESHOLD 的候选直接丢弃。
-    失败（超时/网络/格式错/未配置 key）时返回空——不回退原序（原序是弱相关候选，
-    注入会污染回答），由上层据此走低置信拒答。
+    失败（超时/网络/格式错）时回退召回原序并标记 rerank_degraded——精排是增强层，
+    不可用不应导致整条知识问答链路被判「无资料」。
 
     Args:
         query: 用户提问
@@ -47,7 +73,8 @@ def rerank(query: str, candidates: list[dict], top_n: int) -> list[dict]:
         top_n: 返回条数上限
 
     Returns:
-        重排后、过阈值的 top_n 条（每条附 rerank_score）；失败或无达标候选则返回空。
+        重排后、过阈值的 top_n 条（每条附 rerank_score）；
+        未启用/无 key 时按原序返回 top_n；调用失败时按原序返回并标 rerank_degraded。
     """
     if not candidates:
         return []
@@ -59,12 +86,12 @@ def rerank(query: str, candidates: list[dict], top_n: int) -> list[dict]:
     try:
         scores = _call_rerank(query, docs)
     except Exception as e:
-        logger.warning("rerank 失败，返回空（不回退原序，交上层低置信拒答）: %s", e)
-        return []
+        logger.warning("rerank 失败，回退召回原序(top_n=%d): %s", top_n, e)
+        return _degraded(candidates, top_n)
 
     if len(scores) != len(docs):
-        logger.warning("rerank 返回条数不符(%d vs %d)，返回空", len(scores), len(docs))
-        return []
+        logger.warning("rerank 返回条数不符(%d vs %d)，回退召回原序", len(scores), len(docs))
+        return _degraded(candidates, top_n)
 
     ranked = sorted(zip(candidates[:MAX_CANDIDATES], scores),
                     key=lambda p: p[1], reverse=True)

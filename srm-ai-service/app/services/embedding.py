@@ -15,8 +15,8 @@ logger = logging.getLogger("srm-ai.embedding")
 
 # ==================== 配置（通过环境变量覆盖） ====================
 
-# Embedding API 密钥 — 从环境变量读取，不写死在代码里
-EMBEDDING_API_KEY = os.environ.get("EMBEDDING_API_KEY", "sk-luwhfzptejfkzawlbwvdjjzuirahdjelszpjrczdhfohuvsp")
+# Embedding API 密钥 — 仅从环境变量读取（.env / 服务器环境注入），代码中禁止写死
+EMBEDDING_API_KEY = os.environ.get("EMBEDDING_API_KEY", "")
 # Embedding API 地址 — 默认硅基流动（OpenAI 兼容接口）
 EMBEDDING_BASE_URL = os.environ.get("EMBEDDING_BASE_URL", "https://api.siliconflow.cn/v1")
 # Embedding 模型名称 — BGE-M3 多语言（100+语种），1024 维向量

@@ -1,9 +1,8 @@
-"""
-RAG 检索质量门禁测试（P0-1）
+"""RAG 检索质量门禁测试
 
 覆盖：
-  (a) rerank 分数低（低于阈值）→ 过滤掉，retrieve 返回空
-  (b) rerank 异常 → 返回空（不回退原序）
+  (a) rerank 分数低（低于阈值）→ 过滤掉
+  (b) rerank 异常 → 回退召回原序（标记 rerank_degraded），不再返回空
   (c) 高分 chunk → 正常返回
   (d) 未配置 key 时 → 保持旧行为（退回原序，不过滤）
 """
@@ -85,13 +84,14 @@ def test_mixed_below_threshold_dropped():
         restore()
 
 
-def test_rerank_exception_returns_empty():
-    """(b) rerank 异常 → 返回空，不回退原序。"""
+def test_rerank_exception_falls_back_to_original_order():
+    """(b) rerank 异常 → 回退召回原序并标记降级（空结果会被误判为「知识库没有」）。"""
     restore = _patch(raise_exc=True)
     try:
         cands = [{"content": "a"}, {"content": "b"}]
         out = rerank_mod.rerank("q", cands, 5)
-        assert out == [], f"异常应返回空而非原序: {out}"
+        assert [c["content"] for c in out] == ["a", "b"], f"异常应回退原序: {out}"
+        assert all(c.get("rerank_degraded") for c in out), out
     finally:
         restore()
 

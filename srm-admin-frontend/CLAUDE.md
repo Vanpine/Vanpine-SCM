@@ -270,7 +270,7 @@ cd srm-admin-backend && mvn clean install -DskipTests
 # 依次运行 5 个启动类（spring.profiles.active: dev）：
 #   GscGatewayApplication → GscPlatformApplication → GscSupplierApplication
 #   → GscTradeApplication → GscDeliveryApplication
-# 中间件：Nacos 120.77.169.224:8848，MySQL/Redis/RabbitMQ 120.26.30.114
+# 中间件：Nacos 120.26.30.114:8848，MySQL/Redis/RabbitMQ 120.26.30.114
 ```
 
 ## 详细规范

@@ -13,16 +13,23 @@ import io
 import logging
 import re
 
+from app.docparse.clean.toc import is_toc_line
 from app.services.chunker import Block
 
 logger = logging.getLogger("srm-ai.docx")
 
 # Word 标题样式：'Heading 1'..'Heading 9' / '标题 1'..（中文 Word）
 _HEADING_STYLE_RE = re.compile(r"^(?:Heading|标题)\s*(\d+)$", re.IGNORECASE)
+# Word 自动目录样式：'TOC 1'..'TOC 9' / '目录 1'..（中文 Word）
+_TOC_STYLE_RE = re.compile(r"^(?:TOC|目录)\s*\d*$", re.IGNORECASE)
+# 目录标题样式（不参与切分，同样丢弃）
+_TOC_STYLE_NAMES = {"TOC Heading", "目录标题"}
 # 列表样式
 _LIST_STYLE_HINT = ("List", "列表")
 # 表格转 Markdown 的最大行数（超出切片，每片重复表头）
 TABLE_MAX_ROWS = 40
+# 无 TOC 样式时，连续多少行目录特征才判定为手工目录（防误删正文）
+MIN_MANUAL_TOC_RUN = 3
 
 
 def extract_docx_blocks(raw_bytes: bytes) -> list[Block]:
@@ -61,6 +68,9 @@ def extract_docx_blocks(raw_bytes: bytes) -> list[Block]:
         elif tag == "tbl":
             _handle_table(document, child, blocks, heading_stack)
 
+    # 兜底：手工录入的目录没有 TOC 样式，按「连续目录特征行」识别并标记
+    _mark_manual_toc_runs(blocks)
+
     logger.info("docx 解析完成: %d 块", len(blocks))
     return blocks
 
@@ -76,6 +86,12 @@ def _handle_paragraph(document, p_element, blocks: list[Block],
         return
 
     style_name = (para.style.name if para.style else "") or ""
+
+    # 目录：标记为 toc，由 chunker 统一丢弃（目录含全部章节名，入库是强噪声）
+    if _is_toc_style(style_name):
+        blocks.append(Block(text=text, kind="toc",
+                            heading_path=list(heading_stack)))
+        return
 
     # 标题：style 名带 Heading N / 标题 N
     m = _HEADING_STYLE_RE.match(style_name.strip())
@@ -142,3 +158,38 @@ def _rows_to_md(header: list[str], body: list[list[str]]) -> str:
         r = r + [""] * (ncol - len(r))
         lines.append("| " + " | ".join(r) + " |")
     return "\n".join(lines)
+
+
+def _is_toc_style(style_name: str) -> bool:
+    """判断段落样式是否为 Word 自动目录（TOC 1..9 / 目录 1..9 / 目录标题）。"""
+    name = (style_name or "").strip()
+    return name in _TOC_STYLE_NAMES or bool(_TOC_STYLE_RE.match(name))
+
+
+def _looks_like_toc_entry(text: str) -> bool:
+    """按目录行特征判断（复用 PDF 目录的同一套规则）。
+
+    Word 目录用制表符分隔页码，先转成 4 个空格再交给共享识别器。
+    """
+    return is_toc_line((text or "").replace("\t", "    "))
+
+
+def _mark_manual_toc_runs(blocks: list[Block]) -> None:
+    """把连续 ≥3 行的手工目录段落标记为 toc（无 TOC 样式的兜底）。
+
+    只处理普通段落；不足 3 行不触发，避免把正文里零星的「详见附录...页码」误删。
+    """
+    run: list[Block] = []
+
+    def flush() -> None:
+        if len(run) >= MIN_MANUAL_TOC_RUN:
+            for block in run:
+                block.kind = "toc"
+        run.clear()
+
+    for block in blocks:
+        if block.kind == "para" and _looks_like_toc_entry(block.text):
+            run.append(block)
+        else:
+            flush()
+    flush()

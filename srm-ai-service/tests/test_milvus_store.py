@@ -50,7 +50,7 @@ def test_ensure_collection_raises_when_doc_id_missing(monkeypatch):
     monkeypatch.setattr(milvus_store, "_client", FakeMilvusClient(no_doc_id))
 
     with pytest.raises(RuntimeError, match="doc_id"):
-        milvus_store._ensure_collection(milvus_store.DOC_COLLECTION_NAME, with_doc_id=True)
+        milvus_store._ensure_doc_collection()
 
 
 def test_ensure_collection_passes_on_matching_schema(monkeypatch):
