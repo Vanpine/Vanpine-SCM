@@ -348,7 +348,7 @@ def _search_knowledge_base(arguments: dict, tenant_id: int | None, tool_token: s
     if tenant_id is None:
         return {"success": False, "result": None, "error": "缺少租户标识，无法检索知识库"}
     try:
-        from app.services.rag import retrieve
+        from app.rag.retrieve import retrieve
         hits = retrieve(str(query), tenant_id, tool_token=tool_token)
     except Exception as e:
         logger.error("知识库检索失败: %s", e, exc_info=True)

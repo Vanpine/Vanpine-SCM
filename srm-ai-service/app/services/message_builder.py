@@ -4,8 +4,8 @@
 依赖方向：message_builder → prompts / context_budget，反向无依赖，不成环。
 """
 from app.services.context_budget import _content_tokens, _enforce_total_budget
-from app.services.prompts import build_system_prompt
-from app.services.tokenizer import count_tokens
+from app.llm.prompts import build_system_prompt
+from app.document.tokenizer import count_tokens
 
 
 

@@ -8,7 +8,7 @@ import logging
 
 from langchain_core.messages import ToolMessage  # 工具结果消息（压缩时按类型筛）
 
-from app.services.tokenizer import count_tokens  # token 估算（与 Java TokenEstimator 同源）
+from app.document.tokenizer import count_tokens  # token 估算（与 Java TokenEstimator 同源）
 
 logger = logging.getLogger("srm-ai.context-budget")
 

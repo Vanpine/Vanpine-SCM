@@ -13,9 +13,9 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from app.services.docx_parser import extract_docx_blocks
-from app.services.chunker import build_chunks
-from app.services.tokenizer import count_tokens
+from app.document.parsers.docx import extract_docx_blocks
+from app.document.chunker import build_chunks
+from app.document.tokenizer import count_tokens
 
 
 def _make_docx() -> bytes:

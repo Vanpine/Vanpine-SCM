@@ -80,7 +80,7 @@ def test_temperature_lowered():
     改在定义它的模块源码里找字面量。
     """
     import inspect
-    from app.services import llm as llm_mod
+    from app.llm import client as llm_mod
     src = inspect.getsource(llm_mod._get_chat_llm)
     assert "temperature=0.2" in src, "对话温度应降到 0.2"
 

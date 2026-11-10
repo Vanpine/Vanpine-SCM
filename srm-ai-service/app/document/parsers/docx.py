@@ -14,7 +14,7 @@ import logging
 import re
 
 from app.docparse.clean.toc import is_toc_line
-from app.services.chunker import Block
+from app.document.chunker import Block
 
 logger = logging.getLogger("srm-ai.docx")
 

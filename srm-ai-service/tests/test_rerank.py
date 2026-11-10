@@ -11,7 +11,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from app.services import rerank as rerank_mod
+from app.rag import rerank as rerank_mod
 
 
 def _patch(monkey_score=None, raise_exc=False):

@@ -13,7 +13,7 @@
 import re
 from dataclasses import dataclass, field
 
-from app.services.tokenizer import count_tokens
+from app.document.tokenizer import count_tokens
 
 # ==================== 切分参数 ====================
 

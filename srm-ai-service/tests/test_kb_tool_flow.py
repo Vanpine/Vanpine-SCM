@@ -66,7 +66,7 @@ class _FakeLLM:
 
 def test_kb_tool_flow():
     import app.services.chat as chat
-    import app.services.rag as rag
+    from app.rag import retrieve as rag
 
     # 改的都是模块级全局，必须还原：不还原会污染后跑的测试
     # （曾导致 test_prompt_split 的 temperature 断言 inspect 到本文件里的 lambda 源码）
@@ -78,7 +78,7 @@ def test_kb_tool_flow():
         chat._get_tool_llm = lambda question="": fake
         chat._get_chat_llm = lambda: fake
         # mock 知识库检索。tools._search_knowledge_base 内部是
-        # `from app.services.rag import retrieve`（调用时实时取），patch 这里即可生效
+        # `from app.rag.retrieve import retrieve`（调用时实时取），patch 这里即可生效
         rag.retrieve = lambda q, tenant_id, top_k=5, tool_token="": [
             {"file_name": "准入制度.pdf", "heading_path": ["准入", "资质"],
              "content": "需提供营业执照、ISO 认证", "document_id": 7, "chunk_index": 3}

@@ -34,7 +34,7 @@ from app.services import tools  # noqa: E402
 
 
 def _patch_retrieve(hits=None, raise_exc=False):
-    import app.services.rag as rag_mod
+    from app.rag import retrieve as rag_mod
     orig = rag_mod.retrieve
 
     def fake(q, tenant_id, top_k=5, tool_token=""):

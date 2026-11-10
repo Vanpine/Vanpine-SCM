@@ -57,7 +57,7 @@ def parse_document(raw_bytes: bytes, file_type: str) -> ParseResult:
 def _dispatch(raw_bytes: bytes, real_type: str, meta: DocMeta) -> list:
     """按真实类型分派到对应解析器，并回填解析器信息。"""
     if real_type == "pdf":
-        from app.services.pdf_parser import parse_pdf_document
+        from app.document.parsers.pdf import parse_pdf_document
 
         blocks, info = parse_pdf_document(raw_bytes)
         meta.parser = "pypdf+pdfplumber"
@@ -71,19 +71,19 @@ def _dispatch(raw_bytes: bytes, real_type: str, meta: DocMeta) -> list:
         return blocks
 
     if real_type == "docx":
-        from app.services.docx_parser import extract_docx_blocks
+        from app.document.parsers.docx import extract_docx_blocks
 
         meta.parser = "python-docx"
         return extract_docx_blocks(raw_bytes)
 
     if real_type == "xlsx":
-        from app.services.excel_parser import extract_excel_blocks
+        from app.document.parsers.excel import extract_excel_blocks
 
         meta.parser = "openpyxl"
         return extract_excel_blocks(raw_bytes)
 
     if real_type in ("txt", "md"):
-        from app.services.chunker import extract_blocks
+        from app.document.chunker import extract_blocks
 
         meta.parser = "regex"
         return extract_blocks(_decode_text(raw_bytes))

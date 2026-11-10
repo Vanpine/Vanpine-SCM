@@ -37,7 +37,8 @@ from app.services.quote_analysis import (  # 比价分析服务
     generate_award_reason as do_generate_award_reason,
     suggest_inquiry_fields as do_suggest_inquiry_fields,
 )
-from app.services import rag, chat  # RAG 检索与流式对话
+from app.services import chat  # 流式对话
+from app.rag import retrieve as rag  # RAG 检索
 from app.docparse.types import DocumentParseError  # 带原因码的解析异常
 from app.services.intent import classify  # 意图预路由（元问题直答，防业务大表劫持）
 from app.services.query_rewriter import rewrite as rewrite_query  # 查询改写与指代消解

@@ -14,8 +14,8 @@ import pytest
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from app.services import rag as rag_mod  # noqa: E402
-from app.services import rerank as rerank_mod  # noqa: E402
+from app.rag import retrieve as rag_mod  # noqa: E402
+from app.rag import rerank as rerank_mod  # noqa: E402
 from app.store import milvus_store  # noqa: E402
 
 

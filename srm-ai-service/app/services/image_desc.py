@@ -12,7 +12,7 @@ import logging
 
 from app.services.compaction import _cut_at_boundary  # 按句边界收口（与摘要共用同一截断口径）
 from app.services.context_budget import _chunk_text  # 多模态块收成纯文本
-from app.services.llm import _get_chat_llm  # 与对话共用同一套 LLM 配置
+from app.llm.client import _get_chat_llm  # 与对话共用同一套 LLM 配置
 
 logger = logging.getLogger("srm-ai.image-desc")
 

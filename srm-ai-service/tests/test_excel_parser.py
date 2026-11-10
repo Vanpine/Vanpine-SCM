@@ -13,8 +13,8 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from app.services.excel_parser import extract_excel_blocks, TABLE_MAX_ROWS
-from app.services.chunker import build_chunks
+from app.document.parsers.excel import extract_excel_blocks, TABLE_MAX_ROWS
+from app.document.chunker import build_chunks
 
 
 def _make_xlsx() -> bytes:

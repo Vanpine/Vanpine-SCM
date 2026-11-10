@@ -30,7 +30,7 @@ from app.docparse.clean.header_footer import strip_running_lines
 from app.docparse.clean.text_repair import join_hyphenated_lines, merge_cross_page_blocks
 from app.docparse.clean.toc import strip_toc_pages
 from app.docparse.types import DocumentParseError, ParseErrorCode
-from app.services.chunker import Block
+from app.document.chunker import Block
 
 logger = logging.getLogger("srm-ai.pdf")
 
@@ -221,7 +221,7 @@ def _ocr_scanned_pages(raw_bytes: bytes, page_texts: list[str],
         scanned_indexes: 扫描页下标（0-based）
         info: 解析统计（累计 OCR 成功/失败页数）
     """
-    from app.services import vlm  # 惰性导入：避免未启用 OCR 时加载 LangChain 视觉客户端
+    from app.integrations import vlm  # 惰性导入：避免未启用 OCR 时加载 LangChain 视觉客户端
 
     if not vlm.is_available():
         logger.info("VLM 未启用或无密钥，跳过扫描页 OCR: %d 页", len(scanned_indexes))

@@ -13,7 +13,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from app.services import java_client
+from app.integrations import java_client
 
 
 class _FakeResp:

@@ -12,7 +12,7 @@
 """
 import logging  # 日志模块
 import re  # 正则表达式（提取中文关键词）
-from app.services.embedding import encode, build_requirement_text, build_profile_text
+from app.integrations.embedding import encode, build_requirement_text, build_profile_text
 from app.store.milvus_store import (
     query_similar,
     upsert_embedding,

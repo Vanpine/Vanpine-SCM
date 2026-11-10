@@ -14,8 +14,8 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from app.services.pdf_parser import extract_pdf_blocks, _MAX_PAGES
-from app.services.chunker import build_chunks
+from app.document.parsers.pdf import extract_pdf_blocks, _MAX_PAGES
+from app.document.chunker import build_chunks
 
 
 def _make_pdf(pages_text: list[str]) -> bytes:
@@ -60,7 +60,7 @@ def test_pdf_pages_extracted_with_number():
 def test_clause_recognized():
     """(b) 中文条款行被识别（用真实中文内容）。"""
     # 构造含中文条款的 PDF（用 pypdf 无法直接写中文，改用假数据走内部函数）
-    from app.services.pdf_parser import _text_to_blocks
+    from app.document.parsers.pdf import _text_to_blocks
     stack = ["合同"]
     blocks = []
     _text_to_blocks("第一条 标的物\n本合同标的物为钢材。\n第二条 付款\n货到付款。", stack, blocks, 1)

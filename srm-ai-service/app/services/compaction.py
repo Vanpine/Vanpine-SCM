@@ -7,7 +7,7 @@
 import logging
 
 from app.services.context_budget import _chunk_text
-from app.services.llm import _get_chat_llm
+from app.llm.client import _get_chat_llm
 from app.services.message_builder import _image_desc_text
 
 logger = logging.getLogger("srm-ai.compaction")

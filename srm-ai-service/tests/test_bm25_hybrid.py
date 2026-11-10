@@ -10,8 +10,8 @@
 import pytest
 from pymilvus import DataType
 
-from app.services import rag as rag_mod
-from app.services.chunker import Block
+from app.rag import retrieve as rag_mod
+from app.document.chunker import Block
 from app.store import milvus_store
 
 

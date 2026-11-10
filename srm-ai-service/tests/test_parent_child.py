@@ -12,7 +12,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from app.services.chunker import extract_blocks, build_parent_child, PARENT_TARGET_TOKENS
+from app.document.chunker import extract_blocks, build_parent_child, PARENT_TARGET_TOKENS
 
 # 长章节：同一标题下多段正文，聚合后应跨多个子块但归属同一父块
 LONG_DOC = """# 采购合同
@@ -67,7 +67,7 @@ def test_parent_target_not_exceeded():
     """(d) 父块不超过 PARENT_TARGET_TOKENS（除非单子块本身超）。"""
     blocks = extract_blocks(LONG_DOC)
     _, parents = build_parent_child(blocks)
-    from app.services.tokenizer import count_tokens
+    from app.document.tokenizer import count_tokens
     for p in parents:
         # 允许单子块超上限的极端情况，正常聚合不应超太多
         assert p["token_count"] <= PARENT_TARGET_TOKENS * 2

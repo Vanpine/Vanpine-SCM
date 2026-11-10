@@ -29,3 +29,6 @@ htmlcov/
 
 #codegraph
 .codegraph/
+
+# 本地 CI 配置（含部署凭据，不入库）
+.gitlab-ci.yml

@@ -24,7 +24,7 @@ import uuid  # 服务端强制调天气时生成 tool_call_id
 from langchain_core.messages import AIMessage, ToolMessage  # 工具循环消息
 
 from app.services.context_budget import _enforce_agent_budget  # 工具循环内预算兜底
-from app.services.llm import _get_chat_llm, _get_tool_llm, _kb_citation_sources  # LLM 客户端
+from app.llm.client import _get_chat_llm, _get_tool_llm, _kb_citation_sources  # LLM 客户端
 from app.services.message_builder import build_messages  # 消息组装
 from app.services.tool_context import project_tool_result  # 工具结果进上下文前的裁剪
 from app.services.tools import MAX_TOOL_ROUNDS, execute_tool, summarize  # 工具 schema + 执行
@@ -54,7 +54,7 @@ from app.services.context_budget import (  # noqa: E402,F401
     _msg_content,
     _shrink_old_tool_results,
 )
-from app.services.llm import (  # noqa: E402,F401
+from app.llm.client import (  # noqa: E402,F401
     _WEATHER_TOOL_NAME,
     _DeepSeekChatOpenAI,
     _tools_for,
@@ -68,7 +68,7 @@ from app.services.message_builder import (  # noqa: E402,F401
     _trim_assistant_answer,
     measure_context,
 )
-from app.services.prompts import (  # noqa: E402,F401
+from app.llm.prompts import (  # noqa: E402,F401
     AGENT_STATIC_PROMPT,
     BASE_SYSTEM_PROMPT,
     DISPLAY_RULE,

@@ -13,7 +13,7 @@ excel 解析器
 import io
 import logging
 
-from app.services.chunker import Block
+from app.document.chunker import Block
 
 logger = logging.getLogger("srm-ai.excel")
 

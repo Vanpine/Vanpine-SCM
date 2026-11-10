@@ -13,8 +13,8 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from app.services.tokenizer import count_tokens
-from app.services.chunker import (
+from app.document.tokenizer import count_tokens
+from app.document.chunker import (
     extract_blocks, build_chunks,
     CHUNK_MAX_TOKENS, CHUNK_TARGET_TOKENS,
 )

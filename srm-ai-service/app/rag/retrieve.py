@@ -11,9 +11,9 @@ import os  # 环境变量（父块预算可配）
 import logging  # 日志模块
 import uuid  # 生成确定性分块 ID（Milvus 主键需 int64，raw id 经 store 映射）
 import httpx  # HTTP 客户端（下载 OSS 文件，连接池复用）
-from app.services.embedding import encode, encode_batch  # Embedding 编码（单条/批量）
-from app.services.chunker import extract_blocks, build_chunks, build_parent_child  # 结构化/父子切分
-from app.services.tokenizer import count_tokens  # token 计量（父块预算截断用）
+from app.integrations.embedding import encode, encode_batch  # Embedding 编码（单条/批量）
+from app.document.chunker import extract_blocks, build_chunks, build_parent_child  # 结构化/父子切分
+from app.document.tokenizer import count_tokens  # token 计量（父块预算截断用）
 from app.store.milvus_store import upsert_chunks, query_chunks  # AI 文档向量写入/检索
 
 logger = logging.getLogger("srm-ai.rag")  # 模块日志器
@@ -104,7 +104,7 @@ def _rerank_parents(query: str, filled: list[dict], top_k: int) -> list[dict]:
         if count_tokens(content) > PARENT_MAX_TOKENS:
             f["content"] = _truncate_tokens(content, PARENT_MAX_TOKENS)
     try:
-        from app.services.rerank import rerank, RERANK_ENABLED, _API_KEY
+        from app.rag.rerank import rerank, RERANK_ENABLED, _API_KEY
         # rerank 未启用/无 key 时不调用（rerank 内部会退回原序，但这里显式短路省一次判断）
         if not RERANK_ENABLED or not _API_KEY:
             return filled[:top_k]
@@ -146,7 +146,7 @@ def _rerank(query: str, candidates: list[dict], top_k: int) -> list[dict]:
     if not candidates:
         return []
     try:
-        from app.services.rerank import rerank
+        from app.rag.rerank import rerank
         return rerank(query, candidates, top_k)
     except Exception as e:
         logger.warning("rerank 调用异常，回退召回原序(top_k=%d): %s", top_k, e)
@@ -170,7 +170,7 @@ def _backfill_parents(children: list[dict], tool_token: str = "") -> list[dict]:
     parents: dict[str, dict] = {}
     if parent_ids and tool_token:
         try:
-            from app.services.java_client import fetch_parents
+            from app.integrations.java_client import fetch_parents
             # parent_id 在写入时已加 document_id 前缀，跨文档唯一
             parents = fetch_parents(parent_ids, tool_token)
         except Exception as e:

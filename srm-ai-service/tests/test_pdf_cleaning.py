@@ -15,8 +15,8 @@ import pytest
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from app.docparse.types import DocumentParseError, ParseErrorCode
-from app.services import pdf_parser
-from app.services.pdf_parser import extract_pdf_blocks, parse_pdf_document
+from app.document.parsers import pdf as pdf_parser
+from app.document.parsers.pdf import extract_pdf_blocks, parse_pdf_document
 
 
 def _make_pdf_lines(pages: list[list[str]]) -> bytes:
@@ -127,7 +127,7 @@ def test_pdf_toc_page_not_indexed():
 
 def test_bookmark_heading_path_has_no_empty_segment():
     """书签标题跳级时 heading_path 不得出现空字符串占位。"""
-    from app.services.pdf_parser import _push_heading
+    from app.document.parsers.pdf import _push_heading
 
     stack: list[str] = []
     _push_heading(stack, 2, "目 录")
