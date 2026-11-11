@@ -1,0 +1,56 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="860" viewBox="0 0 1400 860">
+<rect width="1400" height="860" fill="#ffffff"/>
+<defs>
+              <marker id="arr" markerWidth="10" markerHeight="10" refX="9" refY="3.2" orient="auto" markerUnits="strokeWidth">
+                <path d="M0,0 L0,6.4 L9,3.2 z" fill="#6b7280"/>
+              </marker>
+              <marker id="arrb" markerWidth="10" markerHeight="10" refX="9" refY="3.2" orient="auto" markerUnits="strokeWidth">
+                <path d="M0,0 L0,6.4 L9,3.2 z" fill="#2e75b6"/>
+              </marker>
+              <marker id="arrg" markerWidth="10" markerHeight="10" refX="9" refY="3.2" orient="auto" markerUnits="strokeWidth">
+                <path d="M0,0 L0,6.4 L9,3.2 z" fill="#548235"/>
+              </marker>
+            </defs>
+<rect x="300" y="80" width="800" height="700" rx="14" fill="#fbfcfe" stroke="#1f4e79" stroke-width="2"/>
+<text x="700" y="122" text-anchor="middle" font-family="PingFang SC, Microsoft YaHei, SimSun, sans-serif" font-size="20" fill="#1f4e79" font-weight="bold" opacity="1.0">入驻审核与租户管理</text>
+<ellipse cx="480" cy="190.0" rx="108" ry="40" fill="#e8f1fb" stroke="#2e75b6" stroke-width="1.6"/>
+<text x="480" y="194.725" text-anchor="middle" font-family="PingFang SC, Microsoft YaHei, SimSun, sans-serif" font-size="13.5" fill="#1f4e79" font-weight="normal" opacity="1.0">提交入驻申请</text>
+<ellipse cx="480" cy="460.0" rx="108" ry="40" fill="#e8f1fb" stroke="#2e75b6" stroke-width="1.6"/>
+<text x="480" y="464.725" text-anchor="middle" font-family="PingFang SC, Microsoft YaHei, SimSun, sans-serif" font-size="13.5" fill="#1f4e79" font-weight="normal" opacity="1.0">上传资质材料</text>
+<ellipse cx="480" cy="730.0" rx="108" ry="40" fill="#e8f1fb" stroke="#2e75b6" stroke-width="1.6"/>
+<text x="480" y="734.725" text-anchor="middle" font-family="PingFang SC, Microsoft YaHei, SimSun, sans-serif" font-size="13.5" fill="#1f4e79" font-weight="normal" opacity="1.0">查看审核进度</text>
+<ellipse cx="1040" cy="190.0" rx="108" ry="40" fill="#e2efda" stroke="#548235" stroke-width="1.6"/>
+<text x="1040" y="194.725" text-anchor="middle" font-family="PingFang SC, Microsoft YaHei, SimSun, sans-serif" font-size="13.5" fill="#1f4e79" font-weight="normal" opacity="1.0">制裁名单筛查</text>
+<ellipse cx="1040" cy="298.0" rx="108" ry="40" fill="#e2efda" stroke="#548235" stroke-width="1.6"/>
+<text x="1040" y="302.725" text-anchor="middle" font-family="PingFang SC, Microsoft YaHei, SimSun, sans-serif" font-size="13.5" fill="#1f4e79" font-weight="normal" opacity="1.0">审核入驻申请</text>
+<ellipse cx="1040" cy="406.0" rx="108" ry="40" fill="#e2efda" stroke="#548235" stroke-width="1.6"/>
+<text x="1040" y="410.725" text-anchor="middle" font-family="PingFang SC, Microsoft YaHei, SimSun, sans-serif" font-size="13.5" fill="#1f4e79" font-weight="normal" opacity="1.0">开通企业租户</text>
+<ellipse cx="1040" cy="514.0" rx="108" ry="40" fill="#e2efda" stroke="#548235" stroke-width="1.6"/>
+<text x="1040" y="518.725" text-anchor="middle" font-family="PingFang SC, Microsoft YaHei, SimSun, sans-serif" font-size="13.5" fill="#1f4e79" font-weight="normal" opacity="1.0">初始化管理员</text>
+<ellipse cx="1040" cy="622.0" rx="108" ry="40" fill="#e2efda" stroke="#548235" stroke-width="1.6"/>
+<text x="1040" y="626.725" text-anchor="middle" font-family="PingFang SC, Microsoft YaHei, SimSun, sans-serif" font-size="13.5" fill="#1f4e79" font-weight="normal" opacity="1.0">分配角色菜单</text>
+<ellipse cx="1040" cy="730.0" rx="108" ry="40" fill="#e2efda" stroke="#548235" stroke-width="1.6"/>
+<text x="1040" y="734.725" text-anchor="middle" font-family="PingFang SC, Microsoft YaHei, SimSun, sans-serif" font-size="13.5" fill="#1f4e79" font-weight="normal" opacity="1.0">停用/启用租户</text>
+<circle cx="120" cy="414.0" r="14.0" fill="#fff" stroke="#1f4e79" stroke-width="2"/>
+<line x1="120" y1="428.0" x2="120" y2="468.0" stroke="#1f4e79" stroke-width="2"/>
+<line x1="100.0" y1="444.0" x2="140.0" y2="444.0" stroke="#1f4e79" stroke-width="2"/>
+<line x1="120" y1="468.0" x2="104.0" y2="494.0" stroke="#1f4e79" stroke-width="2"/>
+<line x1="120" y1="468.0" x2="136.0" y2="494.0" stroke="#1f4e79" stroke-width="2"/>
+<text x="120" y="522.0" text-anchor="middle" font-family="PingFang SC, Microsoft YaHei, SimSun, sans-serif" font-size="17" fill="#1f4e79" font-weight="bold" opacity="1.0">申请企业</text>
+<line x1="178" y1="460.0" x2="378" y2="190.0" stroke="#9db4cc" stroke-width="1.1"/>
+<line x1="178" y1="460.0" x2="378" y2="460.0" stroke="#9db4cc" stroke-width="1.1"/>
+<line x1="178" y1="460.0" x2="378" y2="730.0" stroke="#9db4cc" stroke-width="1.1"/>
+<circle cx="1380" cy="414.0" r="14.0" fill="#fff" stroke="#1f4e79" stroke-width="2"/>
+<line x1="1380" y1="428.0" x2="1380" y2="468.0" stroke="#1f4e79" stroke-width="2"/>
+<line x1="1360.0" y1="444.0" x2="1400.0" y2="444.0" stroke="#1f4e79" stroke-width="2"/>
+<line x1="1380" y1="468.0" x2="1364.0" y2="494.0" stroke="#1f4e79" stroke-width="2"/>
+<line x1="1380" y1="468.0" x2="1396.0" y2="494.0" stroke="#1f4e79" stroke-width="2"/>
+<text x="1380" y="522.0" text-anchor="middle" font-family="PingFang SC, Microsoft YaHei, SimSun, sans-serif" font-size="17" fill="#1f4e79" font-weight="bold" opacity="1.0">平台管理员</text>
+<line x1="1322" y1="460.0" x2="1142" y2="190.0" stroke="#9dbf9a" stroke-width="1.1"/>
+<line x1="1322" y1="460.0" x2="1142" y2="298.0" stroke="#9dbf9a" stroke-width="1.1"/>
+<line x1="1322" y1="460.0" x2="1142" y2="406.0" stroke="#9dbf9a" stroke-width="1.1"/>
+<line x1="1322" y1="460.0" x2="1142" y2="514.0" stroke="#9dbf9a" stroke-width="1.1"/>
+<line x1="1322" y1="460.0" x2="1142" y2="622.0" stroke="#9dbf9a" stroke-width="1.1"/>
+<line x1="1322" y1="460.0" x2="1142" y2="730.0" stroke="#9dbf9a" stroke-width="1.1"/>
+<text x="700" y="825" text-anchor="middle" font-family="PingFang SC, Microsoft YaHei, SimSun, sans-serif" font-size="15" fill="#7f7f7f" font-weight="normal" opacity="1.0">图3-2  入驻审核与租户管理子用例图</text>
+</svg>

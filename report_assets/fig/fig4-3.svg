@@ -1,0 +1,93 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1080" viewBox="0 0 1600 1080">
+<rect width="1600" height="1080" fill="#ffffff"/>
+<defs>
+              <marker id="arr" markerWidth="10" markerHeight="10" refX="9" refY="3.2" orient="auto" markerUnits="strokeWidth">
+                <path d="M0,0 L0,6.4 L9,3.2 z" fill="#6b7280"/>
+              </marker>
+              <marker id="arrb" markerWidth="10" markerHeight="10" refX="9" refY="3.2" orient="auto" markerUnits="strokeWidth">
+                <path d="M0,0 L0,6.4 L9,3.2 z" fill="#2e75b6"/>
+              </marker>
+              <marker id="arrg" markerWidth="10" markerHeight="10" refX="9" refY="3.2" orient="auto" markerUnits="strokeWidth">
+                <path d="M0,0 L0,6.4 L9,3.2 z" fill="#548235"/>
+              </marker>
+            </defs>
+<text x="800" y="46" text-anchor="middle" font-family="PingFang SC, Microsoft YaHei, SimSun, sans-serif" font-size="24" fill="#1f4e79" font-weight="bold" opacity="1.0">系统技术架构</text>
+<rect x="70" y="90" width="1460" height="110" rx="12" fill="#e8f1fb" stroke="#2e75b6" stroke-width="1.5"/>
+<text x="175" y="145" text-anchor="middle" font-family="PingFang SC, Microsoft YaHei, SimSun, sans-serif" font-size="18" fill="#2e75b6" font-weight="bold" opacity="1.0">前端展现层</text>
+<rect x="418" y="112" width="200" height="66" rx="8" fill="#fff" stroke="#2e75b6" stroke-width="1.2"/>
+<text x="518.0" y="153" text-anchor="middle" font-family="PingFang SC, Microsoft YaHei, SimSun, sans-serif" font-size="14" fill="#1f2937" font-weight="normal" opacity="1.0">Vue 3.5</text>
+<rect x="636" y="112" width="200" height="66" rx="8" fill="#fff" stroke="#2e75b6" stroke-width="1.2"/>
+<text x="736.0" y="153" text-anchor="middle" font-family="PingFang SC, Microsoft YaHei, SimSun, sans-serif" font-size="14" fill="#1f2937" font-weight="normal" opacity="1.0">Vite 8</text>
+<rect x="854" y="112" width="200" height="66" rx="8" fill="#fff" stroke="#2e75b6" stroke-width="1.2"/>
+<text x="954.0" y="153" text-anchor="middle" font-family="PingFang SC, Microsoft YaHei, SimSun, sans-serif" font-size="14" fill="#1f2937" font-weight="normal" opacity="1.0">Element Plus</text>
+<rect x="1072" y="112" width="200" height="66" rx="8" fill="#fff" stroke="#2e75b6" stroke-width="1.2"/>
+<text x="1172.0" y="153" text-anchor="middle" font-family="PingFang SC, Microsoft YaHei, SimSun, sans-serif" font-size="14" fill="#1f2937" font-weight="normal" opacity="1.0">Pinia / Vue Router</text>
+<rect x="1290" y="112" width="200" height="66" rx="8" fill="#fff" stroke="#2e75b6" stroke-width="1.2"/>
+<text x="1390.0" y="153" text-anchor="middle" font-family="PingFang SC, Microsoft YaHei, SimSun, sans-serif" font-size="14" fill="#1f2937" font-weight="normal" opacity="1.0">Vue I18n / Tailwind</text>
+<rect x="70" y="230" width="1460" height="110" rx="12" fill="#dbe5f1" stroke="#1f4e79" stroke-width="1.5"/>
+<text x="175" y="285" text-anchor="middle" font-family="PingFang SC, Microsoft YaHei, SimSun, sans-serif" font-size="18" fill="#1f4e79" font-weight="bold" opacity="1.0">网关与安全层</text>
+<rect x="418" y="252" width="200" height="66" rx="8" fill="#fff" stroke="#1f4e79" stroke-width="1.2"/>
+<text x="518.0" y="293" text-anchor="middle" font-family="PingFang SC, Microsoft YaHei, SimSun, sans-serif" font-size="14" fill="#1f2937" font-weight="normal" opacity="1.0">Spring Cloud Gateway</text>
+<rect x="636" y="252" width="200" height="66" rx="8" fill="#fff" stroke="#1f4e79" stroke-width="1.2"/>
+<text x="736.0" y="293" text-anchor="middle" font-family="PingFang SC, Microsoft YaHei, SimSun, sans-serif" font-size="14" fill="#1f2937" font-weight="normal" opacity="1.0">JWT 鉴权</text>
+<rect x="854" y="252" width="200" height="66" rx="8" fill="#fff" stroke="#1f4e79" stroke-width="1.2"/>
+<text x="954.0" y="293" text-anchor="middle" font-family="PingFang SC, Microsoft YaHei, SimSun, sans-serif" font-size="14" fill="#1f2937" font-weight="normal" opacity="1.0">Sentinel 限流</text>
+<rect x="1072" y="252" width="200" height="66" rx="8" fill="#fff" stroke="#1f4e79" stroke-width="1.2"/>
+<text x="1172.0" y="293" text-anchor="middle" font-family="PingFang SC, Microsoft YaHei, SimSun, sans-serif" font-size="14" fill="#1f2937" font-weight="normal" opacity="1.0">CORS</text>
+<rect x="1290" y="252" width="200" height="66" rx="8" fill="#fff" stroke="#1f4e79" stroke-width="1.2"/>
+<text x="1390.0" y="293" text-anchor="middle" font-family="PingFang SC, Microsoft YaHei, SimSun, sans-serif" font-size="14" fill="#1f2937" font-weight="normal" opacity="1.0">内部接口白名单</text>
+<rect x="70" y="370" width="1460" height="110" rx="12" fill="#dbe5f1" stroke="#1f4e79" stroke-width="1.5"/>
+<text x="175" y="425" text-anchor="middle" font-family="PingFang SC, Microsoft YaHei, SimSun, sans-serif" font-size="18" fill="#1f4e79" font-weight="bold" opacity="1.0">业务服务层</text>
+<rect x="418" y="392" width="200" height="66" rx="8" fill="#fff" stroke="#1f4e79" stroke-width="1.2"/>
+<text x="518.0" y="433" text-anchor="middle" font-family="PingFang SC, Microsoft YaHei, SimSun, sans-serif" font-size="14" fill="#1f2937" font-weight="normal" opacity="1.0">Spring Boot 3.3.7</text>
+<rect x="636" y="392" width="200" height="66" rx="8" fill="#fff" stroke="#1f4e79" stroke-width="1.2"/>
+<text x="736.0" y="433" text-anchor="middle" font-family="PingFang SC, Microsoft YaHei, SimSun, sans-serif" font-size="14" fill="#1f2937" font-weight="normal" opacity="1.0">Spring Cloud Alibaba</text>
+<rect x="854" y="392" width="200" height="66" rx="8" fill="#fff" stroke="#1f4e79" stroke-width="1.2"/>
+<text x="954.0" y="433" text-anchor="middle" font-family="PingFang SC, Microsoft YaHei, SimSun, sans-serif" font-size="14" fill="#1f2937" font-weight="normal" opacity="1.0">OpenFeign</text>
+<rect x="1072" y="392" width="200" height="66" rx="8" fill="#fff" stroke="#1f4e79" stroke-width="1.2"/>
+<text x="1172.0" y="433" text-anchor="middle" font-family="PingFang SC, Microsoft YaHei, SimSun, sans-serif" font-size="14" fill="#1f2937" font-weight="normal" opacity="1.0">MyBatis-Plus 3.5.7</text>
+<rect x="1290" y="392" width="200" height="66" rx="8" fill="#fff" stroke="#1f4e79" stroke-width="1.2"/>
+<text x="1390.0" y="433" text-anchor="middle" font-family="PingFang SC, Microsoft YaHei, SimSun, sans-serif" font-size="14" fill="#1f2937" font-weight="normal" opacity="1.0">Knife4j</text>
+<rect x="70" y="510" width="1460" height="110" rx="12" fill="#fbe5d6" stroke="#c55a11" stroke-width="1.5"/>
+<text x="175" y="565" text-anchor="middle" font-family="PingFang SC, Microsoft YaHei, SimSun, sans-serif" font-size="18" fill="#c55a11" font-weight="bold" opacity="1.0">中间件与数据层</text>
+<rect x="418" y="532" width="200" height="66" rx="8" fill="#fff" stroke="#c55a11" stroke-width="1.2"/>
+<text x="518.0" y="573" text-anchor="middle" font-family="PingFang SC, Microsoft YaHei, SimSun, sans-serif" font-size="14" fill="#1f2937" font-weight="normal" opacity="1.0">Nacos 注册配置</text>
+<rect x="636" y="532" width="200" height="66" rx="8" fill="#fff" stroke="#c55a11" stroke-width="1.2"/>
+<text x="736.0" y="573" text-anchor="middle" font-family="PingFang SC, Microsoft YaHei, SimSun, sans-serif" font-size="14" fill="#1f2937" font-weight="normal" opacity="1.0">RabbitMQ</text>
+<rect x="854" y="532" width="200" height="66" rx="8" fill="#fff" stroke="#c55a11" stroke-width="1.2"/>
+<text x="954.0" y="573" text-anchor="middle" font-family="PingFang SC, Microsoft YaHei, SimSun, sans-serif" font-size="14" fill="#1f2937" font-weight="normal" opacity="1.0">Redis</text>
+<rect x="1072" y="532" width="200" height="66" rx="8" fill="#fff" stroke="#c55a11" stroke-width="1.2"/>
+<text x="1172.0" y="573" text-anchor="middle" font-family="PingFang SC, Microsoft YaHei, SimSun, sans-serif" font-size="14" fill="#1f2937" font-weight="normal" opacity="1.0">MySQL 8</text>
+<rect x="1290" y="532" width="200" height="66" rx="8" fill="#fff" stroke="#c55a11" stroke-width="1.2"/>
+<text x="1390.0" y="573" text-anchor="middle" font-family="PingFang SC, Microsoft YaHei, SimSun, sans-serif" font-size="14" fill="#1f2937" font-weight="normal" opacity="1.0">Zipkin 链路追踪</text>
+<rect x="70" y="650" width="1460" height="110" rx="12" fill="#eee4f6" stroke="#7030a0" stroke-width="1.5"/>
+<text x="175" y="705" text-anchor="middle" font-family="PingFang SC, Microsoft YaHei, SimSun, sans-serif" font-size="18" fill="#7030a0" font-weight="bold" opacity="1.0">AI 能力层</text>
+<rect x="418" y="672" width="200" height="66" rx="8" fill="#fff" stroke="#7030a0" stroke-width="1.2"/>
+<text x="518.0" y="713" text-anchor="middle" font-family="PingFang SC, Microsoft YaHei, SimSun, sans-serif" font-size="14" fill="#1f2937" font-weight="normal" opacity="1.0">Python 3.9+</text>
+<rect x="636" y="672" width="200" height="66" rx="8" fill="#fff" stroke="#7030a0" stroke-width="1.2"/>
+<text x="736.0" y="713" text-anchor="middle" font-family="PingFang SC, Microsoft YaHei, SimSun, sans-serif" font-size="14" fill="#1f2937" font-weight="normal" opacity="1.0">FastAPI</text>
+<rect x="854" y="672" width="200" height="66" rx="8" fill="#fff" stroke="#7030a0" stroke-width="1.2"/>
+<text x="954.0" y="713" text-anchor="middle" font-family="PingFang SC, Microsoft YaHei, SimSun, sans-serif" font-size="14" fill="#1f2937" font-weight="normal" opacity="1.0">LangChain</text>
+<rect x="1072" y="672" width="200" height="66" rx="8" fill="#fff" stroke="#7030a0" stroke-width="1.2"/>
+<text x="1172.0" y="713" text-anchor="middle" font-family="PingFang SC, Microsoft YaHei, SimSun, sans-serif" font-size="14" fill="#1f2937" font-weight="normal" opacity="1.0">Milvus</text>
+<rect x="1290" y="672" width="200" height="66" rx="8" fill="#fff" stroke="#7030a0" stroke-width="1.2"/>
+<text x="1390.0" y="713" text-anchor="middle" font-family="PingFang SC, Microsoft YaHei, SimSun, sans-serif" font-size="14" fill="#1f2937" font-weight="normal" opacity="1.0">DeepSeek / bge-m3</text>
+<rect x="70" y="790" width="1460" height="110" rx="12" fill="#e2efda" stroke="#548235" stroke-width="1.5"/>
+<text x="175" y="845" text-anchor="middle" font-family="PingFang SC, Microsoft YaHei, SimSun, sans-serif" font-size="18" fill="#548235" font-weight="bold" opacity="1.0">工程与部署层</text>
+<rect x="418" y="812" width="200" height="66" rx="8" fill="#fff" stroke="#548235" stroke-width="1.2"/>
+<text x="518.0" y="853" text-anchor="middle" font-family="PingFang SC, Microsoft YaHei, SimSun, sans-serif" font-size="14" fill="#1f2937" font-weight="normal" opacity="1.0">Maven 多模块</text>
+<rect x="636" y="812" width="200" height="66" rx="8" fill="#fff" stroke="#548235" stroke-width="1.2"/>
+<text x="736.0" y="853" text-anchor="middle" font-family="PingFang SC, Microsoft YaHei, SimSun, sans-serif" font-size="14" fill="#1f2937" font-weight="normal" opacity="1.0">Docker Compose</text>
+<rect x="854" y="812" width="200" height="66" rx="8" fill="#fff" stroke="#548235" stroke-width="1.2"/>
+<text x="954.0" y="853" text-anchor="middle" font-family="PingFang SC, Microsoft YaHei, SimSun, sans-serif" font-size="14" fill="#1f2937" font-weight="normal" opacity="1.0">systemd</text>
+<rect x="1072" y="812" width="200" height="66" rx="8" fill="#fff" stroke="#548235" stroke-width="1.2"/>
+<text x="1172.0" y="853" text-anchor="middle" font-family="PingFang SC, Microsoft YaHei, SimSun, sans-serif" font-size="14" fill="#1f2937" font-weight="normal" opacity="1.0">Nginx</text>
+<rect x="1290" y="812" width="200" height="66" rx="8" fill="#fff" stroke="#548235" stroke-width="1.2"/>
+<text x="1390.0" y="853" text-anchor="middle" font-family="PingFang SC, Microsoft YaHei, SimSun, sans-serif" font-size="14" fill="#1f2937" font-weight="normal" opacity="1.0">Git</text>
+<line x1="800" y1="200" x2="800" y2="230" stroke="#6b7280" stroke-width="1.4" marker-end="url(#arr)"/>
+<line x1="800" y1="340" x2="800" y2="370" stroke="#6b7280" stroke-width="1.4" marker-end="url(#arr)"/>
+<line x1="800" y1="480" x2="800" y2="510" stroke="#6b7280" stroke-width="1.4" marker-end="url(#arr)"/>
+<line x1="800" y1="620" x2="800" y2="650" stroke="#6b7280" stroke-width="1.4" marker-end="url(#arr)"/>
+<line x1="800" y1="760" x2="800" y2="790" stroke="#6b7280" stroke-width="1.4" marker-end="url(#arr)"/>
+<text x="800" y="970" text-anchor="middle" font-family="PingFang SC, Microsoft YaHei, SimSun, sans-serif" font-size="15" fill="#7f7f7f" font-weight="normal" opacity="1.0">后端按业务域拆分为 5 个 Spring Boot 微服务，统一由网关暴露；AI 计算下沉至独立 Python 服务</text>
+</svg>

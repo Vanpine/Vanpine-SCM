@@ -41,7 +41,7 @@ REQ_COLLECTION_NAME = "open_requirements"
 DOC_COLLECTION_NAME = os.environ.get("DOC_COLLECTION_NAME", "ai_doc_chunks_v2")
 
 # Milvus 连接地址 — 默认指向内网 Milvus，可通过环境变量覆盖
-MILVUS_HOST = os.environ.get("MILVUS_HOST", "120.77.169.224")
+MILVUS_HOST = os.environ.get("MILVUS_HOST", "118.31.5.158")
 MILVUS_PORT = int(os.environ.get("MILVUS_PORT", "19530"))
 # 向量维度 — 与 embedding.py 的 VECTOR_DIM 保持一致（默认 1024）
 VECTOR_DIM = int(os.environ.get("EMBEDDING_VECTOR_DIM", "1024"))

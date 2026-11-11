@@ -1,0 +1,121 @@
+<!DOCTYPE html><html><head><meta charset="utf-8"><style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{width:1600px;height:1000px;overflow:hidden;font-family:'Noto Sans SC','PingFang SC','Microsoft YaHei',sans-serif;
+color:#334155;background:#f5f6f8;letter-spacing:.4px;font-size:14px}
+.app{display:flex;width:1600px;height:1000px}
+.sidebar{width:220px;flex:0 0 220px;background:linear-gradient(180deg,#0d1b2a 0%,#0a1525 100%);color:#fff;padding:18px 12px;display:flex;flex-direction:column}
+.brand{display:flex;align-items:center;gap:10px;padding:4px 10px 22px}
+.brand .mark{width:34px;height:34px;border-radius:9px;background:linear-gradient(135deg,#0066ff,#00b4ff);display:grid;place-items:center;font-weight:800;font-size:15px}
+.brand .name{font-size:17px;font-weight:700;letter-spacing:.5px}
+.brand .sub{font-size:10px;color:rgba(255,255,255,.45);margin-top:2px;letter-spacing:1px}
+.menu{flex:1;overflow:hidden}
+.mgroup{font-size:11px;color:rgba(255,255,255,.3);margin:16px 12px 6px;letter-spacing:1.5px}
+.mitem{display:flex;align-items:center;gap:10px;height:38px;padding:0 12px;border-radius:8px;color:rgba(255,255,255,.62);font-size:13.5px;margin-bottom:2px}
+.mitem svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:1.7;opacity:.9}
+.mitem.active{background:linear-gradient(135deg,rgba(0,102,255,.38),rgba(0,160,255,.18));color:#fff;box-shadow:inset 0 0 0 1px rgba(0,180,255,.18)}
+.mitem.active svg{stroke:#00b4ff}
+.main{flex:1;display:flex;flex-direction:column;min-width:0}
+.header{height:62px;background:#fff;display:flex;align-items:center;justify-content:space-between;padding:0 26px;box-shadow:0 1px 3px rgba(15,23,42,.06);z-index:2}
+.crumb{font-size:15px;color:#64748b}
+.crumb b{color:#1a1a2e;font-weight:600}
+.hactions{display:flex;align-items:center;gap:18px;color:#94a3b8}
+.hicon{width:34px;height:34px;border-radius:9px;background:#f1f5f9;display:grid;place-items:center;position:relative}
+.hicon svg{width:17px;height:17px;stroke:#64748b;fill:none;stroke-width:1.7}
+.dot{position:absolute;right:7px;top:7px;width:7px;height:7px;border-radius:50%;background:#f56c6c;border:2px solid #fff}
+.user{display:flex;align-items:center;gap:9px;color:#334155;font-size:13.5px}
+.avatar{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,#0066ff,#00b4ff);color:#fff;display:grid;place-items:center;font-weight:600;font-size:13px}
+.content{flex:1;padding:16px 24px 18px;overflow:hidden}
+.page-title{font-size:20px;font-weight:700;color:#1a1a2e;margin-bottom:4px}
+.page-sub{font-size:12.5px;color:#94a3b8;margin-bottom:16px}
+.card{background:#fff;border-radius:12px;box-shadow:0 1px 3px rgba(15,23,42,.06)}
+.row{display:flex;gap:16px}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:16px}
+.stat{padding:18px 20px;position:relative;overflow:hidden}
+.stat .lab{font-size:13px;color:#64748b}
+.stat .num{font-size:30px;font-weight:700;color:#1a1a2e;margin-top:8px;font-family:'DIN Alternate','PingFang SC',sans-serif}
+.stat .trend{font-size:11.5px;color:#16a34a;margin-top:6px}
+.stat .trend.down{color:#dc2626}
+.stat .ico{position:absolute;right:18px;top:18px;width:36px;height:36px;border-radius:10px;display:grid;place-items:center}
+.stat .ico svg{width:19px;height:19px;fill:none;stroke:#0066ff;stroke-width:1.8}
+.btn{display:inline-flex;align-items:center;gap:6px;height:34px;padding:0 16px;border-radius:8px;font-size:13px}
+.btn.primary{background:#0066ff;color:#fff;box-shadow:0 4px 10px rgba(0,102,255,.22)}
+.btn.plain{background:#fff;color:#475569;border:1px solid #e2e8f0}
+.btn.ghost{background:#f1f5f9;color:#475569}
+.tag{display:inline-flex;align-items:center;height:23px;padding:0 9px;border-radius:5px;font-size:11.5px;font-weight:500}
+.tag.green{background:#e8f7ee;color:#15803d}.tag.blue{background:#e8f1ff;color:#1d4ed8}
+.tag.orange{background:#fff3e6;color:#c2410c}.tag.red{background:#feecec;color:#b91c1c}
+.tag.gray{background:#f1f5f9;color:#64748b}.tag.purple{background:#f2ebff;color:#6d28d9}
+table{width:100%;border-collapse:collapse}
+th{background:#f8fafc;color:#64748b;font-size:12px;font-weight:600;text-align:left;padding:11px 14px;border-bottom:1px solid #eef2f7;white-space:nowrap}
+td{font-size:13px;padding:12px 14px;border-bottom:1px solid #f1f5f9;color:#334155;white-space:nowrap}
+tr:last-child td{border-bottom:none}
+.link{color:#0066ff}
+.muted{color:#94a3b8;font-size:12px}
+.field{display:flex;flex-direction:column;gap:7px}
+.field label{font-size:12.5px;color:#64748b}
+.input{height:38px;border:1px solid #e2e8f0;border-radius:8px;display:flex;align-items:center;padding:0 12px;color:#334155;background:#fff;font-size:13.5px}
+.input.filled{color:#1e293b}
+.select::after{content:'⌄';margin-left:auto;color:#94a3b8}
+.ring{width:116px;height:116px;border-radius:50%;background:conic-gradient(#0066ff 0 86%,#eef2f7 86% 100%);display:grid;place-items:center;position:relative}
+.ring::after{content:'';position:absolute;inset:9px;border-radius:50%;background:#fff}
+.ring span{position:relative;z-index:1;font-size:26px;font-weight:700;color:#0066ff}
+.ring span small{font-size:12px;color:#94a3b8;font-weight:500}
+.pbar{height:7px;border-radius:6px;background:#eef2f7;overflow:hidden}
+.pbar i{display:block;height:100%;border-radius:6px;background:linear-gradient(90deg,#0066ff,#00b4ff)}
+</style></head>
+<body><div class="app"><aside class="sidebar"><div class="brand"><div class="mark">V</div><div><div class="name">Vanpine SRM</div><div class="sub">GLOBAL SUPPLIER NETWORK</div></div></div><nav class="menu"><div class="mitem"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg><span>工作台</span></div><div class="mgroup">智能撮合</div><div class="mitem"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.6-6.5 8-6.5s8 2.5 8 6.5"/></svg><span>企业画像</span></div><div class="mitem"><svg viewBox="0 0 24 24"><path d="M6 3h8l4 4v14H6z"/><path d="M14 3v4h4M9 12h6M9 16h6"/></svg><span>采购需求</span></div><div class="mitem"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c0-3.6 3-5.8 6.5-5.8s6.5 2.2 6.5 5.8"/><path d="M16 5.2a3.5 3.5 0 0 1 0 6.6M17.5 14.5c2.4.5 4 2.3 4 5"/></svg><span>对接记录</span></div><div class="mitem"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg><span>找供应商</span></div><div class="mgroup">采购管理</div><div class="mitem"><svg viewBox="0 0 24 24"><path d="M21 3 10 14"/><path d="M21 3 14 21l-4-7-7-4z"/></svg><span>询盘管理</span></div><div class="mitem"><svg viewBox="0 0 24 24"><path d="M4 20V9M10 20V4M16 20v-7M22 20H2"/></svg><span>比价管理</span></div><div class="mitem"><svg viewBox="0 0 24 24"><path d="M5 3h9l5 5v13H5z"/><path d="M14 3v5h5M8 13h8M8 17h5"/></svg><span>合同管理</span></div><div class="mgroup">可信交付</div><div class="mitem"><svg viewBox="0 0 24 24"><path d="M3 6h10v10H3zM13 10h4l4 3v3h-8z"/><circle cx="7" cy="18" r="2"/><circle cx="17.5" cy="18" r="2"/></svg><span>发货管理</span></div><div class="mitem"><svg viewBox="0 0 24 24"><path d="M3 7.5 12 3l9 4.5v9L12 21l-9-4.5z"/><path d="M3 7.5 12 12l9-4.5M12 12v9"/></svg><span>收货确认</span></div><div class="mitem"><svg viewBox="0 0 24 24"><path d="m4 12 5 5L20 6"/></svg><span>验收管理</span></div><div class="mitem"><svg viewBox="0 0 24 24"><path d="M12 3 2.5 20h19z"/><path d="M12 9v5M12 17.2v.3"/></svg><span>风险监控</span></div><div class="mitem"><svg viewBox="0 0 24 24"><path d="M12 3 4 6v6c0 5 3.4 8 8 9 4.6-1 8-4 8-9V6z"/><path d="m8.5 12 2.5 2.5 4.5-5"/></svg><span>尽职调查</span></div><div class="mitem"><svg viewBox="0 0 24 24"><rect x="4" y="8" width="16" height="12" rx="3"/><path d="M12 4v4M8 14h.01M16 14h.01M9 18h6"/></svg><span>AI 知识库</span></div><div class="mgroup">系统管理</div><div class="mitem"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3 3.5 3 14 0 18M12 3c-3 3.5-3 14 0 18"/></svg><span>租户管理</span></div><div class="mitem"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c0-3.6 3-5.8 6.5-5.8s6.5 2.2 6.5 5.8"/><path d="M16 5.2a3.5 3.5 0 0 1 0 6.6M17.5 14.5c2.4.5 4 2.3 4 5"/></svg><span>用户管理</span></div><div class="mitem active"><svg viewBox="0 0 24 24"><path d="M6 3h8l4 4v14H6z"/><path d="M14 3v4h4M9 12h6M9 16h6"/></svg><span>入驻预审</span></div><div class="mitem"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/></svg><span>操作日志</span></div><div class="mitem"><svg viewBox="0 0 24 24"><path d="M12 3 4 6v6c0 5 3.4 8 8 9 4.6-1 8-4 8-9V6z"/><path d="m8.5 12 2.5 2.5 4.5-5"/></svg><span>制裁名单</span></div></nav></aside><div class="main"><header class="header">
+      <div class="crumb">首页 / <b>入驻预审</b></div>
+      <div class="hactions">
+        <div class="hicon"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg></div>
+        <div class="hicon"><svg viewBox="0 0 24 24"><path d="M6 9a6 6 0 0 1 12 0c0 6 2 7 2 7H4s2-1 2-7"/><path d="M10 20a2 2 0 0 0 4 0"/></svg><i class="dot"></i></div>
+        <div class="hicon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3 3.5 3 14 0 18M12 3c-3 3.5-3 14 0 18"/></svg></div>
+        <div class="user"><div class="avatar">张</div><div>张经理<br><span class="muted" style="font-size:11px">采购企业 / 管理员</span></div></div>
+      </div>
+    </header><div class="content">
+    <div style="display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:16px">
+      <div><div class="page-title">入驻预审</div><div class="page-sub" style="margin:0">企业注册申请、资质材料与制裁名单筛查结果</div></div>
+      <div style="display:flex;gap:10px"><div class="btn plain">批量导出</div><div class="btn primary">刷新列表</div></div>
+    </div>
+    <div class="card" style="padding:16px 20px;margin-bottom:16px;display:flex;gap:14px;align-items:center">
+      <div class="input" style="width:240px"><svg style='width:16px;height:16px;stroke:#94a3b8;fill:none;stroke-width:1.7;margin-right:8px' viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg><span style="color:#94a3b8">搜索企业名称 / 申请编号</span></div>
+      <div class="input select" style="width:150px;justify-content:space-between">全部身份</div>
+      <div class="input select" style="width:150px;justify-content:space-between">全部状态</div>
+      <div class="input select" style="width:160px;justify-content:space-between">全部国家/地区</div>
+      <div class="btn primary" style="margin-left:auto">查询</div><div class="btn ghost">重置</div>
+    </div>
+    <div class="row">
+      <div class="card" style="flex:1;overflow:hidden">
+        <div style="padding:16px 20px;display:flex;justify-content:space-between;align-items:center">
+          <div style="font-size:15px;font-weight:600">入驻申请列表 <span class="muted" style="font-weight:400">共 27 条</span></div>
+          <div style="display:flex;gap:6px"><span class="tag blue">待审核 4</span><span class="tag orange">待尽调 2</span></div>
+        </div>
+        <table><thead><tr><th>申请编号</th><th>企业名称</th><th>申请身份</th><th>国家/地区</th><th>提交时间</th><th>制裁筛查</th><th>状态</th><th>操作</th></tr></thead>
+        <tbody><tr><td class="link">AP-20261105-021</td><td>新加坡环宇贸易 Pte. Ltd.</td><td><span class="tag blue">采购商</span></td><td>新加坡</td><td class="muted">2026-11-05 14:22</td><td><span class="tag green">无命中</span></td><td><span class="tag orange">待审核</span></td><td><span class="link">审核</span> <span class="muted" style="margin-left:10px">详情</span></td></tr><tr><td class="link">AP-20261105-018</td><td>宁波恒动机械有限公司</td><td><span class="tag purple">供应商</span></td><td>中国</td><td class="muted">2026-11-05 11:08</td><td><span class="tag green">无命中</span></td><td><span class="tag orange">待审核</span></td><td><span class="link">审核</span> <span class="muted" style="margin-left:10px">详情</span></td></tr><tr><td class="link">AP-20261104-015</td><td>Kaya Metals Co., Ltd.</td><td><span class="tag purple">供应商</span></td><td>越南</td><td class="muted">2026-11-04 17:45</td><td><span class="tag orange">1 条疑似</span></td><td><span class="tag blue">待尽调</span></td><td><span class="link">审核</span> <span class="muted" style="margin-left:10px">详情</span></td></tr><tr><td class="link">AP-20261103-009</td><td>青岛海润包装股份</td><td><span class="tag purple">双重身份</span></td><td>中国</td><td class="muted">2026-11-03 09:31</td><td><span class="tag green">无命中</span></td><td><span class="tag green">审核通过</span></td><td><span class="link">审核</span> <span class="muted" style="margin-left:10px">详情</span></td></tr><tr><td class="link">AP-20261102-006</td><td>Greenline GmbH</td><td><span class="tag purple">供应商</span></td><td>德国</td><td class="muted">2026-11-02 16:12</td><td><span class="tag green">无命中</span></td><td><span class="tag green">已开通</span></td><td><span class="link">审核</span> <span class="muted" style="margin-left:10px">详情</span></td></tr></tbody></table>
+      </div>
+      <div class="card" style="width:430px;padding:20px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+          <div style="font-size:15px;font-weight:600">申请详情</div><span class="tag orange">待审核</span>
+        </div>
+        <div style="padding:16px;border-radius:10px;background:#f8fafc;margin-bottom:14px">
+          <div style="font-size:16px;font-weight:700;color:#0f172a">Kaya Metals Co., Ltd.</div>
+          <div class="muted" style="margin-top:5px">AP-20261104-015 · 越南 · 供应商</div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px 16px;font-size:12.5px">
+          <div><div class="muted">统一社会信用代码</div><div style="margin-top:4px">VN-0316-8821</div></div>
+          <div><div class="muted">成立年份</div><div style="margin-top:4px">2012</div></div>
+          <div><div class="muted">主营品类</div><div style="margin-top:4px">金属结构件 / 铸锻件</div></div>
+          <div><div class="muted">年产能</div><div style="margin-top:4px">18,000 吨</div></div>
+          <div><div class="muted">出口经验</div><div style="margin-top:4px">4 年 · 12 个国家</div></div>
+          <div><div class="muted">联系人</div><div style="margin-top:4px">Nguyen Van An</div></div>
+        </div>
+        <div style="margin-top:16px;padding:14px;border-radius:10px;background:#fff7ed;border:1px solid #fed7aa">
+          <div style="font-size:12.5px;font-weight:600;color:#c2410c;margin-bottom:6px">制裁名单筛查提示</div>
+          <div style="font-size:12px;color:#9a3412;line-height:1.75">命中 1 条疑似记录（相似度 82%），建议转尽职调查并核对股权结构。</div>
+        </div>
+        <div style="margin-top:18px;display:flex;gap:10px">
+          <div class="btn primary" style="flex:1;justify-content:center">审核通过</div>
+          <div class="btn plain" style="flex:1;justify-content:center">驳回申请</div>
+          <div class="btn ghost" style="justify-content:center">发起尽调</div>
+        </div>
+      </div>
+    </div></div></div></div></body></html>

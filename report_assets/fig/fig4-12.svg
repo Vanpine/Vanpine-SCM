@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1500" height="900" viewBox="0 0 1500 900">
+<rect width="1500" height="900" fill="#ffffff"/>
+<defs>
+              <marker id="arr" markerWidth="10" markerHeight="10" refX="9" refY="3.2" orient="auto" markerUnits="strokeWidth">
+                <path d="M0,0 L0,6.4 L9,3.2 z" fill="#6b7280"/>
+              </marker>
+              <marker id="arrb" markerWidth="10" markerHeight="10" refX="9" refY="3.2" orient="auto" markerUnits="strokeWidth">
+                <path d="M0,0 L0,6.4 L9,3.2 z" fill="#2e75b6"/>
+              </marker>
+              <marker id="arrg" markerWidth="10" markerHeight="10" refX="9" refY="3.2" orient="auto" markerUnits="strokeWidth">
+                <path d="M0,0 L0,6.4 L9,3.2 z" fill="#548235"/>
+              </marker>
+            </defs>
+<text x="750" y="44" text-anchor="middle" font-family="PingFang SC, Microsoft YaHei, SimSun, sans-serif" font-size="22" fill="#1f4e79" font-weight="bold" opacity="1.0">局部 E-R 图（租户与权限）</text>
+<rect x="155.0" y="407.0" width="170" height="66" rx="4" fill="#e8f1fb" stroke="#2e75b6" stroke-width="1.8"/>
+<text x="240" y="446" text-anchor="middle" font-family="PingFang SC, Microsoft YaHei, SimSun, sans-serif" font-size="18" fill="#1f4e79" font-weight="bold" opacity="1.0">租户</text>
+<rect x="535.0" y="407.0" width="170" height="66" rx="4" fill="#e8f1fb" stroke="#2e75b6" stroke-width="1.8"/>
+<text x="620" y="446" text-anchor="middle" font-family="PingFang SC, Microsoft YaHei, SimSun, sans-serif" font-size="18" fill="#1f4e79" font-weight="bold" opacity="1.0">用户</text>
+<rect x="905.0" y="407.0" width="170" height="66" rx="4" fill="#e8f1fb" stroke="#2e75b6" stroke-width="1.8"/>
+<text x="990" y="446" text-anchor="middle" font-family="PingFang SC, Microsoft YaHei, SimSun, sans-serif" font-size="18" fill="#1f4e79" font-weight="bold" opacity="1.0">角色</text>
+<rect x="1245.0" y="247.0" width="170" height="66" rx="4" fill="#e8f1fb" stroke="#2e75b6" stroke-width="1.8"/>
+<text x="1330" y="286" text-anchor="middle" font-family="PingFang SC, Microsoft YaHei, SimSun, sans-serif" font-size="18" fill="#1f4e79" font-weight="bold" opacity="1.0">菜单</text>
+<rect x="1245.0" y="587.0" width="170" height="66" rx="4" fill="#e8f1fb" stroke="#2e75b6" stroke-width="1.8"/>
+<text x="1330" y="626" text-anchor="middle" font-family="PingFang SC, Microsoft YaHei, SimSun, sans-serif" font-size="18" fill="#1f4e79" font-weight="bold" opacity="1.0">权限</text>
+<line x1="325" y1="440" x2="535" y2="440" stroke="#6b7280" stroke-width="1.4"/>
+<text x="370" y="428" text-anchor="middle" font-family="PingFang SC, Microsoft YaHei, SimSun, sans-serif" font-size="14" fill="#c55a11" font-weight="bold" opacity="1.0">1</text>
+<text x="490" y="428" text-anchor="middle" font-family="PingFang SC, Microsoft YaHei, SimSun, sans-serif" font-size="14" fill="#c55a11" font-weight="bold" opacity="1.0">n</text>
+<text x="430" y="480" text-anchor="middle" font-family="PingFang SC, Microsoft YaHei, SimSun, sans-serif" font-size="16" fill="#1f2937" font-weight="normal" opacity="1.0">拥有</text>
+<polygon points="805,405.0 865.0,440 805,475.0 745.0,440" fill="#fbe5d6" stroke="#c55a11" stroke-width="1.6"/>
+<text x="805" y="444.9" text-anchor="middle" font-family="PingFang SC, Microsoft YaHei, SimSun, sans-serif" font-size="14" fill="#c55a11" font-weight="bold" opacity="1.0">用户角色</text>
+<line x1="705" y1="440" x2="745" y2="440" stroke="#6b7280" stroke-width="1.4"/>
+<line x1="865" y1="440" x2="905" y2="440" stroke="#6b7280" stroke-width="1.4"/>
+<text x="730" y="426" text-anchor="middle" font-family="PingFang SC, Microsoft YaHei, SimSun, sans-serif" font-size="14" fill="#c55a11" font-weight="bold" opacity="1.0">m</text>
+<text x="880" y="426" text-anchor="middle" font-family="PingFang SC, Microsoft YaHei, SimSun, sans-serif" font-size="14" fill="#c55a11" font-weight="bold" opacity="1.0">n</text>
+<line x1="1075" y1="425" x2="1230" y2="300" stroke="#6b7280" stroke-width="1.4"/>
+<polygon points="1160,325.0 1220.0,360 1160,395.0 1100.0,360" fill="#fbe5d6" stroke="#c55a11" stroke-width="1.6"/>
+<text x="1160" y="364.9" text-anchor="middle" font-family="PingFang SC, Microsoft YaHei, SimSun, sans-serif" font-size="14" fill="#c55a11" font-weight="bold" opacity="1.0">角色菜单</text>
+<text x="1110" y="360" text-anchor="middle" font-family="PingFang SC, Microsoft YaHei, SimSun, sans-serif" font-size="14" fill="#c55a11" font-weight="bold" opacity="1.0">m</text>
+<text x="1210" y="350" text-anchor="middle" font-family="PingFang SC, Microsoft YaHei, SimSun, sans-serif" font-size="14" fill="#c55a11" font-weight="bold" opacity="1.0">n</text>
+<line x1="1075" y1="455" x2="1230" y2="600" stroke="#6b7280" stroke-width="1.4"/>
+<polygon points="1160,495.0 1220.0,530 1160,565.0 1100.0,530" fill="#fbe5d6" stroke="#c55a11" stroke-width="1.6"/>
+<text x="1160" y="534.9" text-anchor="middle" font-family="PingFang SC, Microsoft YaHei, SimSun, sans-serif" font-size="14" fill="#c55a11" font-weight="bold" opacity="1.0">角色权限</text>
+<text x="1110" y="530" text-anchor="middle" font-family="PingFang SC, Microsoft YaHei, SimSun, sans-serif" font-size="14" fill="#c55a11" font-weight="bold" opacity="1.0">m</text>
+<text x="1210" y="540" text-anchor="middle" font-family="PingFang SC, Microsoft YaHei, SimSun, sans-serif" font-size="14" fill="#c55a11" font-weight="bold" opacity="1.0">n</text>
+<text x="750" y="840" text-anchor="middle" font-family="PingFang SC, Microsoft YaHei, SimSun, sans-serif" font-size="15" fill="#7f7f7f" font-weight="normal" opacity="1.0">图4-12  租户与权限局部 E-R 图</text>
+</svg>

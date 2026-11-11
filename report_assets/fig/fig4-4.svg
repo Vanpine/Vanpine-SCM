@@ -1,0 +1,88 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="940" viewBox="0 0 1600 940">
+<rect width="1600" height="940" fill="#ffffff"/>
+<defs>
+              <marker id="arr" markerWidth="10" markerHeight="10" refX="9" refY="3.2" orient="auto" markerUnits="strokeWidth">
+                <path d="M0,0 L0,6.4 L9,3.2 z" fill="#6b7280"/>
+              </marker>
+              <marker id="arrb" markerWidth="10" markerHeight="10" refX="9" refY="3.2" orient="auto" markerUnits="strokeWidth">
+                <path d="M0,0 L0,6.4 L9,3.2 z" fill="#2e75b6"/>
+              </marker>
+              <marker id="arrg" markerWidth="10" markerHeight="10" refX="9" refY="3.2" orient="auto" markerUnits="strokeWidth">
+                <path d="M0,0 L0,6.4 L9,3.2 z" fill="#548235"/>
+              </marker>
+            </defs>
+<text x="800" y="46" text-anchor="middle" font-family="PingFang SC, Microsoft YaHei, SimSun, sans-serif" font-size="24" fill="#1f4e79" font-weight="bold" opacity="1.0">系统部署与网络架构</text>
+<rect x="40" y="90" width="1520" height="150" rx="12" fill="#f7fbff" stroke="#2e75b6" stroke-width="1.6" stroke-dasharray="6,4"/>
+<text x="120" y="175" text-anchor="middle" font-family="PingFang SC, Microsoft YaHei, SimSun, sans-serif" font-size="16" fill="#2e75b6" font-weight="bold" opacity="1.0">公网访问区</text>
+<rect x="250" y="115" width="260" height="80" rx="9" fill="#fff" stroke="#2e75b6" stroke-width="1.6"/>
+<text x="380.0" y="149.0" text-anchor="middle" font-family="PingFang SC, Microsoft YaHei, SimSun, sans-serif" font-size="16" fill="#1f4e79" font-weight="bold" opacity="1.0">采购/供应企业浏览器</text>
+<text x="380.0" y="173.0" text-anchor="middle" font-family="PingFang SC, Microsoft YaHei, SimSun, sans-serif" font-size="13" fill="#1f2937" font-weight="normal" opacity="1.0">HTTPS</text>
+<rect x="640" y="115" width="260" height="80" rx="9" fill="#fff" stroke="#2e75b6" stroke-width="1.6"/>
+<text x="770.0" y="149.0" text-anchor="middle" font-family="PingFang SC, Microsoft YaHei, SimSun, sans-serif" font-size="16" fill="#1f4e79" font-weight="bold" opacity="1.0">Nginx 反向代理</text>
+<text x="770.0" y="173.0" text-anchor="middle" font-family="PingFang SC, Microsoft YaHei, SimSun, sans-serif" font-size="13" fill="#1f2937" font-weight="normal" opacity="1.0">TLS 终止 / 静态资源</text>
+<rect x="1030" y="115" width="260" height="80" rx="9" fill="#fff" stroke="#2e75b6" stroke-width="1.6"/>
+<text x="1160.0" y="149.0" text-anchor="middle" font-family="PingFang SC, Microsoft YaHei, SimSun, sans-serif" font-size="16" fill="#1f4e79" font-weight="bold" opacity="1.0">运维与监控终端</text>
+<text x="1160.0" y="173.0" text-anchor="middle" font-family="PingFang SC, Microsoft YaHei, SimSun, sans-serif" font-size="13" fill="#1f2937" font-weight="normal" opacity="1.0">日志 / 指标</text>
+<line x1="510" y1="155" x2="640" y2="155" stroke="#2e75b6" stroke-width="1.6" marker-end="url(#arr)"/>
+<rect x="40" y="280" width="1520" height="275" rx="12" fill="#eef4fb" stroke="#1f4e79" stroke-width="1.6" stroke-dasharray="6,4"/>
+<text x="120" y="430" text-anchor="middle" font-family="PingFang SC, Microsoft YaHei, SimSun, sans-serif" font-size="16" fill="#1f4e79" font-weight="bold" opacity="1.0">应用服务区</text>
+<rect x="220" y="340" width="260" height="72" rx="9" fill="#fff" stroke="#1f4e79" stroke-width="1.6"/>
+<text x="350.0" y="370.0" text-anchor="middle" font-family="PingFang SC, Microsoft YaHei, SimSun, sans-serif" font-size="17" fill="#1f4e79" font-weight="bold" opacity="1.0">API 网关</text>
+<text x="350.0" y="394.0" text-anchor="middle" font-family="PingFang SC, Microsoft YaHei, SimSun, sans-serif" font-size="14" fill="#1f2937" font-weight="normal" opacity="1.0">gsc-gateway :18080</text>
+<line x1="900" y1="195" x2="420" y2="340" stroke="#1f4e79" stroke-width="1.5" marker-end="url(#arr)"/>
+<rect x="560" y="320" width="240" height="70" rx="9" fill="#fff" stroke="#1f4e79" stroke-width="1.6"/>
+<text x="680.0" y="349.0" text-anchor="middle" font-family="PingFang SC, Microsoft YaHei, SimSun, sans-serif" font-size="15" fill="#1f4e79" font-weight="bold" opacity="1.0">平台服务</text>
+<text x="680.0" y="373.0" text-anchor="middle" font-family="PingFang SC, Microsoft YaHei, SimSun, sans-serif" font-size="12" fill="#1f2937" font-weight="normal" opacity="1.0">:3081</text>
+<line x1="480" y1="376" x2="560" y2="355" stroke="#1f4e79" stroke-width="1.2" marker-end="url(#arr)"/>
+<rect x="850" y="320" width="240" height="70" rx="9" fill="#fff" stroke="#1f4e79" stroke-width="1.6"/>
+<text x="970.0" y="349.0" text-anchor="middle" font-family="PingFang SC, Microsoft YaHei, SimSun, sans-serif" font-size="15" fill="#1f4e79" font-weight="bold" opacity="1.0">供应商服务</text>
+<text x="970.0" y="373.0" text-anchor="middle" font-family="PingFang SC, Microsoft YaHei, SimSun, sans-serif" font-size="12" fill="#1f2937" font-weight="normal" opacity="1.0">:3082</text>
+<line x1="480" y1="376" x2="850" y2="355" stroke="#1f4e79" stroke-width="1.2" marker-end="url(#arr)"/>
+<rect x="1140" y="320" width="240" height="70" rx="9" fill="#fff" stroke="#1f4e79" stroke-width="1.6"/>
+<text x="1260.0" y="349.0" text-anchor="middle" font-family="PingFang SC, Microsoft YaHei, SimSun, sans-serif" font-size="15" fill="#1f4e79" font-weight="bold" opacity="1.0">交易服务</text>
+<text x="1260.0" y="373.0" text-anchor="middle" font-family="PingFang SC, Microsoft YaHei, SimSun, sans-serif" font-size="12" fill="#1f2937" font-weight="normal" opacity="1.0">:3083</text>
+<line x1="480" y1="376" x2="1140" y2="355" stroke="#1f4e79" stroke-width="1.2" marker-end="url(#arr)"/>
+<rect x="560" y="420" width="240" height="70" rx="9" fill="#fff" stroke="#1f4e79" stroke-width="1.6"/>
+<text x="680.0" y="449.0" text-anchor="middle" font-family="PingFang SC, Microsoft YaHei, SimSun, sans-serif" font-size="15" fill="#1f4e79" font-weight="bold" opacity="1.0">交付服务</text>
+<text x="680.0" y="473.0" text-anchor="middle" font-family="PingFang SC, Microsoft YaHei, SimSun, sans-serif" font-size="12" fill="#1f2937" font-weight="normal" opacity="1.0">:3084</text>
+<line x1="480" y1="376" x2="560" y2="455" stroke="#1f4e79" stroke-width="1.2" marker-end="url(#arr)"/>
+<rect x="850" y="420" width="240" height="70" rx="9" fill="#fff" stroke="#1f4e79" stroke-width="1.6"/>
+<text x="970.0" y="449.0" text-anchor="middle" font-family="PingFang SC, Microsoft YaHei, SimSun, sans-serif" font-size="15" fill="#1f4e79" font-weight="bold" opacity="1.0">AI 服务</text>
+<text x="970.0" y="473.0" text-anchor="middle" font-family="PingFang SC, Microsoft YaHei, SimSun, sans-serif" font-size="12" fill="#1f2937" font-weight="normal" opacity="1.0">:3085</text>
+<line x1="480" y1="376" x2="850" y2="455" stroke="#1f4e79" stroke-width="1.2" marker-end="url(#arr)"/>
+<rect x="1140" y="420" width="280" height="70" rx="9" fill="#fff" stroke="#7030a0" stroke-width="1.6"/>
+<text x="1280.0" y="449.0" text-anchor="middle" font-family="PingFang SC, Microsoft YaHei, SimSun, sans-serif" font-size="15" fill="#7030a0" font-weight="bold" opacity="1.0">Python AI 服务</text>
+<text x="1280.0" y="473.0" text-anchor="middle" font-family="PingFang SC, Microsoft YaHei, SimSun, sans-serif" font-size="12" fill="#1f2937" font-weight="normal" opacity="1.0">FastAPI :8100</text>
+<line x1="1090" y1="455" x2="1140" y2="455" stroke="#7030a0" stroke-width="1.2" marker-end="url(#arr)"/>
+<rect x="40" y="585" width="1520" height="160" rx="12" fill="#f6fbf6" stroke="#548235" stroke-width="1.6" stroke-dasharray="6,4"/>
+<text x="120" y="670" text-anchor="middle" font-family="PingFang SC, Microsoft YaHei, SimSun, sans-serif" font-size="16" fill="#548235" font-weight="bold" opacity="1.0">数据与中间件区</text>
+<rect x="250" y="620" width="230" height="76" rx="9" fill="#fff" stroke="#548235" stroke-width="1.6"/>
+<text x="365.0" y="652.0" text-anchor="middle" font-family="PingFang SC, Microsoft YaHei, SimSun, sans-serif" font-size="16" fill="#548235" font-weight="bold" opacity="1.0">MySQL 8</text>
+<text x="365.0" y="676.0" text-anchor="middle" font-family="PingFang SC, Microsoft YaHei, SimSun, sans-serif" font-size="13" fill="#1f2937" font-weight="normal" opacity="1.0">业务数据库</text>
+<rect x="510" y="620" width="230" height="76" rx="9" fill="#fff" stroke="#548235" stroke-width="1.6"/>
+<text x="625.0" y="652.0" text-anchor="middle" font-family="PingFang SC, Microsoft YaHei, SimSun, sans-serif" font-size="16" fill="#548235" font-weight="bold" opacity="1.0">Redis</text>
+<text x="625.0" y="676.0" text-anchor="middle" font-family="PingFang SC, Microsoft YaHei, SimSun, sans-serif" font-size="13" fill="#1f2937" font-weight="normal" opacity="1.0">缓存 / 令牌</text>
+<rect x="770" y="620" width="230" height="76" rx="9" fill="#fff" stroke="#548235" stroke-width="1.6"/>
+<text x="885.0" y="652.0" text-anchor="middle" font-family="PingFang SC, Microsoft YaHei, SimSun, sans-serif" font-size="16" fill="#548235" font-weight="bold" opacity="1.0">RabbitMQ</text>
+<text x="885.0" y="676.0" text-anchor="middle" font-family="PingFang SC, Microsoft YaHei, SimSun, sans-serif" font-size="13" fill="#1f2937" font-weight="normal" opacity="1.0">异步消息</text>
+<rect x="1030" y="620" width="230" height="76" rx="9" fill="#fff" stroke="#548235" stroke-width="1.6"/>
+<text x="1145.0" y="652.0" text-anchor="middle" font-family="PingFang SC, Microsoft YaHei, SimSun, sans-serif" font-size="16" fill="#548235" font-weight="bold" opacity="1.0">Milvus</text>
+<text x="1145.0" y="676.0" text-anchor="middle" font-family="PingFang SC, Microsoft YaHei, SimSun, sans-serif" font-size="13" fill="#1f2937" font-weight="normal" opacity="1.0">向量索引</text>
+<rect x="1290" y="620" width="230" height="76" rx="9" fill="#fff" stroke="#548235" stroke-width="1.6"/>
+<text x="1405.0" y="652.0" text-anchor="middle" font-family="PingFang SC, Microsoft YaHei, SimSun, sans-serif" font-size="16" fill="#548235" font-weight="bold" opacity="1.0">Nacos</text>
+<text x="1405.0" y="676.0" text-anchor="middle" font-family="PingFang SC, Microsoft YaHei, SimSun, sans-serif" font-size="13" fill="#1f2937" font-weight="normal" opacity="1.0">注册配置中心</text>
+<rect x="40" y="770" width="1520" height="130" rx="12" fill="#f5eef8" stroke="#7030a0" stroke-width="1.6" stroke-dasharray="6,4"/>
+<text x="120" y="840" text-anchor="middle" font-family="PingFang SC, Microsoft YaHei, SimSun, sans-serif" font-size="16" fill="#7030a0" font-weight="bold" opacity="1.0">外部服务区</text>
+<rect x="280" y="800" width="260" height="70" rx="9" fill="#fff" stroke="#7030a0" stroke-width="1.6"/>
+<text x="410.0" y="829.0" text-anchor="middle" font-family="PingFang SC, Microsoft YaHei, SimSun, sans-serif" font-size="15" fill="#7030a0" font-weight="bold" opacity="1.0">Embedding API</text>
+<text x="410.0" y="853.0" text-anchor="middle" font-family="PingFang SC, Microsoft YaHei, SimSun, sans-serif" font-size="12" fill="#1f2937" font-weight="normal" opacity="1.0">bge-m3</text>
+<rect x="580" y="800" width="260" height="70" rx="9" fill="#fff" stroke="#7030a0" stroke-width="1.6"/>
+<text x="710.0" y="829.0" text-anchor="middle" font-family="PingFang SC, Microsoft YaHei, SimSun, sans-serif" font-size="15" fill="#7030a0" font-weight="bold" opacity="1.0">DeepSeek</text>
+<text x="710.0" y="853.0" text-anchor="middle" font-family="PingFang SC, Microsoft YaHei, SimSun, sans-serif" font-size="12" fill="#1f2937" font-weight="normal" opacity="1.0">大模型</text>
+<rect x="880" y="800" width="260" height="70" rx="9" fill="#fff" stroke="#7030a0" stroke-width="1.6"/>
+<text x="1010.0" y="829.0" text-anchor="middle" font-family="PingFang SC, Microsoft YaHei, SimSun, sans-serif" font-size="15" fill="#7030a0" font-weight="bold" opacity="1.0">天气数据</text>
+<text x="1010.0" y="853.0" text-anchor="middle" font-family="PingFang SC, Microsoft YaHei, SimSun, sans-serif" font-size="12" fill="#1f2937" font-weight="normal" opacity="1.0">航线/港口</text>
+<rect x="1180" y="800" width="260" height="70" rx="9" fill="#fff" stroke="#7030a0" stroke-width="1.6"/>
+<text x="1310.0" y="829.0" text-anchor="middle" font-family="PingFang SC, Microsoft YaHei, SimSun, sans-serif" font-size="15" fill="#7030a0" font-weight="bold" opacity="1.0">制裁名单</text>
+<text x="1310.0" y="853.0" text-anchor="middle" font-family="PingFang SC, Microsoft YaHei, SimSun, sans-serif" font-size="12" fill="#1f2937" font-weight="normal" opacity="1.0">合规数据</text>
+</svg>

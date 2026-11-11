@@ -1,0 +1,77 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="900" viewBox="0 0 1600 900">
+<rect width="1600" height="900" fill="#ffffff"/>
+<defs>
+              <marker id="arr" markerWidth="10" markerHeight="10" refX="9" refY="3.2" orient="auto" markerUnits="strokeWidth">
+                <path d="M0,0 L0,6.4 L9,3.2 z" fill="#6b7280"/>
+              </marker>
+              <marker id="arrb" markerWidth="10" markerHeight="10" refX="9" refY="3.2" orient="auto" markerUnits="strokeWidth">
+                <path d="M0,0 L0,6.4 L9,3.2 z" fill="#2e75b6"/>
+              </marker>
+              <marker id="arrg" markerWidth="10" markerHeight="10" refX="9" refY="3.2" orient="auto" markerUnits="strokeWidth">
+                <path d="M0,0 L0,6.4 L9,3.2 z" fill="#548235"/>
+              </marker>
+            </defs>
+<text x="800" y="52" text-anchor="middle" font-family="PingFang SC, Microsoft YaHei, SimSun, sans-serif" font-size="24" fill="#1f4e79" font-weight="bold" opacity="1.0">VANPINE SRM 业务架构</text>
+<rect x="40" y="100" width="1520" height="170" rx="12" fill="#f7fbff" stroke="#2e75b6" stroke-width="1.6"/>
+<text x="120" y="190" text-anchor="middle" font-family="PingFang SC, Microsoft YaHei, SimSun, sans-serif" font-size="17" fill="#2e75b6" font-weight="bold" opacity="1.0">采购
+企业</text>
+<rect x="40" y="630" width="1520" height="170" rx="12" fill="#f6fbf6" stroke="#548235" stroke-width="1.6"/>
+<text x="120" y="720" text-anchor="middle" font-family="PingFang SC, Microsoft YaHei, SimSun, sans-serif" font-size="17" fill="#548235" font-weight="bold" opacity="1.0">供应
+企业</text>
+<rect x="40" y="300" width="1520" height="300" rx="12" fill="#fffdf8" stroke="#c55a11" stroke-width="1.6"/>
+<text x="92" y="455" text-anchor="middle" font-family="PingFang SC, Microsoft YaHei, SimSun, sans-serif" font-size="16" fill="#c55a11" font-weight="bold" opacity="1.0">平
+台
+能
+力</text>
+<rect x="200" y="160" width="138" height="62" rx="9" fill="#e8f1fb" stroke="#2e75b6" stroke-width="1.6"/>
+<text x="269.0" y="196.25" text-anchor="middle" font-family="PingFang SC, Microsoft YaHei, SimSun, sans-serif" font-size="15" fill="#1f4e79" font-weight="bold" opacity="1.0">需求发布</text>
+<line x1="338" y1="191" x2="368" y2="191" stroke="#2e75b6" stroke-width="1.6" marker-end="url(#arr)"/>
+<rect x="368" y="160" width="138" height="62" rx="9" fill="#e8f1fb" stroke="#2e75b6" stroke-width="1.6"/>
+<text x="437.0" y="196.25" text-anchor="middle" font-family="PingFang SC, Microsoft YaHei, SimSun, sans-serif" font-size="15" fill="#1f4e79" font-weight="bold" opacity="1.0">智能匹配</text>
+<line x1="506" y1="191" x2="536" y2="191" stroke="#2e75b6" stroke-width="1.6" marker-end="url(#arr)"/>
+<rect x="536" y="160" width="138" height="62" rx="9" fill="#e8f1fb" stroke="#2e75b6" stroke-width="1.6"/>
+<text x="605.0" y="196.25" text-anchor="middle" font-family="PingFang SC, Microsoft YaHei, SimSun, sans-serif" font-size="15" fill="#1f4e79" font-weight="bold" opacity="1.0">询盘邀请</text>
+<line x1="674" y1="191" x2="704" y2="191" stroke="#2e75b6" stroke-width="1.6" marker-end="url(#arr)"/>
+<rect x="704" y="160" width="138" height="62" rx="9" fill="#e8f1fb" stroke="#2e75b6" stroke-width="1.6"/>
+<text x="773.0" y="196.25" text-anchor="middle" font-family="PingFang SC, Microsoft YaHei, SimSun, sans-serif" font-size="15" fill="#1f4e79" font-weight="bold" opacity="1.0">在线报价</text>
+<line x1="842" y1="191" x2="872" y2="191" stroke="#2e75b6" stroke-width="1.6" marker-end="url(#arr)"/>
+<rect x="872" y="160" width="138" height="62" rx="9" fill="#e8f1fb" stroke="#2e75b6" stroke-width="1.6"/>
+<text x="941.0" y="196.25" text-anchor="middle" font-family="PingFang SC, Microsoft YaHei, SimSun, sans-serif" font-size="15" fill="#1f4e79" font-weight="bold" opacity="1.0">比价授标</text>
+<line x1="1010" y1="191" x2="1040" y2="191" stroke="#2e75b6" stroke-width="1.6" marker-end="url(#arr)"/>
+<rect x="1040" y="160" width="138" height="62" rx="9" fill="#e8f1fb" stroke="#2e75b6" stroke-width="1.6"/>
+<text x="1109.0" y="196.25" text-anchor="middle" font-family="PingFang SC, Microsoft YaHei, SimSun, sans-serif" font-size="15" fill="#1f4e79" font-weight="bold" opacity="1.0">电子合同</text>
+<line x1="1178" y1="191" x2="1208" y2="191" stroke="#2e75b6" stroke-width="1.6" marker-end="url(#arr)"/>
+<rect x="1208" y="160" width="138" height="62" rx="9" fill="#e8f1fb" stroke="#2e75b6" stroke-width="1.6"/>
+<text x="1277.0" y="196.25" text-anchor="middle" font-family="PingFang SC, Microsoft YaHei, SimSun, sans-serif" font-size="15" fill="#1f4e79" font-weight="bold" opacity="1.0">交付履约</text>
+<line x1="1346" y1="191" x2="1376" y2="191" stroke="#2e75b6" stroke-width="1.6" marker-end="url(#arr)"/>
+<rect x="1376" y="160" width="138" height="62" rx="9" fill="#e8f1fb" stroke="#2e75b6" stroke-width="1.6"/>
+<text x="1445.0" y="196.25" text-anchor="middle" font-family="PingFang SC, Microsoft YaHei, SimSun, sans-serif" font-size="15" fill="#1f4e79" font-weight="bold" opacity="1.0">风险监控</text>
+<rect x="210" y="390" width="190" height="54" rx="9" fill="#fbe5d6" stroke="#c55a11" stroke-width="1.6"/>
+<text x="305.0" y="421.9" text-anchor="middle" font-family="PingFang SC, Microsoft YaHei, SimSun, sans-serif" font-size="14" fill="#1f4e79" font-weight="bold" opacity="1.0">多租户与RBAC</text>
+<rect x="435" y="390" width="190" height="54" rx="9" fill="#fbe5d6" stroke="#c55a11" stroke-width="1.6"/>
+<text x="530.0" y="421.9" text-anchor="middle" font-family="PingFang SC, Microsoft YaHei, SimSun, sans-serif" font-size="14" fill="#1f4e79" font-weight="bold" opacity="1.0">供应商画像库</text>
+<rect x="660" y="390" width="190" height="54" rx="9" fill="#fbe5d6" stroke="#c55a11" stroke-width="1.6"/>
+<text x="755.0" y="421.9" text-anchor="middle" font-family="PingFang SC, Microsoft YaHei, SimSun, sans-serif" font-size="14" fill="#1f4e79" font-weight="bold" opacity="1.0">AI匹配与理由</text>
+<rect x="885" y="390" width="190" height="54" rx="9" fill="#fbe5d6" stroke="#c55a11" stroke-width="1.6"/>
+<text x="980.0" y="421.9" text-anchor="middle" font-family="PingFang SC, Microsoft YaHei, SimSun, sans-serif" font-size="14" fill="#1f4e79" font-weight="bold" opacity="1.0">TCO比价引擎</text>
+<rect x="1110" y="390" width="190" height="54" rx="9" fill="#fbe5d6" stroke="#c55a11" stroke-width="1.6"/>
+<text x="1205.0" y="421.9" text-anchor="middle" font-family="PingFang SC, Microsoft YaHei, SimSun, sans-serif" font-size="14" fill="#1f4e79" font-weight="bold" opacity="1.0">风险信号聚合</text>
+<rect x="1335" y="390" width="190" height="54" rx="9" fill="#fbe5d6" stroke="#c55a11" stroke-width="1.6"/>
+<text x="1430.0" y="421.9" text-anchor="middle" font-family="PingFang SC, Microsoft YaHei, SimSun, sans-serif" font-size="14" fill="#1f4e79" font-weight="bold" opacity="1.0">电子存证</text>
+<line x1="268" y1="300" x2="308" y2="390" stroke="#c55a11" stroke-width="1.2" stroke-dasharray="4,3" marker-end="url(#arr)"/>
+<line x1="772" y1="300" x2="812" y2="390" stroke="#c55a11" stroke-width="1.2" stroke-dasharray="4,3" marker-end="url(#arr)"/>
+<line x1="940" y1="300" x2="980" y2="390" stroke="#c55a11" stroke-width="1.2" stroke-dasharray="4,3" marker-end="url(#arr)"/>
+<rect x="210" y="690" width="190" height="54" rx="9" fill="#e2efda" stroke="#548235" stroke-width="1.6"/>
+<text x="305.0" y="721.9" text-anchor="middle" font-family="PingFang SC, Microsoft YaHei, SimSun, sans-serif" font-size="14" fill="#1f4e79" font-weight="bold" opacity="1.0">企业画像维护</text>
+<rect x="435" y="690" width="190" height="54" rx="9" fill="#e2efda" stroke="#548235" stroke-width="1.6"/>
+<text x="530.0" y="721.9" text-anchor="middle" font-family="PingFang SC, Microsoft YaHei, SimSun, sans-serif" font-size="14" fill="#1f4e79" font-weight="bold" opacity="1.0">接收询盘</text>
+<rect x="660" y="690" width="190" height="54" rx="9" fill="#e2efda" stroke="#548235" stroke-width="1.6"/>
+<text x="755.0" y="721.9" text-anchor="middle" font-family="PingFang SC, Microsoft YaHei, SimSun, sans-serif" font-size="14" fill="#1f4e79" font-weight="bold" opacity="1.0">提交报价</text>
+<rect x="885" y="690" width="190" height="54" rx="9" fill="#e2efda" stroke="#548235" stroke-width="1.6"/>
+<text x="980.0" y="721.9" text-anchor="middle" font-family="PingFang SC, Microsoft YaHei, SimSun, sans-serif" font-size="14" fill="#1f4e79" font-weight="bold" opacity="1.0">合同确认</text>
+<rect x="1110" y="690" width="190" height="54" rx="9" fill="#e2efda" stroke="#548235" stroke-width="1.6"/>
+<text x="1205.0" y="721.9" text-anchor="middle" font-family="PingFang SC, Microsoft YaHei, SimSun, sans-serif" font-size="14" fill="#1f4e79" font-weight="bold" opacity="1.0">组织发货</text>
+<rect x="1335" y="690" width="190" height="54" rx="9" fill="#e2efda" stroke="#548235" stroke-width="1.6"/>
+<text x="1430.0" y="721.9" text-anchor="middle" font-family="PingFang SC, Microsoft YaHei, SimSun, sans-serif" font-size="14" fill="#1f4e79" font-weight="bold" opacity="1.0">售后与评价</text>
+<text x="800" y="855" text-anchor="middle" font-family="PingFang SC, Microsoft YaHei, SimSun, sans-serif" font-size="16" fill="#7f7f7f" font-weight="normal" opacity="1.0">平台以「交易全链路 + AI 能力 + 风险信号」支撑采购方与供应方的双向协同</text>
+</svg>
