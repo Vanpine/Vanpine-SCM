@@ -1,5 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="400" height="200" viewBox="0 0 400 200">
-<rect width="400" height="200" fill="#fff"/>
-<rect x="20" y="20" width="150" height="60" rx="8" fill="#dbe5f1" stroke="#1f4e79"/>
-<text x="95" y="55" text-anchor="middle" font-family="PingFang SC" font-size="18" fill="#1f4e79">测试中文</text>
-</svg>

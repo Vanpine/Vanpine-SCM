@@ -28,6 +28,7 @@ gsc-fronted/
 
 # 毕业设计相关材料（本地保留，不纳入版本管理）
 毕设/
+report_assets/
 
 # 子仓库 .git 的临时备份名
 .git-local-backup*
