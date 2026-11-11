@@ -10,6 +10,7 @@ out/
 .env
 .env.*
 !.env.example
+!srm-admin-frontend/.env.production
 
 # 编辑器 / 系统
 .idea/
