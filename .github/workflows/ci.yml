@@ -62,14 +62,15 @@ jobs:
       - name: Trigger Jenkins
         env:
           JENKINS_URL: ${{ secrets.JENKINS_URL }}
+          JENKINS_USER: ${{ secrets.JENKINS_USER }}
           JENKINS_TOKEN: ${{ secrets.JENKINS_TOKEN }}
         run: |
-          if [ -z "$JENKINS_URL" ] || [ -z "$JENKINS_TOKEN" ]; then
-            echo "JENKINS_URL / JENKINS_TOKEN secrets not set" >&2
+          if [ -z "$JENKINS_URL" ] || [ -z "$JENKINS_USER" ] || [ -z "$JENKINS_TOKEN" ]; then
+            echo "JENKINS_URL / JENKINS_USER / JENKINS_TOKEN secrets not set" >&2
             exit 1
           fi
           curl -fsS -X POST \
+            -u "$JENKINS_USER:$JENKINS_TOKEN" \
             "$JENKINS_URL/job/Vanpine%20SRM/buildWithParameters" \
-            --data-urlencode "token=$JENKINS_TOKEN" \
             --data-urlencode "COMMIT=${{ github.sha }}"
           echo "Jenkins build triggered for ${{ github.sha }}"
