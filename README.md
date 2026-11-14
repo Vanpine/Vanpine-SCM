@@ -12,6 +12,8 @@
 
 **一句话**：企业不用再靠人脉找供应商、靠 Excel 管报价、靠邮件催交付，整条采购链路在一个平台里完成并留痕。
 
+面向跨境采购的 B2B 多租户全球供应链管理系统，服务采购企业、供应商、第三方尽调机构、平台运营方、承运商五类主体，通过租户隔离与 RBAC 支撑多主体协同。系统覆盖供应商入驻、资质审核、全域画像、智能匹配、合规尽调、询价比价、签约与履约跟踪全流程；基于 Spring Cloud Alibaba + FastAPI + Vue 3，集成 Nacos、Gateway、OpenFeign、Redis、RabbitMQ、Milvus，实现供应商画像向量化、多因子智能匹配、风险预警和 RAG 问答。
+
 ## 项目速览
 
 | 维度 | 说明 |
@@ -453,6 +455,32 @@ pip install -r requirements.txt
 cp .env.example .env          # 填入 EMBEDDING_API_KEY / DEEPSEEK_API_KEY 等
 uvicorn app.main:app --host 127.0.0.1 --port 8100
 ```
+
+## CI / CD
+
+推送 `main` 后的自动流水线：
+
+```
+push / PR ──▶ GitHub Actions（并行门禁）
+               ├─ Frontend: npm ci → lint → build
+               └─ AI service: pip install → pytest
+                         │
+                         ▼ 全部通过且为 main 的 push
+               GitHub Actions 调用 Jenkins API
+                         │
+                         ▼
+               Jenkins「Vanpine SRM」流水线
+                 Checkout → Build frontend → Build backend → Deploy
+                         │
+                         ▼
+               deploy/ci-deploy.sh 经 SSH 发布
+                 ├─ jar   → /opt/gsc，systemctl 重启网关与平台服务
+                 └─ dist  → /var/www/gsc
+```
+
+**GitHub Actions**（`.github/workflows/ci.yml`）：前端 lint + build、AI 服务 pytest 作为合并门禁，两个 job 并行。只有 `main` 分支的 push 才会在门禁全绿后触发部署（PR 只跑检查、不部署）。Jenkins 地址与凭证存在仓库 Secrets（`JENKINS_URL` / `JENKINS_USER` / `JENKINS_TOKEN`），用 Basic Auth 调 `buildWithParameters` 并传入提交 SHA。
+
+**Jenkins**（`Jenkinsfile`）：容器内执行，从 GitHub 拉取指定 commit，构建前端与后端，再通过 `deploy/ci-deploy.sh` 用 SSH 私钥发布到宿主机。当前只部署 `gsc-gateway` 与 `gsc-service-platform`（见上方演示环境说明），其余服务暂停以节省服务器资源；构建产物 20 次后自动清理。
 
 ## 环境变量
 
