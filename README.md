@@ -2,6 +2,11 @@
 
 > 赋能地方资源 · 连接全球市场
 
+[![在线体验 · 官网](https://img.shields.io/badge/🌐_在线体验-官网-2563eb?style=for-the-badge)](http://118.31.5.158:8081)
+[![管理后台](https://img.shields.io/badge/🖥_在线体验-管理后台-0f172a?style=for-the-badge)](http://118.31.5.158)
+
+[![全球供应链 AI 赋能平台](img/website-home.png)](http://118.31.5.158:8081)
+
 一个面向跨境采购的 **B2B 供应链协同平台（SCM）**：采购方在平台上发布采购需求，平台用 AI 从供应商库中匹配候选并给出评分理由；双方在线询盘、比价、电子签约；签约后系统持续追踪交付、物流与风险，并把制裁名单、股权关系、地缘与天气等外部信号接入到每一笔交易里。
 
 **一句话**：企业不用再靠人脉找供应商、靠 Excel 管报价、靠邮件催交付，整条采购链路在一个平台里完成并留痕。
@@ -10,7 +15,7 @@
 
 | 维度 | 说明 |
 |---|---|
-| 项目类型 | B2B 跨境供应链协同平台（Glboal SCM） |
+| 项目类型 | B2B 跨境供应链协同平台（Global SCM） |
 | 业务闭环 | 入驻审核 → 供应商画像 → 智能匹配 → 询盘报价 → 比价授标 → 电子合同 → 交付验收 → 风险监控 |
 | 服务对象 | 采购企业、供应企业、第三方尽调机构、平台运营方、承运商 |
 | 系统形态 | 后台管理系统 + Java 微服务后端 + Python AI 服务 |
@@ -282,6 +287,32 @@ AI 服务独立部署，负责"计算与生成"，业务数据由后端通过内
 | 运输天气建议 | 航线天气查询 + 时效影响解读 |
 | AI 助理 | RAG 知识库问答（支持 PDF / Word / Excel 解析入库）、多轮对话、上下文压缩、**写操作工具调用需人工确认** |
 
+## 界面展示
+
+### 官网 —— [118.31.5.158:8081](http://118.31.5.158:8081)
+
+首屏以全球航线网络为背景，直接传达"全球供应链 AI 赋能平台"的定位：赋能地方资源、连接全球市场。
+
+![官网首屏](img/website-home.png)
+
+全球风险地图 · 实时控制塔：把运输航线的实时风险装到一张地球上，风险等级与事件一路可见。
+
+![全球风险地图](img/website-risk-map.png)
+
+### 管理后台 —— [118.31.5.158](http://118.31.5.158)
+
+**工作台**：待办事项、待处理事项、快捷入口与最新动态聚合在一页，登录即知今天要做什么。
+
+![管理工作台](img/admin-dashboard.png)
+
+**智能匹配**：采购需求发出后，AI 解析需求并召回候选供应商，按匹配度排序并给出匹配理由与风险提示——采购员看到的不是分数，而是"为什么推荐这家"。
+
+![AI 智能匹配](img/admin-ai-matching.png)
+
+**入驻审核**：供应商的企业信息、产品线与资质、主营产品、财务与资质一览，审核员在一个页面里完成判断。
+
+![入驻审核](img/admin-application-review.png)
+
 ## 架构设计
 
 ### 工程规模
@@ -298,7 +329,7 @@ AI 服务独立部署，负责"计算与生成"，业务数据由后端通过内
 ## 目录结构
 
 ```
-vanpine-srm/
+vanpine-scm/
 ├── srm-admin-backend     # Java 微服务后端（Spring Cloud Alibaba）
 ├── srm-admin-frontend    # 后台管理前端（Vue 3）
 └── srm-ai-service        # Python AI 服务（FastAPI）
@@ -309,8 +340,10 @@ vanpine-srm/
 | 项目 | 技术栈 | 默认端口 | 说明 |
 |------|--------|----------|------|
 | srm-admin-backend | Java 17 · Spring Boot 3.3.7 · Spring Cloud Alibaba · MyBatis-Plus · MySQL 8 · Redis · RabbitMQ · Nacos | 网关 18080<br>业务服务 3081–3085 | 多模块微服务单体仓库 |
-| srm-admin-frontend | Vue 3 · Vite · Element Plus · Pinia · Vue Router · Vue I18n · Tailwind CSS 4 | 5173（Vite） | 后台管理系统 |
+| srm-admin-frontend | Vue 3 · Vite · Element Plus · Pinia · Vue Router · Vue I18n · Tailwind CSS 4 | 5173（Vite） | 后台管理系统 · [在线体验](http://118.31.5.158) |
 | srm-ai-service | Python · FastAPI · LangChain · Milvus · DeepSeek · Embedding API | 8100 | 供应商匹配、报价分析、授标理由生成 |
+
+> 官网（`http://118.31.5.158:8081`）在独立的 `gsc-fronted` 仓库中，未纳入本源码合集。
 
 ### Java 微服务项目结构
 
