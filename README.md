@@ -302,6 +302,8 @@ AI 服务独立部署，负责"计算与生成"，业务数据由后端通过内
 
 ### 管理后台 —— [118.31.5.158](http://118.31.5.158)
 
+> **注**：演示服务器资源有限，线上只部署了网关与平台服务（`gsc-gateway`、`gsc-service-platform`）；交易、交付、供应商、AI 域服务暂停，对应模块在演示环境不可用，本地完整部署后可用。
+
 **工作台**：待办事项、待处理事项、快捷入口与最新动态聚合在一页，登录即知今天要做什么。
 
 ![管理工作台](img/admin-dashboard.png)
@@ -351,7 +353,7 @@ vanpine-scm/
 | 项目 | 技术栈 | 默认端口 | 说明 |
 |------|--------|----------|------|
 | srm-admin-backend | Java 17 · Spring Boot 3.3.7 · Spring Cloud Alibaba · MyBatis-Plus · MySQL 8 · Redis · RabbitMQ · Nacos | 网关 18080<br>业务服务 3081–3085 | 多模块微服务单体仓库 |
-| srm-admin-frontend | Vue 3 · Vite · Element Plus · Pinia · Vue Router · Vue I18n · Tailwind CSS 4 | 5173（Vite） | 后台管理系统 · [在线体验](http://118.31.5.158) |
+| srm-admin-frontend | Vue 3 · Vite · Element Plus · Pinia · Vue Router · Vue I18n · Tailwind CSS 4 | 5173（Vite） | 后台管理系统 · [在线体验](http://118.31.5.158)（仅开放平台域服务，见上方说明） |
 | srm-ai-service | Python · FastAPI · LangChain · Milvus · DeepSeek · Embedding API | 8100 | 供应商匹配、报价分析、授标理由生成 |
 
 > 官网（`http://118.31.5.158:8081`）在独立的 `gsc-fronted` 仓库中，未纳入本源码合集。
