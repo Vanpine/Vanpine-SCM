@@ -4,6 +4,7 @@
 
 [![在线体验 · 官网](https://img.shields.io/badge/🌐_在线体验-官网-2563eb?style=for-the-badge)](http://118.31.5.158:8081)
 [![管理后台](https://img.shields.io/badge/🖥_在线体验-管理后台-0f172a?style=for-the-badge)](http://118.31.5.158)
+[![项目讲解 PDF](https://img.shields.io/badge/📄_项目讲解-PDF-16a34a?style=for-the-badge)](http://118.31.5.158:8081/files/VANPINE-SCM-presentation.pdf)
 
 [![全球供应链 AI 赋能平台](img/website-home.png)](http://118.31.5.158:8081)
 
@@ -312,6 +313,16 @@ AI 服务独立部署，负责"计算与生成"，业务数据由后端通过内
 **入驻审核**：供应商的企业信息、产品线与资质、主营产品、财务与资质一览，审核员在一个页面里完成判断。
 
 ![入驻审核](img/admin-application-review.png)
+
+## 项目讲解
+
+一份 19 页的项目讲解 PPT（PDF），不从技术栈讲起，而是从业务侧把这条链路拆开：全球供应链的现状与痛点 → 平台定位 → 七条业务流程（入驻准入、画像与匹配、询盘报价、比价授标、合同签署、交付履约、风险处置）→ 异常处理 → AI 在流程里的位置 → 案例走查与复盘。
+
+一句话概括它的主线：**上一阶段的产出，就是下一阶段的输入**——任何一张单据都能往前追到最初那条采购需求。
+
+[![下载项目讲解 PDF](https://img.shields.io/badge/📄_下载项目讲解-PDF-16a34a?style=flat-square)](http://118.31.5.158:8081/files/VANPINE-SCM-presentation.pdf)
+
+> 在线地址：<http://118.31.5.158:8081/files/VANPINE-SCM-presentation.pdf>
 
 ## 架构设计
 
