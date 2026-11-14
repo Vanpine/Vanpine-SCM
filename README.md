@@ -462,25 +462,41 @@ uvicorn app.main:app --host 127.0.0.1 --port 8100
 
 ```
 push / PR ──▶ GitHub Actions（并行门禁）
-               ├─ Frontend: npm ci → lint → build
+               ├─ Frontend: npm ci → lint:check → build
                └─ AI service: pip install → pytest
                          │
-                         ▼ 全部通过且为 main 的 push
-               GitHub Actions 调用 Jenkins API
-                         │
+                         ▼ 门禁全绿 且 为 main 分支的 push
+               GitHub Actions 调 Jenkins API（buildWithParameters）
+                         │  Basic Auth + 提交 SHA
                          ▼
                Jenkins「Vanpine SRM」流水线
                  Checkout → Build frontend → Build backend → Deploy
                          │
                          ▼
-               deploy/ci-deploy.sh 经 SSH 发布
-                 ├─ jar   → /opt/gsc，systemctl 重启网关与平台服务
-                 └─ dist  → /var/www/gsc
+               deploy/ci-deploy.sh 经 SSH 发布到宿主机
+                 ├─ jar（网关 + 平台）→ /opt/gsc
+                 ├─ dist              → /var/www/gsc
+                 └─ systemctl restart gsc-service-platform → gsc-gateway
 ```
 
-**GitHub Actions**（`.github/workflows/ci.yml`）：前端 lint + build、AI 服务 pytest 作为合并门禁，两个 job 并行。只有 `main` 分支的 push 才会在门禁全绿后触发部署（PR 只跑检查、不部署）。Jenkins 地址与凭证存在仓库 Secrets（`JENKINS_URL` / `JENKINS_USER` / `JENKINS_TOKEN`），用 Basic Auth 调 `buildWithParameters` 并传入提交 SHA。
+**GitHub Actions**（`.github/workflows/ci.yml`）：前端 lint + build、AI 服务 pytest 作为质量门禁，两个 job 并行。PR 只跑检查不部署；只有 `main` 分支的 push 在门禁全绿后才会触发部署。Jenkins 地址与凭证存放于仓库 Secrets（`JENKINS_URL` / `JENKINS_USER` / `JENKINS_TOKEN`），通过 Basic Auth 调用 `buildWithParameters` 并传入提交 SHA。
 
-**Jenkins**（`Jenkinsfile`）：容器内执行，从 GitHub 拉取指定 commit，构建前端与后端，再通过 `deploy/ci-deploy.sh` 用 SSH 私钥发布到宿主机。当前只部署 `gsc-gateway` 与 `gsc-service-platform`（见上方演示环境说明），其余服务暂停以节省服务器资源；构建产物 20 次后自动清理。
+**Jenkins**（`Jenkinsfile`）：「Pipeline script from SCM」模式，流水线定义随代码版本管理。
+
+| 阶段 | 内容 |
+|---|---|
+| Checkout | 拉取 `origin/main`，切到 `COMMIT` 参数指定的提交（缺省为 `origin/main`） |
+| Build frontend | `npm ci --registry=https://registry.npmmirror.com` → `npm run build` |
+| Build backend | `mvn -pl gsc-gateway,gsc-service-platform -am clean package`，包含单元测试 |
+| Deploy | `deploy/ci-deploy.sh`：SSH 传输产物并重启服务，任一服务启动失败即中止 |
+
+几个与运行环境相关的约束：
+
+- **只构建与部署网关和平台两个模块**，其余微服务暂停（见上方演示环境说明）。
+- **资源限制**：`NODE_OPTIONS` / `MAVEN_OPTS` 均限制 512m，单次构建 30 分钟超时，历史构建保留 20 次。
+- **Node 环境**：构建容器内无 node，通过 Jenkins 全局工具 `node22` 注入。
+- **源码地址**：服务器直连 GitHub 不通，SCM 的 Repository URL 走镜像前缀 `https://ghfast.top/`。
+- **部署密钥**：私钥位于 Jenkins 容器 `/var/jenkins_home/.ssh/id_ed25519`，免密登录宿主机 `172.17.0.1`，不经过 GitHub Secrets。
 
 ## 环境变量
 
