@@ -469,7 +469,7 @@ push / PR ──▶ GitHub Actions（并行门禁）
                GitHub Actions 调 Jenkins API（buildWithParameters）
                          │  Basic Auth + 提交 SHA
                          ▼
-               Jenkins「Vanpine SRM」流水线
+               Jenkins「Vanpine SCM」流水线
                  Checkout → Build frontend → Build backend → Deploy
                          │
                          ▼
